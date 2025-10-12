@@ -22,8 +22,10 @@ class OAuthService @Inject constructor() {
     private var requestToken: OAuth1RequestToken? = null
     
     companion object {
-        private const val CONSUMER_KEY = "your_consumer_key" // Will be configured
-        private const val CONSUMER_SECRET = "your_consumer_secret" // Will be configured
+        // TODO: IMPORTANT - Configure these with YOUR OSM OAuth credentials
+        // Get them from: https://www.openstreetmap.org/oauth_clients/new
+        private const val CONSUMER_KEY = "CONFIGURE_ME" // Replace with your consumer key
+        private const val CONSUMER_SECRET = "CONFIGURE_ME" // Replace with your consumer secret
         private const val CALLBACK_URL = "osmcamera://oauth"
         
         // OSM OAuth endpoints

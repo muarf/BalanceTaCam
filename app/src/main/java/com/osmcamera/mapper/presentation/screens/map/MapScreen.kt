@@ -120,13 +120,18 @@ fun MapScreen(
             floatingActionButton = {
                 Column(horizontalAlignment = Alignment.End) {
                     // Center on user location button
-                    if (userLocation != null) {
-                        FloatingActionButton(
-                            onClick = {
-                                userLocation?.let { location ->
-                                    mapView?.controller?.animateTo(location)
+                    FloatingActionButton(
+                        onClick = {
+                            if (userLocation != null) {
+                                mapView?.controller?.apply {
+                                    setZoom(18.0)
+                                    animateTo(userLocation)
                                 }
-                            },
+                            } else {
+                                // Request location if not available
+                                mapViewModel.getUserLocation()
+                            }
+                        },
                             modifier = Modifier.padding(bottom = 16.dp),
                             containerColor = MaterialTheme.colorScheme.secondaryContainer
                         ) {
@@ -164,10 +169,20 @@ fun MapScreen(
                             setTileSource(TileSourceFactory.MAPNIK)
                             setMultiTouchControls(true)
                             
+                            // Enable all gestures
+                            isClickable = true
+                            isFocusable = true
+                            setBuiltInZoomControls(false)
+                            setUseDataConnection(true)
+                            
                             // Set initial position
                             controller.setZoom(15.0)
                             val startPoint = userLocation ?: GeoPoint(48.8566, 2.3522) // Paris default
                             controller.setCenter(startPoint)
+                            
+                            // Force enable touch
+                            minZoomLevel = 3.0
+                            maxZoomLevel = 20.0
                             
                             // Add location overlay if permissions granted
                             if (locationPermissions.allPermissionsGranted) {
@@ -198,9 +213,26 @@ fun MapScreen(
                             val marker = Marker(map).apply {
                                 position = GeoPoint(camera.latitude, camera.longitude)
                                 id = "camera_${camera.id}"
-                                title = camera.cameraType ?: "Camera"
-                                snippet = camera.operator ?: ""
+                                
+                                // Better info display
+                                val type = camera.cameraType ?: "caméra"
+                                val mount = camera.cameraMount?.let { " ($it)" } ?: ""
+                                title = "📷 Caméra $type$mount"
+                                
+                                val infos = mutableListOf<String>()
+                                camera.operator?.let { infos.add("Opérateur: $it") }
+                                camera.surveillanceZone?.let { infos.add("Zone: $it") }
+                                camera.cameraDirection?.let { infos.add("Direction: ${it}°") }
+                                camera.height?.let { infos.add("Hauteur: $it") }
+                                snippet = infos.joinToString("\n")
+                                
                                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                
+                                // Enable info window
+                                setOnMarkerClickListener { marker, _ ->
+                                    marker.showInfoWindow()
+                                    true
+                                }
                             }
                             map.overlays.add(marker)
                         }
