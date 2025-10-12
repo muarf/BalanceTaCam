@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">OSM Camera Mapper</string>
+    
+    <!-- General -->
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+    <string name="edit">Bearbeiten</string>
+    <string name="close">Schließen</string>
+    <string name="back">Zurück</string>
+    <string name="next">Weiter</string>
+    <string name="done">Fertig</string>
+    <string name="loading">Lädt…</string>
+    <string name="error">Fehler</string>
+    <string name="retry">Wiederholen</string>
+    
+    <!-- Navigation -->
+    <string name="nav_map">Karte</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="nav_about">Über</string>
+    
+    <!-- Map Screen -->
+    <string name="map_title">Kamera-Karte</string>
+    <string name="map_my_location">Mein Standort</string>
+    <string name="map_center_on_location">Auf meinen Standort zentrieren</string>
+    <string name="map_loading_cameras">Lade Kameras…</string>
+    <string name="map_no_cameras">Keine Kameras in diesem Bereich</string>
+    <string name="map_zoom_in_more">Hineinzoomen um Kameras zu sehen</string>
+    <string name="add_camera">Kamera Hinzufügen</string>
+    
+    <!-- Authentication -->
+    <string name="auth_title">Bei OpenStreetMap Anmelden</string>
+    <string name="auth_description">Du musst dich bei deinem OpenStreetMap-Konto anmelden, um Kamera-Standorte beizutragen.</string>
+    <string name="auth_login_button">Mit OSM Anmelden</string>
+    <string name="auth_logging_in">Anmelden…</string>
+    <string name="auth_success">Erfolgreich angemeldet!</string>
+    <string name="auth_error">Anmeldung fehlgeschlagen. Bitte versuche es erneut.</string>
+    <string name="auth_logout">Abmelden</string>
+    <string name="auth_logged_in_as">Angemeldet als %s</string>
+    
+    <!-- Add Camera Screen -->
+    <string name="add_camera_title">Überwachungskamera Hinzufügen</string>
+    <string name="add_camera_quick_mode">Schnellmodus</string>
+    <string name="add_camera_detailed_mode">Detaillierter Modus</string>
+    <string name="add_camera_position">Position</string>
+    <string name="add_camera_latitude">Breitengrad</string>
+    <string name="add_camera_longitude">Längengrad</string>
+    <string name="add_camera_adjust_position">Ziehe die Karte, um die Position anzupassen</string>
+    <string name="add_camera_publish">Auf OSM Veröffentlichen</string>
+    <string name="add_camera_publishing">Veröffentlichen…</string>
+    <string name="add_camera_success">Kamera erfolgreich hinzugefügt!</string>
+    <string name="add_camera_error">Fehler beim Hinzufügen der Kamera. Bitte versuche es erneut.</string>
+    
+    <!-- Camera Details -->
+    <string name="camera_type">Kamera-Typ</string>
+    <string name="camera_type_fixed">Fest</string>
+    <string name="camera_type_dome">Kuppel</string>
+    <string name="camera_type_ptz">PTZ (Schwenk-Neige-Zoom)</string>
+    <string name="camera_type_panoramic">Panorama</string>
+    
+    <string name="camera_mount">Montagetyp</string>
+    <string name="camera_mount_pole">Mast</string>
+    <string name="camera_mount_wall">Wand</string>
+    <string name="camera_mount_ceiling">Decke</string>
+    <string name="camera_mount_street_lamp">Straßenlaterne</string>
+    
+    <string name="camera_direction">Richtung (Grad)</string>
+    <string name="camera_direction_hint">0-360 (0=Norden)</string>
+    
+    <string name="surveillance_type">Überwachungstyp</string>
+    <string name="surveillance_type_public">Öffentlich</string>
+    <string name="surveillance_type_outdoor">Außen</string>
+    <string name="surveillance_type_indoor">Innen</string>
+    
+    <string name="operator">Betreiber</string>
+    <string name="operator_hint">z.B. Stadt Berlin</string>
+    
+    <string name="operator_type">Betreibertyp</string>
+    <string name="operator_type_public">Öffentlich</string>
+    <string name="operator_type_private">Privat</string>
+    <string name="operator_type_commercial">Kommerziell</string>
+    
+    <string name="surveillance_zone">Überwachungszone</string>
+    <string name="surveillance_zone_town">Stadt</string>
+    <string name="surveillance_zone_parking">Parkplatz</string>
+    <string name="surveillance_zone_traffic">Verkehr</string>
+    <string name="surveillance_zone_building">Gebäude</string>
+    
+    <string name="description">Beschreibung</string>
+    <string name="description_hint">Zusätzliche Details…</string>
+    
+    <string name="level">Ebene/Stockwerk</string>
+    <string name="level_hint">z.B. 2</string>
+    
+    <string name="height">Höhe</string>
+    <string name="height_hint">z.B. 5 m</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_account">OSM-Konto</string>
+    <string name="settings_theme">Design</string>
+    <string name="settings_theme_light">Hell</string>
+    <string name="settings_theme_dark">Dunkel</string>
+    <string name="settings_theme_system">Systemstandard</string>
+    
+    <!-- About -->
+    <string name="about_title">Über</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_description">Eine Open-Source-Android-App zur Kartierung von Überwachungskameras auf OpenStreetMap.</string>
+    <string name="about_github">Auf GitHub Ansehen</string>
+    <string name="about_osm_wiki">OSM Surveillance Wiki</string>
+    <string name="about_license">Lizenz: GPL-3.0</string>
+    <string name="about_contributors">Mitwirkende</string>
+    
+    <!-- Permissions -->
+    <string name="permission_location_title">Standortberechtigung Erforderlich</string>
+    <string name="permission_location_rationale">Die Standortberechtigung wird benötigt, um deine Position auf der Karte anzuzeigen und Kameras an deinem aktuellen Standort hinzuzufügen.</string>
+    <string name="permission_denied">Berechtigung verweigert</string>
+    
+    <!-- Errors -->
+    <string name="error_network">Netzwerkfehler. Bitte überprüfe deine Verbindung.</string>
+    <string name="error_authentication">Authentifizierung erforderlich. Bitte melde dich an.</string>
+    <string name="error_location">Standort kann nicht ermittelt werden. Bitte aktiviere GPS.</string>
+    <string name="error_invalid_position">Ungültige Position ausgewählt.</string>
+    <string name="error_osm_api">OSM-API-Fehler: %s</string>
+    
+    <!-- Validation -->
+    <string name="validation_required_field">Dieses Feld ist erforderlich</string>
+    <string name="validation_invalid_number">Ungültige Zahl</string>
+    <string name="validation_direction_range">Die Richtung muss zwischen 0 und 360 liegen</string>
+    
+    <!-- Changeset -->
+    <string name="changeset_comment">Überwachungskamera über OSM Camera Mapper hinzugefügt</string>
+    <string name="changeset_source">survey</string>
+    <string name="changeset_created_by">OSM Camera Mapper v%s</string>
+</resources>
+
+
