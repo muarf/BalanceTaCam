@@ -22,10 +22,9 @@ class OAuthService @Inject constructor() {
     private var requestToken: OAuth1RequestToken? = null
     
     companion object {
-        // TODO: IMPORTANT - Configure these with YOUR OSM OAuth credentials
-        // Get them from: https://www.openstreetmap.org/oauth_clients/new
-        private const val CONSUMER_KEY = "CONFIGURE_ME" // Replace with your consumer key
-        private const val CONSUMER_SECRET = "CONFIGURE_ME" // Replace with your consumer secret
+        // OAuth credentials configured for BalanceTaCam
+        private const val CONSUMER_KEY = "Az0_KWIqrRu2kW4xKIqskGyUDMVyaoaTVIAACBBE-Qs"
+        private const val CONSUMER_SECRET = "ISw-8waN1PKLHLfZi3v4AMq28CRpS5MUW5LADhgng44"
         private const val CALLBACK_URL = "osmcamera://oauth"
         
         // OSM OAuth endpoints
