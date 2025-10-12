@@ -52,11 +52,11 @@ class AuthViewModel @Inject constructor(
         }
     }
     
-    fun completeAuthentication(verifier: String) {
+    fun completeAuthentication(code: String) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
-                val result = authRepository.completeAuthentication(verifier)
+                val result = authRepository.completeAuthentication(code)
                 if (result.isSuccess) {
                     _uiState.value = AuthUiState.Authenticated
                     loadUserDetails()

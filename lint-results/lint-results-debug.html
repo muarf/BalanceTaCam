@@ -177,9 +177,9 @@ document.getElementById(id).style.display = 'none';
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
-      <span class="mdl-layout-title">Lint Report: 119 warnings</span>
+      <span class="mdl-layout-title">Lint Report: 122 warnings</span>
       <div class="mdl-layout-spacer"></div>
-      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Sun Oct 12 23:41:26 UTC 2025 by AGP (8.2.2)</nav>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Sun Oct 12 23:52:44 UTC 2025 by AGP (8.2.2)</nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
@@ -190,7 +190,7 @@ document.getElementById(id).style.display = 'none';
       <a class="mdl-navigation__link" href="#OldTargetApi"><i class="material-icons warning-icon">warning</i>Target SDK attribute is not targeting latest version (1)</a>
       <a class="mdl-navigation__link" href="#GradleDependency"><i class="material-icons warning-icon">warning</i>Obsolete Gradle Dependency (15)</a>
       <a class="mdl-navigation__link" href="#ObsoleteSdkInt"><i class="material-icons warning-icon">warning</i>Obsolete SDK_INT Version Check (1)</a>
-      <a class="mdl-navigation__link" href="#UnusedResources"><i class="material-icons warning-icon">warning</i>Unused resources (97)</a>
+      <a class="mdl-navigation__link" href="#UnusedResources"><i class="material-icons warning-icon">warning</i>Unused resources (100)</a>
       <a class="mdl-navigation__link" href="#TypographyDashes"><i class="material-icons warning-icon">warning</i>Hyphen can be replaced with dash (4)</a>
     </nav>
   </div>
@@ -223,7 +223,7 @@ document.getElementById(id).style.display = 'none';
 <td class="countColumn">1</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#ObsoleteSdkInt">ObsoleteSdkInt</a>: Obsolete SDK_INT Version Check</td></tr>
 <tr>
-<td class="countColumn">97</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
+<td class="countColumn">100</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#UnusedResources">UnusedResources</a>: Unused resources</td></tr>
 <tr><td class="countColumn"></td><td class="categoryColumn"><a href="#Usability:Typography">Usability:Typography</a>
 </td></tr>
@@ -647,7 +647,7 @@ Dismiss</button>            </div>
 <span class="lineno"> 13 </span>    <span class="tag">&lt;color</span><span class="attribute"> name</span>=<span class="value">"md_theme_light_onSecondary"</span>>#FFFFFF<span class="tag">&lt;/color></span>
 <span class="lineno"> 14 </span>    <span class="tag">&lt;color</span><span class="attribute"> name</span>=<span class="value">"md_theme_light_secondaryContainer"</span>>#D9E7CA<span class="tag">&lt;/color></span></pre>
 
-<button class="mdl-button mdl-js-button mdl-button--primary" id="UnusedResourcesDivLink" onclick="reveal('UnusedResourcesDiv');" />+ 92 More Occurrences...</button>
+<button class="mdl-button mdl-js-button mdl-button--primary" id="UnusedResourcesDivLink" onclick="reveal('UnusedResourcesDiv');" />+ 95 More Occurrences...</button>
 <div id="UnusedResourcesDiv" style="display: none">
 <span class="location"><a href="../../src/main/res/values/colors.xml">../../src/main/res/values/colors.xml</a>:12</span>: <span class="message">The resource <code>R.color.md_theme_light_secondary</code> appears to be unused</span><br /><pre class="errorlines">
 <span class="lineno">  9 </span>    <span class="tag">&lt;color</span><span class="attribute"> name</span>=<span class="value">"md_theme_light_onPrimary"</span>>#FFFFFF<span class="tag">&lt;/color></span>
@@ -867,7 +867,7 @@ Dismiss</button>            </div>
 </pre>
 
 <span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:7</span>: <span class="message">The resource <code>R.string.ok</code> appears to be unused</span><br /><pre class="errorlines">
-<span class="lineno">   4 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"app_name"</span>>OSM Camera Mapper<span class="tag">&lt;/string></span>
+<span class="lineno">   4 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"app_name"</span>>BalanceTaCam<span class="tag">&lt;/string></span>
 <span class="lineno">   5 </span>    
 <span class="lineno">   6 </span>    <span class="comment">&lt;!-- General --></span>
 <span class="caretline"><span class="lineno">   7 </span>    <span class="tag">&lt;string</span><span class="attribute"> </span><span class="warning"><span class="attribute">name</span>=<span class="value">"ok"</span></span>>OK<span class="tag">&lt;/string></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -976,6 +976,15 @@ Dismiss</button>            </div>
 <span class="lineno">  24 </span>    
 </pre>
 
+<span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:22</span>: <span class="message">The resource <code>R.string.nav_settings</code> appears to be unused</span><br /><pre class="errorlines">
+<span class="lineno">  19 </span>    
+<span class="lineno">  20 </span>    <span class="comment">&lt;!-- Navigation --></span>
+<span class="lineno">  21 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"nav_map"</span>>Map<span class="tag">&lt;/string></span>
+<span class="caretline"><span class="lineno">  22 </span>    <span class="tag">&lt;string</span><span class="attribute"> </span><span class="warning"><span class="attribute">name</span>=<span class="value">"nav_settings"</span></span>>Settings<span class="tag">&lt;/string></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno">  23 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"nav_about"</span>>About<span class="tag">&lt;/string></span>
+<span class="lineno">  24 </span>    
+<span class="lineno">  25 </span>    <span class="comment">&lt;!-- Map Screen --></span></pre>
+
 <span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:27</span>: <span class="message">The resource <code>R.string.map_my_location</code> appears to be unused</span><br /><pre class="errorlines">
 <span class="lineno">  24 </span>    
 <span class="lineno">  25 </span>    <span class="comment">&lt;!-- Map Screen --></span>
@@ -1041,25 +1050,16 @@ Dismiss</button>            </div>
 <span class="lineno">  43 </span>    
 </pre>
 
-<span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:49</span>: <span class="message">The resource <code>R.string.add_camera_latitude</code> appears to be unused</span><br /><pre class="errorlines">
-<span class="lineno">  46 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_quick_mode"</span>>Quick Mode<span class="tag">&lt;/string></span>
-<span class="lineno">  47 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_detailed_mode"</span>>Detailed Mode<span class="tag">&lt;/string></span>
-<span class="lineno">  48 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_position"</span>>Position<span class="tag">&lt;/string></span>
-<span class="caretline"><span class="lineno">  49 </span>    <span class="tag">&lt;string</span><span class="attribute"> </span><span class="warning"><span class="attribute">name</span>=<span class="value">"add_camera_latitude"</span></span>>Latitude<span class="tag">&lt;/string></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno">  50 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_longitude"</span>>Longitude<span class="tag">&lt;/string></span>
-<span class="lineno">  51 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_adjust_position"</span>>Drag map to adjust position<span class="tag">&lt;/string></span>
-<span class="lineno">  52 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_publish"</span>>Publish to OSM<span class="tag">&lt;/string></span></pre>
+<span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:41</span>: <span class="message">The resource <code>R.string.auth_logout</code> appears to be unused</span><br /><pre class="errorlines">
+<span class="lineno">  38 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"auth_logging_in"</span>>Logging in…<span class="tag">&lt;/string></span>
+<span class="lineno">  39 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"auth_success"</span>>Successfully logged in!<span class="tag">&lt;/string></span>
+<span class="lineno">  40 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"auth_error"</span>>Login failed. Please try again.<span class="tag">&lt;/string></span>
+<span class="caretline"><span class="lineno">  41 </span>    <span class="tag">&lt;string</span><span class="attribute"> </span><span class="warning"><span class="attribute">name</span>=<span class="value">"auth_logout"</span></span>>Logout<span class="tag">&lt;/string></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno">  42 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"auth_logged_in_as"</span>>Logged in as %s<span class="tag">&lt;/string></span>
+<span class="lineno">  43 </span>    
+<span class="lineno">  44 </span>    <span class="comment">&lt;!-- Add Camera Screen --></span></pre>
 
-<span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:50</span>: <span class="message">The resource <code>R.string.add_camera_longitude</code> appears to be unused</span><br /><pre class="errorlines">
-<span class="lineno">  47 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_detailed_mode"</span>>Detailed Mode<span class="tag">&lt;/string></span>
-<span class="lineno">  48 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_position"</span>>Position<span class="tag">&lt;/string></span>
-<span class="lineno">  49 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_latitude"</span>>Latitude<span class="tag">&lt;/string></span>
-<span class="caretline"><span class="lineno">  50 </span>    <span class="tag">&lt;string</span><span class="attribute"> </span><span class="warning"><span class="attribute">name</span>=<span class="value">"add_camera_longitude"</span></span>>Longitude<span class="tag">&lt;/string></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno">  51 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_adjust_position"</span>>Drag map to adjust position<span class="tag">&lt;/string></span>
-<span class="lineno">  52 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_publish"</span>>Publish to OSM<span class="tag">&lt;/string></span>
-<span class="lineno">  53 </span>    <span class="tag">&lt;string</span><span class="attribute"> name</span>=<span class="value">"add_camera_publishing"</span>>Publishing…<span class="tag">&lt;/string></span></pre>
-
-<br/><b>NOTE: 47 results omitted.</b><br/><br/></div>
+<br/><b>NOTE: 50 results omitted.</b><br/><br/></div>
 </div>
 <div class="metadata"><div class="explanation" id="explanationUnusedResources" style="display: none;">
 Unused resources make applications larger and slow down builds.<br/>

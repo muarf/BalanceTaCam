@@ -51,9 +51,10 @@ class MainActivity : ComponentActivity() {
         
         // Check if this is an OAuth callback
         if (data?.scheme == "osmcamera" && data.host == "oauth") {
-            val verifier = data.getQueryParameter("oauth_verifier")
-            if (verifier != null) {
-                authViewModel.completeAuthentication(verifier)
+            // OAuth 2.0 uses "code" parameter instead of "oauth_verifier"
+            val code = data.getQueryParameter("code")
+            if (code != null) {
+                authViewModel.completeAuthentication(code)
             }
         }
     }

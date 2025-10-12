@@ -33,12 +33,12 @@ class AuthRepository @Inject constructor(
     }
     
     /**
-     * Complete OAuth authentication with verifier
+     * Complete OAuth authentication with authorization code
      */
-    suspend fun completeAuthentication(verifier: String): Result<OAuthTokens> {
+    suspend fun completeAuthentication(code: String): Result<OAuthTokens> {
         return withContext(Dispatchers.IO) {
             try {
-                val tokens = oauthService.getAccessToken(verifier)
+                val tokens = oauthService.getAccessToken(code)
                 
                 // Save tokens
                 preferencesManager.saveOAuthTokens(tokens)
@@ -69,18 +69,17 @@ class AuthRepository @Inject constructor(
             try {
                 val tokens = preferencesManager.getOAuthTokens() ?: return@withContext null
                 
-                // Sign the request
-                val request = oauthService.signRequest(
-                    url = "${OSMApiService.BASE_URL}api/0.6/user/details.json",
-                    method = com.github.scribejava.core.model.Verb.GET,
-                    tokens = tokens
-                )
-                
-                // Execute request with OkHttp (ScribeJava doesn't have send() for coroutines)
+                // Create authenticated request
                 val okHttpClient = okhttp3.OkHttpClient()
+                val headers = oauthService.getAuthHeaders(tokens.accessToken)
+                
                 val okHttpRequest = okhttp3.Request.Builder()
-                    .url(request.completeUrl)
-                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .url("${OSMApiService.BASE_URL}api/0.6/user/details.json")
+                    .apply {
+                        headers.forEach { (key, value) ->
+                            addHeader(key, value)
+                        }
+                    }
                     .build()
                     
                 val response = okHttpClient.newCall(okHttpRequest).execute()

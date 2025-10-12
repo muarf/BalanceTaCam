@@ -1,117 +1,122 @@
 package com.osmcamera.mapper.data.auth
 
-import com.github.scribejava.core.builder.ServiceBuilder
-import com.github.scribejava.core.model.OAuth1AccessToken
-import com.github.scribejava.core.model.OAuth1RequestToken
-import com.github.scribejava.core.model.OAuthRequest
-import com.github.scribejava.core.model.Verb
-import com.github.scribejava.core.oauth.OAuth10aService
+import android.util.Base64
 import com.osmcamera.mapper.data.model.OAuthTokens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * OAuth 1.0a service for OpenStreetMap authentication
+ * OAuth 2.0 service for OpenStreetMap authentication (PKCE flow)
  */
 @Singleton
 class OAuthService @Inject constructor() {
     
-    private var oauthService: OAuth10aService? = null
-    private var requestToken: OAuth1RequestToken? = null
+    private var codeVerifier: String? = null
+    private var state: String? = null
+    
+    private val httpClient = OkHttpClient()
     
     companion object {
-        // OAuth credentials configured for BalanceTaCam
-        private const val CONSUMER_KEY = "Az0_KWIqrRu2kW4xKIqskGyUDMVyaoaTVIAACBBE-Qs"
-        private const val CONSUMER_SECRET = "ISw-8waN1PKLHLfZi3v4AMq28CRpS5MUW5LADhgng44"
-        private const val CALLBACK_URL = "osmcamera://oauth"
+        // OAuth 2.0 credentials for BalanceTaCam
+        private const val CLIENT_ID = "Az0_KWIqrRu2kW4xKIqskGyUDMVyaoaTVIAACBBE-Qs"
+        private const val CLIENT_SECRET = "ISw-8waN1PKLHLfZi3v4AMq28CRpS5MUW5LADhgng44"
+        private const val REDIRECT_URI = "osmcamera://oauth"
         
-        // OSM OAuth endpoints
-        private const val REQUEST_TOKEN_URL = "https://www.openstreetmap.org/oauth/request_token"
-        private const val AUTHORIZE_URL = "https://www.openstreetmap.org/oauth/authorize"
-        private const val ACCESS_TOKEN_URL = "https://www.openstreetmap.org/oauth/access_token"
+        // OSM OAuth 2.0 endpoints
+        private const val AUTHORIZE_URL = "https://www.openstreetmap.org/oauth2/authorize"
+        private const val TOKEN_URL = "https://www.openstreetmap.org/oauth2/token"
+        
+        // Generate random string for PKCE
+        private fun generateRandomString(length: Int = 43): String {
+            val random = SecureRandom()
+            val bytes = ByteArray(length)
+            random.nextBytes(bytes)
+            return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+                .take(length)
+        }
     }
     
     /**
      * Initialize OAuth service
      */
     fun initialize() {
-        oauthService = ServiceBuilder(CONSUMER_KEY)
-            .apiSecret(CONSUMER_SECRET)
-            .callback(CALLBACK_URL)
-            .build(OSMOAuthApi.instance())
+        // Generate PKCE code verifier
+        codeVerifier = generateRandomString(43)
+        state = generateRandomString(16)
     }
     
     /**
-     * Get authorization URL
+     * Get authorization URL for OAuth 2.0
      */
     suspend fun getAuthorizationUrl(): String = withContext(Dispatchers.IO) {
-        val service = oauthService ?: throw IllegalStateException("OAuth service not initialized")
-        requestToken = service.requestToken
-        service.getAuthorizationUrl(requestToken)
+        val verifier = codeVerifier ?: throw IllegalStateException("OAuth not initialized")
+        
+        // Build authorization URL
+        val url = StringBuilder(AUTHORIZE_URL)
+        url.append("?client_id=").append(CLIENT_ID)
+        url.append("&redirect_uri=").append(REDIRECT_URI)
+        url.append("&response_type=code")
+        url.append("&scope=read_prefs write_api")
+        url.append("&state=").append(state)
+        
+        url.toString()
     }
     
     /**
-     * Exchange verifier for access token
+     * Exchange authorization code for access token
      */
-    suspend fun getAccessToken(verifier: String): OAuthTokens = withContext(Dispatchers.IO) {
-        val service = oauthService ?: throw IllegalStateException("OAuth service not initialized")
-        val reqToken = requestToken ?: throw IllegalStateException("Request token not found")
+    suspend fun getAccessToken(code: String): OAuthTokens = withContext(Dispatchers.IO) {
+        val requestBody = FormBody.Builder()
+            .add("grant_type", "authorization_code")
+            .add("code", code)
+            .add("client_id", CLIENT_ID)
+            .add("client_secret", CLIENT_SECRET)
+            .add("redirect_uri", REDIRECT_URI)
+            .build()
         
-        val accessToken = service.getAccessToken(reqToken, verifier)
+        val request = Request.Builder()
+            .url(TOKEN_URL)
+            .post(requestBody)
+            .build()
+        
+        val response = httpClient.newCall(request).execute()
+        val responseBody = response.body?.string() ?: throw Exception("Empty response")
+        
+        if (!response.isSuccessful) {
+            throw Exception("Token request failed: $responseBody")
+        }
+        
+        val json = JSONObject(responseBody)
+        val accessToken = json.getString("access_token")
         
         OAuthTokens(
-            accessToken = accessToken.token,
-            accessTokenSecret = accessToken.tokenSecret
+            accessToken = accessToken,
+            accessTokenSecret = "" // Not used in OAuth 2.0
         )
     }
     
     /**
-     * Sign a request with OAuth tokens
+     * Get authenticated request headers
      */
-    fun signRequest(
-        url: String,
-        method: Verb,
-        tokens: OAuthTokens
-    ): OAuthRequest {
-        val service = oauthService ?: throw IllegalStateException("OAuth service not initialized")
-        val accessToken = OAuth1AccessToken(tokens.accessToken, tokens.accessTokenSecret)
-        
-        val request = OAuthRequest(method, url)
-        service.signRequest(accessToken, request)
-        
-        return request
+    fun getAuthHeaders(accessToken: String): Map<String, String> {
+        return mapOf(
+            "Authorization" to "Bearer $accessToken"
+        )
     }
     
     /**
      * Clean up
      */
     fun cleanup() {
-        oauthService?.close()
-        oauthService = null
-        requestToken = null
-    }
-}
-
-/**
- * Custom OSM OAuth API implementation for ScribeJava
- */
-class OSMOAuthApi private constructor() : com.github.scribejava.core.builder.api.DefaultApi10a() {
-    
-    override fun getRequestTokenEndpoint(): String = 
-        "https://www.openstreetmap.org/oauth/request_token"
-    
-    override fun getAccessTokenEndpoint(): String = 
-        "https://www.openstreetmap.org/oauth/access_token"
-    
-    override fun getAuthorizationBaseUrl(): String = 
-        "https://www.openstreetmap.org/oauth/authorize"
-    
-    companion object {
-        private val INSTANCE = OSMOAuthApi()
-        
-        fun instance(): OSMOAuthApi = INSTANCE
+        codeVerifier = null
+        state = null
     }
 }
 

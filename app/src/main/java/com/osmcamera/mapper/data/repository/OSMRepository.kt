@@ -79,30 +79,26 @@ class OSMRepository @Inject constructor(
                 val tokens = preferencesManager.getOAuthTokens() ?: return@withContext null
                 
                 val changesetXml = ChangesetXmlBuilder.build(
-                    comment = "Added surveillance camera via OSM Camera Mapper",
+                    comment = "Added surveillance camera via BalanceTaCam",
                     source = "survey",
-                    createdBy = "OSM Camera Mapper v${BuildConfig.VERSION_NAME}"
+                    createdBy = "BalanceTaCam v${BuildConfig.VERSION_NAME}"
                 )
                 
-                // Sign the request
-                val request = oauthService.signRequest(
-                    url = "${OSMApiService.BASE_URL}api/0.6/changeset/create",
-                    method = com.github.scribejava.core.model.Verb.PUT,
-                    tokens = tokens
-                )
-                
-                request.setPayload(changesetXml)
-                request.addHeader("Content-Type", "text/xml")
-                
-                // Execute with OkHttp
+                // Create authenticated request with OAuth 2.0
                 val okHttpClient = okhttp3.OkHttpClient()
+                val headers = oauthService.getAuthHeaders(tokens.accessToken)
+                
                 val okHttpRequest = okhttp3.Request.Builder()
-                    .url(request.completeUrl)
+                    .url("${OSMApiService.BASE_URL}api/0.6/changeset/create")
                     .put(okhttp3.RequestBody.create(
                         "text/xml".toMediaTypeOrNull(),
                         changesetXml
                     ))
-                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .apply {
+                        headers.forEach { (key, value) ->
+                            addHeader(key, value)
+                        }
+                    }
                     .build()
                     
                 val response = okHttpClient.newCall(okHttpRequest).execute()
@@ -134,25 +130,21 @@ class OSMRepository @Inject constructor(
                     tags = cameraData.toOsmTags()
                 )
                 
-                // Sign the request
-                val request = oauthService.signRequest(
-                    url = "${OSMApiService.BASE_URL}api/0.6/node/create",
-                    method = com.github.scribejava.core.model.Verb.PUT,
-                    tokens = tokens
-                )
-                
-                request.setPayload(nodeXml)
-                request.addHeader("Content-Type", "text/xml")
-                
-                // Execute with OkHttp
+                // Create authenticated request with OAuth 2.0
                 val okHttpClient = okhttp3.OkHttpClient()
+                val headers = oauthService.getAuthHeaders(tokens.accessToken)
+                
                 val okHttpRequest = okhttp3.Request.Builder()
-                    .url(request.completeUrl)
+                    .url("${OSMApiService.BASE_URL}api/0.6/node/create")
                     .put(okhttp3.RequestBody.create(
                         "text/xml".toMediaTypeOrNull(),
                         nodeXml
                     ))
-                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .apply {
+                        headers.forEach { (key, value) ->
+                            addHeader(key, value)
+                        }
+                    }
                     .build()
                     
                 val response = okHttpClient.newCall(okHttpRequest).execute()
@@ -177,18 +169,18 @@ class OSMRepository @Inject constructor(
             try {
                 val tokens = preferencesManager.getOAuthTokens() ?: return@withContext
                 
-                val request = oauthService.signRequest(
-                    url = "${OSMApiService.BASE_URL}api/0.6/changeset/$changesetId/close",
-                    method = com.github.scribejava.core.model.Verb.PUT,
-                    tokens = tokens
-                )
-                
-                // Execute with OkHttp
+                // Create authenticated request with OAuth 2.0
                 val okHttpClient = okhttp3.OkHttpClient()
+                val headers = oauthService.getAuthHeaders(tokens.accessToken)
+                
                 val okHttpRequest = okhttp3.Request.Builder()
-                    .url(request.completeUrl)
+                    .url("${OSMApiService.BASE_URL}api/0.6/changeset/$changesetId/close")
                     .put(okhttp3.RequestBody.create(null, ByteArray(0)))
-                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .apply {
+                        headers.forEach { (key, value) ->
+                            addHeader(key, value)
+                        }
+                    }
                     .build()
                     
                 okHttpClient.newCall(okHttpRequest).execute()
