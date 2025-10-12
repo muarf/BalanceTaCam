@@ -58,49 +58,28 @@ fun MapScreen(
         locationPermissions.launchMultiplePermissionRequest()
     }
     
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                DrawerContent(
-                    user = user,
-                    isAuthenticated = isAuthenticated,
-                    onNavigateToSettings = {
-                        scope.launch {
-                            drawerState.close()
-                            onNavigateToSettings()
-                        }
-                    },
-                    onNavigateToAuth = {
-                        scope.launch {
-                            drawerState.close()
-                            onNavigateToAuth()
-                        }
-                    },
-                    onLogout = {
-                        authViewModel.logout()
-                        scope.launch {
-                            drawerState.close()
-                        }
-                    }
-                )
-            }
-        }
-    ) {
+    // Removed ModalNavigationDrawer to avoid swipe conflict with map
+    Box {
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.map_title)) },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        IconButton(onClick = onNavigateToSettings) {
+                            Icon(Icons.Default.Settings, contentDescription = "Settings")
                         }
                     },
                     actions = {
+                        // Auth button in top bar
+                        if (!isAuthenticated) {
+                            IconButton(onClick = onNavigateToAuth) {
+                                Icon(Icons.Default.Login, contentDescription = "Login")
+                            }
+                        } else if (user != null) {
+                            IconButton(onClick = { authViewModel.logout() }) {
+                                Icon(Icons.Default.Logout, contentDescription = "Logout")
+                            }
+                        }
                         IconButton(onClick = {
                             mapView?.let { map ->
                                 val bounds = map.boundingBox
@@ -213,23 +192,33 @@ fun MapScreen(
                                 position = GeoPoint(camera.latitude, camera.longitude)
                                 id = "camera_${camera.id}"
                                 
-                                // Better info display
-                                val type = camera.cameraType ?: "caméra"
-                                val mount = camera.cameraMount?.let { " ($it)" } ?: ""
-                                title = "📷 Caméra $type$mount"
+                                // Complete info display
+                                val type = camera.cameraType ?: "non spécifié"
+                                val mount = camera.cameraMount ?: "non spécifié"
+                                title = "📷 Caméra de Surveillance"
                                 
                                 val infos = mutableListOf<String>()
+                                infos.add("━━━━━━━━━━━━━━━━")
+                                infos.add("Type: $type")
+                                infos.add("Support: $mount")
+                                camera.cameraDirection?.let { infos.add("Direction: ${it}° (0=Nord)") }
+                                camera.surveillance?.let { infos.add("Surveillance: $it") }
                                 camera.operator?.let { infos.add("Opérateur: $it") }
+                                camera.operatorType?.let { infos.add("Type opérateur: $it") }
                                 camera.surveillanceZone?.let { infos.add("Zone: $it") }
-                                camera.cameraDirection?.let { infos.add("Direction: ${it}°") }
                                 camera.height?.let { infos.add("Hauteur: $it") }
+                                camera.level?.let { infos.add("Niveau: $it") }
+                                camera.description?.let { infos.add("Description: $it") }
+                                infos.add("━━━━━━━━━━━━━━━━")
+                                infos.add("ID OSM: ${camera.id}")
                                 snippet = infos.joinToString("\n")
                                 
                                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                                 
-                                // Enable info window
-                                setOnMarkerClickListener { marker, _ ->
-                                    marker.showInfoWindow()
+                                // Force info window to show on click
+                                setOnMarkerClickListener { clickedMarker, _ ->
+                                    clickedMarker.showInfoWindow()
+                                    map.controller.animateTo(clickedMarker.position)
                                     true
                                 }
                             }
@@ -267,66 +256,6 @@ fun MapScreen(
     }
 }
 
-@Composable
-private fun DrawerContent(
-    user: com.osmcamera.mapper.data.model.User?,
-    isAuthenticated: Boolean,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToAuth: () -> Unit,
-    onLogout: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        
-        if (isAuthenticated && user != null) {
-            Text(
-                text = stringResource(R.string.auth_logged_in_as, user.displayName),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-        
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
-        
-        if (!isAuthenticated) {
-            TextButton(
-                onClick = onNavigateToAuth,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Login, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.auth_login_button))
-            }
-        }
-        
-        TextButton(
-            onClick = onNavigateToSettings,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.Settings, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.nav_settings))
-        }
-        
-        if (isAuthenticated) {
-            TextButton(
-                onClick = onLogout,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Logout, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.auth_logout))
-            }
-        }
-    }
-}
+// DrawerContent removed - using top bar buttons instead
 
 
