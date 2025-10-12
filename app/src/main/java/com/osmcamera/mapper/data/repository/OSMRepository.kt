@@ -94,10 +94,21 @@ class OSMRepository @Inject constructor(
                 request.setPayload(changesetXml)
                 request.addHeader("Content-Type", "text/xml")
                 
-                val response = request.send()
+                // Execute with OkHttp
+                val okHttpClient = okhttp3.OkHttpClient()
+                val okHttpRequest = okhttp3.Request.Builder()
+                    .url(request.completeUrl)
+                    .put(okhttp3.RequestBody.create(
+                        okhttp3.MediaType.parse("text/xml"),
+                        changesetXml
+                    ))
+                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .build()
+                    
+                val response = okHttpClient.newCall(okHttpRequest).execute()
                 
                 if (response.isSuccessful) {
-                    response.body.toLongOrNull()
+                    response.body?.string()?.toLongOrNull()
                 } else {
                     null
                 }
@@ -133,10 +144,21 @@ class OSMRepository @Inject constructor(
                 request.setPayload(nodeXml)
                 request.addHeader("Content-Type", "text/xml")
                 
-                val response = request.send()
+                // Execute with OkHttp
+                val okHttpClient = okhttp3.OkHttpClient()
+                val okHttpRequest = okhttp3.Request.Builder()
+                    .url(request.completeUrl)
+                    .put(okhttp3.RequestBody.create(
+                        okhttp3.MediaType.parse("text/xml"),
+                        nodeXml
+                    ))
+                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .build()
+                    
+                val response = okHttpClient.newCall(okHttpRequest).execute()
                 
                 if (response.isSuccessful) {
-                    response.body
+                    response.body?.string()
                 } else {
                     null
                 }
@@ -161,7 +183,15 @@ class OSMRepository @Inject constructor(
                     tokens = tokens
                 )
                 
-                request.send()
+                // Execute with OkHttp
+                val okHttpClient = okhttp3.OkHttpClient()
+                val okHttpRequest = okhttp3.Request.Builder()
+                    .url(request.completeUrl)
+                    .put(okhttp3.RequestBody.create(null, ByteArray(0)))
+                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .build()
+                    
+                okHttpClient.newCall(okHttpRequest).execute()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

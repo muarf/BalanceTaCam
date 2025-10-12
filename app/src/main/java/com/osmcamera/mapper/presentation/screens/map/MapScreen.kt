@@ -118,7 +118,7 @@ fun MapScreen(
                 )
             },
             floatingActionButton = {
-                Column(horizontally = Alignment.End) {
+                Column(horizontalAlignment = Alignment.End) {
                     // Center on user location button
                     if (userLocation != null) {
                         FloatingActionButton(

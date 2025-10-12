@@ -76,10 +76,16 @@ class AuthRepository @Inject constructor(
                     tokens = tokens
                 )
                 
-                // Execute request
-                val response = request.send()
+                // Execute request with OkHttp (ScribeJava doesn't have send() for coroutines)
+                val okHttpClient = okhttp3.OkHttpClient()
+                val okHttpRequest = okhttp3.Request.Builder()
+                    .url(request.completeUrl)
+                    .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
+                    .build()
+                    
+                val response = okHttpClient.newCall(okHttpRequest).execute()
                 if (response.isSuccessful) {
-                    val json = JsonParser.parseString(response.body).asJsonObject
+                    val json = JsonParser.parseString(response.body?.string() ?: "{}").asJsonObject
                     val userObj = json.getAsJsonObject("user")
                     
                     User(
