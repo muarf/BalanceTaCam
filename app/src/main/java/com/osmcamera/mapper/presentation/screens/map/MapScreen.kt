@@ -132,11 +132,10 @@ fun MapScreen(
                                 mapViewModel.getUserLocation()
                             }
                         },
-                            modifier = Modifier.padding(bottom = 16.dp),
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        ) {
-                            Icon(Icons.Default.MyLocation, contentDescription = "My Location")
-                        }
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Icon(Icons.Default.MyLocation, contentDescription = "My Location")
                     }
                     
                     // Add camera button
