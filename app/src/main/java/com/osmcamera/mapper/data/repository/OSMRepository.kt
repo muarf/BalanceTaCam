@@ -99,7 +99,7 @@ class OSMRepository @Inject constructor(
                 val okHttpRequest = okhttp3.Request.Builder()
                     .url(request.completeUrl)
                     .put(okhttp3.RequestBody.create(
-                        okhttp3.MediaType.parse("text/xml"),
+                        "text/xml".toMediaTypeOrNull(),
                         changesetXml
                     ))
                     .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
@@ -149,7 +149,7 @@ class OSMRepository @Inject constructor(
                 val okHttpRequest = okhttp3.Request.Builder()
                     .url(request.completeUrl)
                     .put(okhttp3.RequestBody.create(
-                        okhttp3.MediaType.parse("text/xml"),
+                        "text/xml".toMediaTypeOrNull(),
                         nodeXml
                     ))
                     .headers(okhttp3.Headers.headersOf(*request.headers.flatMap { listOf(it.key, it.value) }.toTypedArray()))
