@@ -203,7 +203,87 @@ class RoutingRepository @Inject constructor(
         }
         
         Log.d(TAG, "Total unique alternatives found: ${allAlternatives.size}")
+        
+        // FALLBACK: If ORS didn't give us alternatives, create detour routes manually
+        if (allAlternatives.isEmpty()) {
+            Log.w(TAG, "No alternatives from ORS, generating detour routes manually")
+            return generateDetourRoutes(start, end, cameras, transportMode)
+        }
+        
         return allAlternatives
+    }
+    
+    /**
+     * Generate routes by adding waypoints (detours) to avoid camera zones
+     * This is a fallback when ORS can't find alternatives
+     */
+    private suspend fun generateDetourRoutes(
+        start: GeoPoint,
+        end: GeoPoint,
+        cameras: List<Camera>,
+        transportMode: String
+    ): List<Route> {
+        val routes = mutableListOf<Route>()
+        
+        // Calculate mid-point
+        val midLat = (start.latitude + end.latitude) / 2
+        val midLon = (start.longitude + end.longitude) / 2
+        
+        // Create 4 detour points around the mid-point (North, South, East, West)
+        val detourOffsets = listOf(
+            Pair(0.003, 0.0),    // ~300m North
+            Pair(-0.003, 0.0),   // ~300m South
+            Pair(0.0, 0.003),    // ~300m East
+            Pair(0.0, -0.003)    // ~300m West
+        )
+        
+        detourOffsets.forEachIndexed { index, (latOffset, lonOffset) ->
+            try {
+                val waypoint = listOf(midLon + lonOffset, midLat + latOffset)
+                
+                val request = ORSRouteRequest(
+                    coordinates = listOf(
+                        listOf(start.longitude, start.latitude),
+                        waypoint,
+                        listOf(end.longitude, end.latitude)
+                    ),
+                    alternativeRoutes = null
+                )
+                
+                val response = orsApi.getRoute(
+                    profile = transportMode,
+                    apiKey = OpenRouteServiceApi.API_KEY,
+                    request = request
+                )
+                
+                if (response.isSuccessful) {
+                    val orsRoute = response.body()?.routes?.firstOrNull()
+                    if (orsRoute != null) {
+                        val points = GeometryUtils.decodePolyline(orsRoute.geometry)
+                        val cameraCount = GeometryUtils.countCamerasNearRoute(
+                            routePoints = points,
+                            cameras = cameras,
+                            radiusMeters = CAMERA_AVOIDANCE_RADIUS
+                        )
+                        
+                        routes.add(Route(
+                            id = "detour_$index",
+                            points = points,
+                            distance = orsRoute.summary.distance,
+                            duration = orsRoute.summary.duration,
+                            cameraCount = cameraCount
+                        ))
+                        
+                        Log.d(TAG, "Detour route $index: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Detour $index failed", e)
+            }
+        }
+        
+        Log.d(TAG, "Generated ${routes.size} detour routes as fallback")
+        return routes
     }
     
     /**
