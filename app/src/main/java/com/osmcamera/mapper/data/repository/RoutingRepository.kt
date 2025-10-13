@@ -155,12 +155,18 @@ class RoutingRepository @Inject constructor(
             )
         }
         
-        // ORS expects: [[[lon, lat], [lon, lat], ...]]
-        // Each camera circle is one polygon in the list
+        // ORS expects avoid_polygons as a GeoJSON FeatureCollection
+        // But for simplicity, we merge all circles into one big polygon
+        // by taking the convex hull or just sending individual polygons
+        
+        // For now: send as individual polygons (one per camera)
+        // Format: { "type": "MultiPolygon", "coordinates": [[[[lon,lat], [lon,lat], ...]]] }
         val multiPolygon = ORSPolygon(
-            type = "Polygon",
-            coordinates = avoidPolygons // List of polygons
+            type = "MultiPolygon",
+            coordinates = listOf(avoidPolygons) // Wrap in extra list for MultiPolygon
         )
+        
+        android.util.Log.d(TAG, "Created MultiPolygon with ${avoidPolygons.size} circles")
         
         val request = ORSRouteRequest(
             coordinates = listOf(
