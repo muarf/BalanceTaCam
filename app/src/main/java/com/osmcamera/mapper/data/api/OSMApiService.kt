@@ -55,16 +55,14 @@ interface OSMApiService {
  */
 object ChangesetXmlBuilder {
     fun build(comment: String, source: String, createdBy: String): String {
-        return """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <osm>
-              <changeset>
-                <tag k="comment" v="${comment.escapeXml()}" />
-                <tag k="source" v="${source.escapeXml()}" />
-                <tag k="created_by" v="${createdBy.escapeXml()}" />
-              </changeset>
-            </osm>
-        """.trimIndent()
+        return """<?xml version="1.0" encoding="UTF-8"?>
+<osm>
+  <changeset>
+    <tag k="comment" v="${comment.escapeXml()}" />
+    <tag k="source" v="${source.escapeXml()}" />
+    <tag k="created_by" v="${createdBy.escapeXml()}" />
+  </changeset>
+</osm>"""
     }
     
     private fun String.escapeXml(): String {
@@ -87,18 +85,20 @@ object NodeXmlBuilder {
         longitude: Double,
         tags: Map<String, String>
     ): String {
+        // Ensure coordinates are valid
+        val validLat = latitude.coerceIn(-90.0, 90.0)
+        val validLon = longitude.coerceIn(-180.0, 180.0)
+        
         val tagElements = tags.entries.joinToString("\n") { (k, v) ->
             """    <tag k="${k.escapeXml()}" v="${v.escapeXml()}" />"""
         }
         
-        return """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <osm>
-              <node changeset="$changesetId" lat="$latitude" lon="$longitude">
-            $tagElements
-              </node>
-            </osm>
-        """.trimIndent()
+        return """<?xml version="1.0" encoding="UTF-8"?>
+<osm>
+  <node changeset="$changesetId" lat="$validLat" lon="$validLon">
+$tagElements
+  </node>
+</osm>"""
     }
     
     private fun String.escapeXml(): String {
