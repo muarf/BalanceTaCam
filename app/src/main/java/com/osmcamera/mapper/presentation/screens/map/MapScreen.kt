@@ -99,8 +99,31 @@ fun MapScreen(
                                 Icon(Icons.Default.Login, contentDescription = "Login")
                             }
                         } else if (user != null) {
-                            IconButton(onClick = { authViewModel.logout() }) {
+                            var showLogoutDialog by remember { mutableStateOf(false) }
+                            
+                            IconButton(onClick = { showLogoutDialog = true }) {
                                 Icon(Icons.Default.Logout, contentDescription = "Logout")
+                            }
+                            
+                            if (showLogoutDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { showLogoutDialog = false },
+                                    title = { Text("Déconnexion") },
+                                    text = { Text("Voulez-vous vous déconnecter de ${user!!.displayName} ?") },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            authViewModel.logout()
+                                            showLogoutDialog = false
+                                        }) {
+                                            Text("Déconnexion")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showLogoutDialog = false }) {
+                                            Text("Annuler")
+                                        }
+                                    }
+                                )
                             }
                         }
                         IconButton(onClick = {
