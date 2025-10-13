@@ -171,7 +171,7 @@ class RoutingRepository @Inject constructor(
             options = ORSOptions(avoidPolygons = multiPolygon)
         )
         
-        val route = executeRouteRequest(request, cameras, "avoiding")
+        val route = executeRouteRequest(request, cameras, "avoiding", transportMode)
         return listOfNotNull(route)
     }
     
@@ -181,11 +181,12 @@ class RoutingRepository @Inject constructor(
     private suspend fun executeRouteRequest(
         request: ORSRouteRequest,
         cameras: List<Camera>,
-        routeType: String
+        routeType: String,
+        transportMode: String = "foot-walking"
     ): Route? {
         try {
             val response = orsApi.getRoute(
-                profile = "driving-car",
+                profile = transportMode,
                 apiKey = OpenRouteServiceApi.API_KEY,
                 request = request
             )
