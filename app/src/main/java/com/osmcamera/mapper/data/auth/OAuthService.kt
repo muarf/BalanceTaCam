@@ -58,12 +58,12 @@ class OAuthService @Inject constructor() {
     suspend fun getAuthorizationUrl(): String = withContext(Dispatchers.IO) {
         val verifier = codeVerifier ?: throw IllegalStateException("OAuth not initialized")
         
-        // Build authorization URL
+        // Build authorization URL with proper encoding
         val url = StringBuilder(AUTHORIZE_URL)
-        url.append("?client_id=").append(CLIENT_ID)
-        url.append("&redirect_uri=").append(REDIRECT_URI)
+        url.append("?client_id=").append(java.net.URLEncoder.encode(CLIENT_ID, "UTF-8"))
+        url.append("&redirect_uri=").append(java.net.URLEncoder.encode(REDIRECT_URI, "UTF-8"))
         url.append("&response_type=code")
-        url.append("&scope=read_prefs write_api")
+        url.append("&scope=").append(java.net.URLEncoder.encode("read_prefs write_api", "UTF-8"))
         url.append("&state=").append(state)
         
         url.toString()
