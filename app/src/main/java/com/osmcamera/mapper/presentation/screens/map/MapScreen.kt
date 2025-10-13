@@ -127,7 +127,7 @@ fun MapScreen(
                                 isAddingCamera = true
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "📍 Tapez sur la carte pour choisir la position de la caméra",
+                                        message = "📍 Déplacez la carte puis tapez sur le marqueur pour confirmer",
                                         duration = SnackbarDuration.Long
                                     )
                                 }
@@ -200,29 +200,29 @@ fun MapScreen(
                         }
                     },
                     update = { map ->
-                        // Handle map tap for adding cameras
-                        map.overlays.removeAll { it is org.osmdroid.views.overlay.MapEventsOverlay }
-                        
-                        if (isAddingCamera) {
-                            val mapEventsOverlay = org.osmdroid.views.overlay.MapEventsOverlay(
-                                object : org.osmdroid.views.overlay.MapEventsReceiver {
-                                    override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
-                                        // User tapped on map - use this position for camera
-                                        isAddingCamera = false
-                                        onAddCamera(p.latitude, p.longitude)
-                                        return true
-                                    }
-                                    
-                                    override fun longPressHelper(p: GeoPoint): Boolean {
-                                        return false
-                                    }
-                                }
-                            )
-                            map.overlays.add(0, mapEventsOverlay) // Add as first overlay
-                        }
-                        
                         // Update camera markers
                         map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
+                        
+                        // Add crosshair marker when in adding mode
+                        if (isAddingCamera) {
+                            map.overlays.removeAll { it is Marker && it.id == "crosshair" }
+                            val center = map.mapCenter as GeoPoint
+                            val crosshair = Marker(map).apply {
+                                position = center
+                                id = "crosshair"
+                                title = "📍 Position de la nouvelle caméra"
+                                snippet = "Tapez ici pour confirmer"
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                                setOnMarkerClickListener { _, _ ->
+                                    isAddingCamera = false
+                                    onAddCamera(center.latitude, center.longitude)
+                                    true
+                                }
+                            }
+                            map.overlays.add(crosshair)
+                        } else {
+                            map.overlays.removeAll { it is Marker && it.id == "crosshair" }
+                        }
                         
                         cameras.forEach { camera ->
                             val marker = Marker(map).apply {
