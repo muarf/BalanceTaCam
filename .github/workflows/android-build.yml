@@ -30,37 +30,8 @@ jobs:
     - name: Run tests
       run: ./gradlew test --stacktrace
 
-    - name: Decode keystore
-      env:
-        KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-      run: |
-        if [ ! -z "$KEYSTORE_FILE" ]; then
-          echo "$KEYSTORE_FILE" | base64 --decode > keystore.jks
-          ls -lh keystore.jks
-          echo "✅ Keystore decoded"
-        else
-          echo "⚠️ No keystore secret found"
-        fi
-
     - name: Build debug APK
-      env:
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: |
-        if [ -f keystore.jks ] && [ ! -z "$KEYSTORE_PASSWORD" ]; then
-          echo "🔐 Building SIGNED APK..."
-          ./gradlew assembleDebug \
-            -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
-            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
-            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
-            -Pandroid.injected.signing.key.password="$KEY_PASSWORD" \
-            --stacktrace
-          echo "✅ Signed APK built"
-        else
-          echo "⚠️ Building UNSIGNED APK (no keystore configured)"
-          ./gradlew assembleDebug --stacktrace
-        fi
+      run: ./gradlew assembleDebug --stacktrace
 
     - name: Upload debug APK
       uses: actions/upload-artifact@v4
