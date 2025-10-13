@@ -86,3 +86,6 @@ secrets.properties
 keystore.properties
 
 
+balancetacam.keystore
+*.keystore
+*.keystore.base64
