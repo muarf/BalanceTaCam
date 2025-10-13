@@ -121,12 +121,6 @@ fun AppNavigation(
                     mapViewModel?.setSelectedRoute(route)
                     navController.popBackStack()
                 },
-                onSelectStartOnMap = {
-                    navController.popBackStack()
-                },
-                onSelectEndOnMap = {
-                    navController.popBackStack()
-                },
                 userLocation = mapViewModel?.userLocation?.value
             )
         }
