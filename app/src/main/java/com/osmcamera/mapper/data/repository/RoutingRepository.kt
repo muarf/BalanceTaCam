@@ -28,6 +28,7 @@ class RoutingRepository @Inject constructor(
     companion object {
         private const val TAG = "BalanceTaCam-Routing"
         private const val CAMERA_AVOIDANCE_RADIUS = 50.0 // meters
+        private const val MAX_CAMERAS_TO_AVOID = 30 // Limit to avoid 413 error
     }
     
     /**
@@ -132,8 +133,18 @@ class RoutingRepository @Inject constructor(
             return emptyList()
         }
         
+        // Limit cameras to avoid 413 error (request too large)
+        val limitedCameras = if (cameras.size > MAX_CAMERAS_TO_AVOID) {
+            android.util.Log.w(TAG, "Too many cameras (${cameras.size}), limiting to $MAX_CAMERAS_TO_AVOID closest to route")
+            cameras.take(MAX_CAMERAS_TO_AVOID)
+        } else {
+            cameras
+        }
+        
+        android.util.Log.d(TAG, "Using ${limitedCameras.size} cameras for avoidance")
+        
         // Create avoidance polygons around cameras
-        val avoidPolygons = cameras.map { camera ->
+        val avoidPolygons = limitedCameras.map { camera ->
             GeometryUtils.createAvoidanceCircle(
                 center = GeoPoint(camera.latitude, camera.longitude),
                 radiusMeters = CAMERA_AVOIDANCE_RADIUS,
