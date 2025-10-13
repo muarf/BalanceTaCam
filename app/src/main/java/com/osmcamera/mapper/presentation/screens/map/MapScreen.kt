@@ -292,6 +292,31 @@ fun MapScreen(
                         }
                     },
                     update = { map ->
+                        // Update route if selected
+                        val route = mapViewModel.selectedRoute.value
+                        if (route != null) {
+                            // Remove old route
+                            map.overlays.removeAll { it is org.osmdroid.views.overlay.Polyline && it.id == "selected_route" }
+                            
+                            // Draw new route
+                            val routeLine = org.osmdroid.views.overlay.Polyline(map).apply {
+                                id = "selected_route"
+                                setPoints(route.geometry.map { GeoPoint(it[1], it[0]) })
+                                outlinePaint.color = android.graphics.Color.parseColor("#2196F3")
+                                outlinePaint.strokeWidth = 10f
+                                title = "Itinéraire (${route.cameraCount} caméras)"
+                            }
+                            map.overlays.add(0, routeLine) // Add below markers
+                            
+                            // Center map on route
+                            if (route.geometry.isNotEmpty()) {
+                                val bounds = org.osmdroid.util.BoundingBox.fromGeoPoints(
+                                    route.geometry.map { GeoPoint(it[1], it[0]) }
+                                )
+                                map.zoomToBoundingBox(bounds, true, 100)
+                            }
+                        }
+                        
                         // Update camera markers
                         map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
                         

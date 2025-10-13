@@ -48,7 +48,10 @@ fun AppNavigation(
             )
         }
         
-        composable(Screen.Map.route) {
+        composable(Screen.Map.route) { backStackEntry ->
+            val mapViewModel: com.osmcamera.mapper.presentation.viewmodel.MapViewModel = 
+                androidx.hilt.navigation.compose.hiltViewModel()
+            
             MapScreen(
                 onAddCamera = { latitude, longitude ->
                     navController.navigate(Screen.AddCamera.createRoute(latitude, longitude))
@@ -61,7 +64,8 @@ fun AppNavigation(
                 },
                 onNavigateToRouting = {
                     navController.navigate(Screen.Routing.route)
-                }
+                },
+                mapViewModel = mapViewModel
             )
         }
         

@@ -32,6 +32,14 @@ class MapViewModel @Inject constructor(
     private val _userLocation = MutableStateFlow<GeoPoint?>(null)
     val userLocation: StateFlow<GeoPoint?> = _userLocation.asStateFlow()
     
+    // Route display
+    private val _selectedRoute = MutableStateFlow<com.osmcamera.mapper.data.model.Route?>(null)
+    val selectedRoute: StateFlow<com.osmcamera.mapper.data.model.Route?> = _selectedRoute.asStateFlow()
+    
+    fun setSelectedRoute(route: com.osmcamera.mapper.data.model.Route?) {
+        _selectedRoute.value = route
+    }
+    
     private val _isLoadingCameras = MutableStateFlow(false)
     val isLoadingCameras: StateFlow<Boolean> = _isLoadingCameras.asStateFlow()
     
