@@ -133,7 +133,7 @@ class OSMRepository @Inject constructor(
                     body?.toLongOrNull()
                 } else {
                     val error = response.body?.string()
-                    android.util.Log.e("BalanceTaCam", "Changeset creation failed: ${response.code()} - $error")
+                    android.util.Log.e("BalanceTaCam", "Changeset creation failed: ${response.code} - $error")
                     null
                 }
             } catch (e: Exception) {
@@ -183,7 +183,7 @@ class OSMRepository @Inject constructor(
                     body
                 } else {
                     val error = response.body?.string()
-                    android.util.Log.e("BalanceTaCam", "Node creation failed: ${response.code()} - $error")
+                    android.util.Log.e("BalanceTaCam", "Node creation failed: ${response.code} - $error")
                     null
                 }
             } catch (e: Exception) {
