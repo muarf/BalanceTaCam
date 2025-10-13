@@ -200,11 +200,6 @@ fun MapScreen(
                                 overlays.add(locationOverlay)
                             }
                             
-                            // Add tap listener for adding cameras
-                            setOnClickListener {
-                                // This is handled by MapEventsOverlay below
-                            }
-                            
                             mapView = this
                             
                             // Load cameras when map is ready
@@ -217,20 +212,54 @@ fun MapScreen(
                                     east = bounds.lonEast
                                 )
                             }
+                            
+                            // Add scroll listener to load cameras when map moves
+                            addMapListener(object : org.osmdroid.events.MapListener {
+                                private var lastUpdate = 0L
+                                
+                                override fun onScroll(event: org.osmdroid.events.ScrollEvent?): Boolean {
+                                    // Debounce: only update every 2 seconds
+                                    val now = System.currentTimeMillis()
+                                    if (now - lastUpdate > 2000) {
+                                        lastUpdate = now
+                                        post {
+                                            val bounds = boundingBox
+                                            if (bounds != null) {
+                                                mapViewModel.refreshCameras(
+                                                    south = bounds.latSouth,
+                                                    west = bounds.lonWest,
+                                                    north = bounds.latNorth,
+                                                    east = bounds.lonEast
+                                                )
+                                            }
+                                        }
+                                    }
+                                    return true
+                                }
+                                
+                                override fun onZoom(event: org.osmdroid.events.ZoomEvent?): Boolean {
+                                    // Also reload on zoom
+                                    val now = System.currentTimeMillis()
+                                    if (now - lastUpdate > 2000) {
+                                        lastUpdate = now
+                                        post {
+                                            val bounds = boundingBox
+                                            if (bounds != null) {
+                                                mapViewModel.refreshCameras(
+                                                    south = bounds.latSouth,
+                                                    west = bounds.lonWest,
+                                                    north = bounds.latNorth,
+                                                    east = bounds.lonEast
+                                                )
+                                            }
+                                        }
+                                    }
+                                    return true
+                                }
+                            })
                         }
                     },
                     update = { map ->
-                        // Auto-load cameras when map moves
-                        val bounds = map.boundingBox
-                        if (bounds != null) {
-                            mapViewModel.refreshCameras(
-                                south = bounds.latSouth,
-                                west = bounds.lonWest,
-                                north = bounds.latNorth,
-                                east = bounds.lonEast
-                            )
-                        }
-                        
                         // Update camera markers
                         map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
                         
