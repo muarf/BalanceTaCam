@@ -36,6 +36,7 @@ fun MapScreen(
     onAddCamera: (Double, Double) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAuth: () -> Unit,
+    onNavigateToRouting: () -> Unit = {},
     mapViewModel: MapViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -84,6 +85,11 @@ fun MapScreen(
                         }
                     },
                     actions = {
+                        // Routing button
+                        IconButton(onClick = onNavigateToRouting) {
+                            Icon(Icons.Default.Route, contentDescription = "Itinéraire", tint = MaterialTheme.colorScheme.tertiary)
+                        }
+                        
                         // Filter toggle
                         IconButton(onClick = { showPublicOnly = !showPublicOnly }) {
                             if (showPublicOnly) {

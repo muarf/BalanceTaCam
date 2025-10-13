@@ -19,8 +19,7 @@ interface OpenRouteServiceApi {
     companion object {
         const val BASE_URL = "https://api.openrouteservice.org/"
         // Free tier: 2000 requests/day
-        // Signup at: https://openrouteservice.org/dev/#/signup
-        const val API_KEY = "CONFIGURE_YOUR_ORS_API_KEY_HERE"
+        const val API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImRiZWE4ZmVlMWEwYzQ3YTVhYTE5ZmQ4ZGZjNDA4NzM2IiwiaCI6Im11cm11cjY0In0="
     }
 }
 

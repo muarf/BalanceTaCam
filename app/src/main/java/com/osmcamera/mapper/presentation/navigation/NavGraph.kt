@@ -10,6 +10,7 @@ import com.osmcamera.mapper.presentation.screens.map.MapScreen
 import com.osmcamera.mapper.presentation.screens.addcamera.AddCameraScreen
 import com.osmcamera.mapper.presentation.screens.settings.SettingsScreen
 import com.osmcamera.mapper.presentation.screens.about.AboutScreen
+import com.osmcamera.mapper.presentation.screens.routing.RoutingScreen
 
 /**
  * Navigation destinations
@@ -23,6 +24,7 @@ sealed class Screen(val route: String) {
     }
     object Settings : Screen("settings")
     object About : Screen("about")
+    object Routing : Screen("routing")
 }
 
 /**
@@ -56,6 +58,9 @@ fun AppNavigation(
                 },
                 onNavigateToAuth = {
                     navController.navigate(Screen.Auth.route)
+                },
+                onNavigateToRouting = {
+                    navController.navigate(Screen.Routing.route)
                 }
             )
         }
@@ -90,6 +95,18 @@ fun AppNavigation(
         composable(Screen.About.route) {
             AboutScreen(
                 onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(Screen.Routing.route) {
+            RoutingScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onShowRouteOnMap = { route ->
+                    // TODO: Show route on map
                     navController.popBackStack()
                 }
             )
