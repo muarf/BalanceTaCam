@@ -11,6 +11,7 @@ import com.osmcamera.mapper.data.model.Route
 import com.osmcamera.mapper.data.model.RouteComparison
 import com.osmcamera.mapper.data.model.RouteInstruction
 import com.osmcamera.mapper.utils.GeometryUtils
+import com.osmcamera.mapper.utils.CameraClusterUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.osmdroid.util.GeoPoint
@@ -214,8 +215,8 @@ class RoutingRepository @Inject constructor(
     }
     
     /**
-     * Generate routes by adding waypoints (detours) to avoid camera zones
-     * This is a fallback when ORS can't find alternatives
+     * Generate INTELLIGENT routes by adding waypoints to avoid camera zones
+     * This analyzes camera positions and creates strategic detours
      */
     private suspend fun generateDetourRoutes(
         start: GeoPoint,
@@ -223,28 +224,39 @@ class RoutingRepository @Inject constructor(
         cameras: List<Camera>,
         transportMode: String
     ): List<Route> {
-        val routes = mutableListOf<Route>()
+        Log.d(TAG, "=== Generating intelligent detour routes ===")
         
-        // Calculate mid-point
-        val midLat = (start.latitude + end.latitude) / 2
-        val midLon = (start.longitude + end.longitude) / 2
-        
-        // Create 4 detour points around the mid-point (North, South, East, West)
-        val detourOffsets = listOf(
-            Pair(0.003, 0.0),    // ~300m North
-            Pair(-0.003, 0.0),   // ~300m South
-            Pair(0.0, 0.003),    // ~300m East
-            Pair(0.0, -0.003)    // ~300m West
+        // 1. Find camera clusters (hotspots)
+        val clusters = CameraClusterUtils.findCameraClusters(
+            cameras = cameras,
+            maxDistanceMeters = 150.0,
+            minCamerasPerCluster = 3
         )
         
-        detourOffsets.forEachIndexed { index, (latOffset, lonOffset) ->
+        Log.d(TAG, "Found ${clusters.size} camera clusters")
+        clusters.take(5).forEach { cluster ->
+            Log.d(TAG, "  Cluster: ${cluster.cameraCount} cameras at (${String.format("%.4f", cluster.center.latitude)}, ${String.format("%.4f", cluster.center.longitude)})")
+        }
+        
+        // 2. Generate intelligent waypoints that avoid clusters
+        val waypoints = CameraClusterUtils.generateAvoidanceWaypoints(
+            start = start,
+            end = end,
+            clusters = clusters,
+            distances = listOf(200.0, 400.0, 600.0)
+        )
+        
+        Log.d(TAG, "Generated ${waypoints.size} intelligent waypoints")
+        
+        // 3. Calculate routes via each waypoint
+        val routes = mutableListOf<Route>()
+        
+        waypoints.take(10).forEachIndexed { index, waypoint ->
             try {
-                val waypoint = listOf(midLon + lonOffset, midLat + latOffset)
-                
                 val request = ORSRouteRequest(
                     coordinates = listOf(
                         listOf(start.longitude, start.latitude),
-                        waypoint,
+                        listOf(waypoint.longitude, waypoint.latitude),
                         listOf(end.longitude, end.latitude)
                     ),
                     alternativeRoutes = null
@@ -267,23 +279,23 @@ class RoutingRepository @Inject constructor(
                         )
                         
                         routes.add(Route(
-                            id = "detour_$index",
+                            id = "intelligent_$index",
                             points = points,
                             distance = orsRoute.summary.distance,
                             duration = orsRoute.summary.duration,
                             cameraCount = cameraCount
                         ))
                         
-                        Log.d(TAG, "Detour route $index: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
+                        Log.d(TAG, "Smart detour $index: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Detour $index failed", e)
+                Log.e(TAG, "Smart detour $index failed", e)
             }
         }
         
-        Log.d(TAG, "Generated ${routes.size} detour routes as fallback")
-        return routes
+        Log.d(TAG, "Generated ${routes.size} intelligent detour routes")
+        return routes.sortedBy { it.cameraCount }.take(5) // Keep best 5
     }
     
     /**
