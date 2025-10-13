@@ -141,10 +141,11 @@ class RoutingRepository @Inject constructor(
             )
         }
         
-        // Combine all polygons into one MultiPolygon
+        // ORS expects: [[[lon, lat], [lon, lat], ...]]
+        // Each camera circle is one polygon in the list
         val multiPolygon = ORSPolygon(
             type = "Polygon",
-            coordinates = listOf(avoidPolygons.flatten().chunked(2).map { listOf(it[0], it[1]) })
+            coordinates = avoidPolygons // List of polygons
         )
         
         val request = ORSRouteRequest(
