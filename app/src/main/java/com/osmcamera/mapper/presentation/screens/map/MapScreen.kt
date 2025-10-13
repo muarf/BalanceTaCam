@@ -86,7 +86,10 @@ fun MapScreen(
                     },
                     actions = {
                         // Routing button
-                        IconButton(onClick = onNavigateToRouting) {
+                        IconButton(onClick = {
+                            // Pass user location to routing screen
+                            onNavigateToRouting()
+                        }) {
                             Icon(Icons.Default.Route, contentDescription = "Itinéraire", tint = MaterialTheme.colorScheme.tertiary)
                         }
                         

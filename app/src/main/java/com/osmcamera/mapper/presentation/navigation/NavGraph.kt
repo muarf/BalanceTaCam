@@ -100,7 +100,15 @@ fun AppNavigation(
             )
         }
         
-        composable(Screen.Routing.route) {
+        composable(Screen.Routing.route) { backStackEntry ->
+            // Get user location from map screen if available
+            val savedStateHandle = backStackEntry.savedStateHandle
+            val userLat = savedStateHandle.get<Double>("userLat")
+            val userLon = savedStateHandle.get<Double>("userLon")
+            val userLocation = if (userLat != null && userLon != null) {
+                org.osmdroid.util.GeoPoint(userLat, userLon)
+            } else null
+            
             RoutingScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -108,7 +116,8 @@ fun AppNavigation(
                 onShowRouteOnMap = { route ->
                     // TODO: Show route on map
                     navController.popBackStack()
-                }
+                },
+                userLocation = userLocation
             )
         }
     }

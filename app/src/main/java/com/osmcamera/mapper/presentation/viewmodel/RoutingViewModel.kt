@@ -2,9 +2,12 @@ package com.osmcamera.mapper.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.osmcamera.mapper.data.api.NominatimApi
 import com.osmcamera.mapper.data.model.RouteComparison
 import com.osmcamera.mapper.data.repository.RoutingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +20,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class RoutingViewModel @Inject constructor(
-    private val routingRepository: RoutingRepository
+    private val routingRepository: RoutingRepository,
+    private val nominatimApi: NominatimApi
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<RoutingUiState>(RoutingUiState.Idle)
@@ -29,12 +33,51 @@ class RoutingViewModel @Inject constructor(
     private val _endPoint = MutableStateFlow<GeoPoint?>(null)
     val endPoint: StateFlow<GeoPoint?> = _endPoint.asStateFlow()
     
-    fun setStartPoint(point: GeoPoint) {
+    private val _addressSearchResults = MutableStateFlow<List<String>>(emptyList())
+    val addressSearchResults: StateFlow<List<String>> = _addressSearchResults.asStateFlow()
+    
+    private var searchJob: Job? = null
+    
+    fun setStartPoint(point: GeoPoint?) {
         _startPoint.value = point
     }
     
-    fun setEndPoint(point: GeoPoint) {
+    fun setEndPoint(point: GeoPoint?) {
         _endPoint.value = point
+    }
+    
+    /**
+     * Search address using Nominatim
+     */
+    fun searchAddress(query: String, isStart: Boolean) {
+        if (query.length < 3) return
+        
+        // Cancel previous search
+        searchJob?.cancel()
+        
+        searchJob = viewModelScope.launch {
+            delay(500) // Debounce
+            
+            try {
+                val response = nominatimApi.search(query)
+                if (response.isSuccessful) {
+                    val results = response.body() ?: emptyList()
+                    if (results.isNotEmpty()) {
+                        val result = results.first()
+                        val lat = result.lat.toDouble()
+                        val lon = result.lon.toDouble()
+                        
+                        if (isStart) {
+                            setStartPoint(GeoPoint(lat, lon))
+                        } else {
+                            setEndPoint(GeoPoint(lat, lon))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("BalanceTaCam", "Address search failed", e)
+            }
+        }
     }
     
     fun clearPoints() {

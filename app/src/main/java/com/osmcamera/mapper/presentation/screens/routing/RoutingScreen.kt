@@ -27,11 +27,17 @@ import com.osmcamera.mapper.presentation.viewmodel.RoutingViewModel
 fun RoutingScreen(
     onNavigateBack: () -> Unit,
     onShowRouteOnMap: (Route) -> Unit,
+    userLocation: org.osmdroid.util.GeoPoint? = null,
     viewModel: RoutingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val startPoint by viewModel.startPoint.collectAsState()
     val endPoint by viewModel.endPoint.collectAsState()
+    
+    var startAddressQuery by remember { mutableStateOf("") }
+    var endAddressQuery by remember { mutableStateOf("") }
+    var selectingStart by remember { mutableStateOf(false) }
+    var selectingEnd by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
@@ -58,40 +64,161 @@ fun RoutingScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            // Point selection info
-            Card(modifier = Modifier.fillMaxWidth()) {
+            // Point selection cards
+            
+            // Start point
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (selectingStart) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    }
+                )
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "📍 Sélectionnez départ et arrivée sur la carte",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Place, contentDescription = null, tint = Color(0xFF4CAF50))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Point de départ", style = MaterialTheme.typography.titleMedium)
+                        }
+                        
+                        // Ma position button
+                        if (userLocation != null) {
+                            IconButton(onClick = { viewModel.setStartPoint(userLocation) }) {
+                                Icon(Icons.Default.MyLocation, contentDescription = "Ma position")
+                            }
+                        }
+                    }
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Place, contentDescription = null, tint = Color(0xFF4CAF50))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            if (startPoint != null) {
-                                "Départ: ${String.format("%.4f", startPoint!!.latitude)}, ${String.format("%.4f", startPoint!!.longitude)}"
-                            } else {
-                                "Tapez sur la carte pour le départ"
+                    if (startPoint != null) {
+                        Text("${String.format("%.5f", startPoint!!.latitude)}, ${String.format("%.5f", startPoint!!.longitude)}")
+                        TextButton(onClick = { viewModel.setStartPoint(null) }) {
+                            Text("Effacer")
+                        }
+                    } else {
+                        // Search address
+                        OutlinedTextField(
+                            value = startAddressQuery,
+                            onValueChange = { startAddressQuery = it },
+                            label = { Text("Rechercher adresse") },
+                            placeholder = { Text("Ex: 10 rue de Rivoli, Paris") },
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                IconButton(onClick = { /* TODO: Geocode */ }) {
+                                    Icon(Icons.Default.Search, contentDescription = "Rechercher")
+                                }
                             }
                         )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Button(
+                            onClick = { selectingStart = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.EditLocation, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Sélectionner sur la Carte")
+                        }
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // End point
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (selectingEnd) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    }
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Flag, contentDescription = null, tint = Color(0xFFF44336))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Destination", style = MaterialTheme.typography.titleMedium)
+                        }
+                        
+                        // Ma position button
+                        if (userLocation != null) {
+                            IconButton(onClick = { viewModel.setEndPoint(userLocation) }) {
+                                Icon(Icons.Default.MyLocation, contentDescription = "Ma position")
+                            }
+                        }
                     }
                     
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Flag, contentDescription = null, tint = Color(0xFFF44336))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            if (endPoint != null) {
-                                "Arrivée: ${String.format("%.4f", endPoint!!.latitude)}, ${String.format("%.4f", endPoint!!.longitude)}"
-                            } else {
-                                "Tapez ensuite pour l'arrivée"
+                    if (endPoint != null) {
+                        Text("${String.format("%.5f", endPoint!!.latitude)}, ${String.format("%.5f", endPoint!!.longitude)}")
+                        TextButton(onClick = { viewModel.setEndPoint(null) }) {
+                            Text("Effacer")
+                        }
+                    } else {
+                        // Search address
+                        OutlinedTextField(
+                            value = endAddressQuery,
+                            onValueChange = { endAddressQuery = it },
+                            label = { Text("Rechercher adresse") },
+                            placeholder = { Text("Ex: Tour Eiffel, Paris") },
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                IconButton(onClick = { 
+                                    viewModel.searchAddress(endAddressQuery, isStart = false)
+                                }) {
+                                    Icon(Icons.Default.Search, contentDescription = "Rechercher")
+                                }
                             }
                         )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Button(
+                            onClick = { selectingEnd = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.EditLocation, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Sélectionner sur la Carte")
+                        }
+                    }
+                }
+            }
+            
+            // Show instruction if selecting
+            if (selectingStart || selectingEnd) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Text(
+                        "📍 Retournez sur la carte et tapez pour choisir ${if (selectingStart) "le départ" else "l'arrivée"}",
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
                     }
                 }
             }

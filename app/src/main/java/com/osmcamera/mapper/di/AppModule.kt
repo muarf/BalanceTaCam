@@ -107,6 +107,23 @@ object AppModule {
     fun provideOpenRouteServiceApi(@ORSRetrofit retrofit: Retrofit): com.osmcamera.mapper.data.api.OpenRouteServiceApi {
         return retrofit.create(com.osmcamera.mapper.data.api.OpenRouteServiceApi::class.java)
     }
+    
+    @Provides
+    @Singleton
+    @NominatimRetrofit
+    fun provideNominatimRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(com.osmcamera.mapper.data.api.NominatimApi.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideNominatimApi(@NominatimRetrofit retrofit: Retrofit): com.osmcamera.mapper.data.api.NominatimApi {
+        return retrofit.create(com.osmcamera.mapper.data.api.NominatimApi::class.java)
+    }
 }
 
 @Qualifier
@@ -120,5 +137,9 @@ annotation class OverpassRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ORSRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NominatimRetrofit
 
 
