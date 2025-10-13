@@ -96,20 +96,27 @@ class RoutingViewModel @Inject constructor(
         }
         
         viewModelScope.launch {
+            android.util.Log.d("BalanceTaCam", "ViewModel: Setting Calculating state")
             _uiState.value = RoutingUiState.Calculating
             
             try {
+                android.util.Log.d("BalanceTaCam", "ViewModel: Calling repository")
                 val result = routingRepository.calculateAntiCameraRoutes(start, end)
+                
+                android.util.Log.d("BalanceTaCam", "ViewModel: Got result, isSuccess=${result.isSuccess}")
                 
                 if (result.isSuccess) {
                     val comparison = result.getOrNull()!!
+                    android.util.Log.d("BalanceTaCam", "ViewModel: Got ${comparison.routes.size} routes")
                     _uiState.value = RoutingUiState.RoutesCalculated(comparison)
+                    android.util.Log.d("BalanceTaCam", "ViewModel: UI state set to RoutesCalculated")
                 } else {
-                    _uiState.value = RoutingUiState.Error(
-                        result.exceptionOrNull()?.message ?: "Échec du calcul d'itinéraire"
-                    )
+                    val error = result.exceptionOrNull()?.message ?: "Échec du calcul d'itinéraire"
+                    android.util.Log.e("BalanceTaCam", "ViewModel: Error - $error")
+                    _uiState.value = RoutingUiState.Error(error)
                 }
             } catch (e: Exception) {
+                android.util.Log.e("BalanceTaCam", "ViewModel: Exception", e)
                 _uiState.value = RoutingUiState.Error(e.message ?: "Erreur inconnue")
             }
         }
