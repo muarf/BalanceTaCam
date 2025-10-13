@@ -54,12 +54,12 @@ class RoutingRepository @Inject constructor(
                 val directRoute = calculateDirectRoute(start, end, cameras, transportMode)
                 Log.d(TAG, "Direct route: ${directRoute?.cameraCount} cameras")
                 
-                // 3. Calculate routes avoiding cameras
-                val avoidingRoutes = calculateRoutesWithAvoidance(start, end, cameras, transportMode)
-                Log.d(TAG, "Calculated ${avoidingRoutes.size} avoiding routes")
+                // 3. Calculate alternative routes (without avoid_polygons since ORS 500 error)
+                val alternativeRoutes = calculateAlternativeRoutes(start, end, cameras, transportMode)
+                Log.d(TAG, "Calculated ${alternativeRoutes.size} alternative routes")
                 
-                // 4. Combine and sort by camera count
-                val allRoutes = (listOf(directRoute) + avoidingRoutes).filterNotNull()
+                // 4. Combine and sort by camera count (best = fewer cameras)
+                val allRoutes = (listOf(directRoute) + alternativeRoutes).filterNotNull()
                 val sortedRoutes = allRoutes.sortedBy { it.cameraCount }
                 
                 val bestRoute = sortedRoutes.firstOrNull() 
@@ -124,9 +124,10 @@ class RoutingRepository @Inject constructor(
     }
     
     /**
-     * Calculate routes with camera avoidance
+     * Calculate alternative routes (using ORS alternative_routes feature)
+     * Then count cameras on each to find the best one
      */
-    private suspend fun calculateRoutesWithAvoidance(
+    private suspend fun calculateAlternativeRoutes(
         start: GeoPoint,
         end: GeoPoint,
         cameras: List<Camera>,
@@ -136,46 +137,58 @@ class RoutingRepository @Inject constructor(
             return emptyList()
         }
         
-        // Limit cameras to avoid 413 error (request too large)
-        val limitedCameras = if (cameras.size > MAX_CAMERAS_TO_AVOID) {
-            android.util.Log.w(TAG, "Too many cameras (${cameras.size}), limiting to $MAX_CAMERAS_TO_AVOID closest to route")
-            cameras.take(MAX_CAMERAS_TO_AVOID)
-        } else {
-            cameras
-        }
-        
-        android.util.Log.d(TAG, "Using ${limitedCameras.size} cameras for avoidance")
-        
-        // Create avoidance polygons around cameras
-        val avoidPolygons = limitedCameras.map { camera ->
-            GeometryUtils.createAvoidanceCircle(
-                center = GeoPoint(camera.latitude, camera.longitude),
-                radiusMeters = CAMERA_AVOIDANCE_RADIUS,
-                points = 8 // Octagon for performance
-            )
-        }
-        
-        // ORS avoid_polygons format: ONE Polygon with multiple rings
-        // Each ring is a camera avoidance circle
-        // Format: { "type": "Polygon", "coordinates": [[[lon,lat],...], [[lon,lat],...]] }
-        val multiPolygon = ORSPolygon(
-            type = "Polygon",
-            coordinates = avoidPolygons // Each polygon is one ring
-        )
-        
-        android.util.Log.d(TAG, "Created Polygon with ${avoidPolygons.size} rings (cameras)")
-        
+        // Request 2 alternative routes from ORS
         val request = ORSRouteRequest(
             coordinates = listOf(
                 listOf(start.longitude, start.latitude),
                 listOf(end.longitude, end.latitude)
             ),
-            alternativeRoutes = null,
-            options = ORSOptions(avoidPolygons = multiPolygon)
+            alternativeRoutes = ORSAlternativeRoutes(
+                targetCount = 2,
+                shareFactor = 0.5, // More different from main route
+                weightFactor = 1.5
+            ),
+            options = null // No avoidance - ORS gives alternatives naturally
         )
         
-        val route = executeRouteRequest(request, cameras, "avoiding", transportMode)
-        return listOfNotNull(route)
+        return try {
+            val response = orsApi.getRoute(
+                profile = transportMode,
+                apiKey = OpenRouteServiceApi.API_KEY,
+                request = request
+            )
+            
+            if (!response.isSuccessful) {
+                Log.e(TAG, "Alternative routes error: ${response.code()}")
+                return emptyList()
+            }
+            
+            val orsRoutes = response.body()?.routes ?: return emptyList()
+            Log.d(TAG, "Got ${orsRoutes.size} alternative routes from ORS")
+            
+            // Convert each ORS route and count cameras
+            orsRoutes.drop(1).mapIndexedNotNull { index, orsRoute ->
+                val points = GeometryUtils.decodePolyline(orsRoute.geometry)
+                val cameraCount = GeometryUtils.countCamerasNearRoute(
+                    routePoints = points,
+                    cameras = cameras,
+                    radiusMeters = CAMERA_AVOIDANCE_RADIUS
+                )
+                
+                Log.d(TAG, "Alternative route ${index + 1}: ${points.size} points, $cameraCount cameras")
+                
+                Route(
+                    id = "alt_$index",
+                    points = points,
+                    distance = orsRoute.summary.distance,
+                    duration = orsRoute.summary.duration,
+                    cameraCount = cameraCount
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Alternative routes failed", e)
+            emptyList()
+        }
     }
     
     /**
