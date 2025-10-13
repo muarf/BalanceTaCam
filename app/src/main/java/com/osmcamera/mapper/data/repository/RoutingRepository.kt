@@ -125,8 +125,8 @@ class RoutingRepository @Inject constructor(
     }
     
     /**
-     * Calculate alternative routes (using ORS alternative_routes feature)
-     * Then count cameras on each to find the best one
+     * Calculate alternative routes by trying different parameters
+     * to get the most variety and find routes with fewer cameras
      */
     private suspend fun calculateAlternativeRoutes(
         start: GeoPoint,
@@ -138,65 +138,72 @@ class RoutingRepository @Inject constructor(
             return emptyList()
         }
         
-        // Request MORE alternative routes from ORS
-        // shareFactor = how different routes must be (lower = more different)
-        // weightFactor = accept longer routes for alternatives (higher = longer OK)
-        val request = ORSRouteRequest(
-            coordinates = listOf(
-                listOf(start.longitude, start.latitude),
-                listOf(end.longitude, end.latitude)
-            ),
-            alternativeRoutes = ORSAlternativeRoutes(
-                targetCount = 10, // Request 10 alternatives (ORS will return what it can)
-                shareFactor = 0.3, // Routes must share <30% of their path (very different)
-                weightFactor = 2.5 // Accept routes up to 2.5x longer if they avoid cameras
-            ),
-            options = null // No avoidance - ORS gives alternatives naturally
+        val allAlternatives = mutableListOf<Route>()
+        
+        // Try 3 different configurations to get more variety
+        val configurations = listOf(
+            ORSAlternativeRoutes(targetCount = 5, shareFactor = 0.3, weightFactor = 2.0),
+            ORSAlternativeRoutes(targetCount = 5, shareFactor = 0.4, weightFactor = 2.5),
+            ORSAlternativeRoutes(targetCount = 5, shareFactor = 0.5, weightFactor = 3.0)
         )
         
-        Log.d(TAG, "Requesting up to 10 alternative routes (shareFactor=0.3)")
-        
-        return try {
-            val response = orsApi.getRoute(
-                profile = transportMode,
-                apiKey = OpenRouteServiceApi.API_KEY,
-                request = request
-            )
-            
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Alternative routes error: ${response.code()}")
-                return emptyList()
-            }
-            
-            val orsRoutes = response.body()?.routes ?: return emptyList()
-            Log.d(TAG, "Got ${orsRoutes.size} total routes from ORS (including direct)")
-            
-            // Convert each ORS alternative route (skip first = direct) and count cameras
-            val alternatives = orsRoutes.drop(1).mapIndexedNotNull { index, orsRoute ->
-                val points = GeometryUtils.decodePolyline(orsRoute.geometry)
-                val cameraCount = GeometryUtils.countCamerasNearRoute(
-                    routePoints = points,
-                    cameras = cameras,
-                    radiusMeters = CAMERA_AVOIDANCE_RADIUS
+        configurations.forEachIndexed { configIndex, altConfig ->
+            try {
+                val request = ORSRouteRequest(
+                    coordinates = listOf(
+                        listOf(start.longitude, start.latitude),
+                        listOf(end.longitude, end.latitude)
+                    ),
+                    alternativeRoutes = altConfig,
+                    options = null
                 )
                 
-                Log.d(TAG, "Alternative route ${index + 1}: ${points.size} points, $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
-                
-                Route(
-                    id = "alt_$index",
-                    points = points,
-                    distance = orsRoute.summary.distance,
-                    duration = orsRoute.summary.duration,
-                    cameraCount = cameraCount
+                val response = orsApi.getRoute(
+                    profile = transportMode,
+                    apiKey = OpenRouteServiceApi.API_KEY,
+                    request = request
                 )
+                
+                if (response.isSuccessful) {
+                    val orsRoutes = response.body()?.routes ?: emptyList()
+                    Log.d(TAG, "Config $configIndex: Got ${orsRoutes.size} routes")
+                    
+                    // Skip first (direct) and convert others
+                    orsRoutes.drop(1).forEach { orsRoute ->
+                        val points = GeometryUtils.decodePolyline(orsRoute.geometry)
+                        val cameraCount = GeometryUtils.countCamerasNearRoute(
+                            routePoints = points,
+                            cameras = cameras,
+                            radiusMeters = CAMERA_AVOIDANCE_RADIUS
+                        )
+                        
+                        val route = Route(
+                            id = "alt_${configIndex}_${allAlternatives.size}",
+                            points = points,
+                            distance = orsRoute.summary.distance,
+                            duration = orsRoute.summary.duration,
+                            cameraCount = cameraCount
+                        )
+                        
+                        // Only add if significantly different from existing routes
+                        val isDuplicate = allAlternatives.any { existing ->
+                            kotlin.math.abs(existing.distance - route.distance) < 50 &&
+                            existing.cameraCount == route.cameraCount
+                        }
+                        
+                        if (!isDuplicate) {
+                            allAlternatives.add(route)
+                            Log.d(TAG, "Added alternative: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Config $configIndex failed", e)
             }
-            
-            Log.d(TAG, "Returning ${alternatives.size} alternative routes")
-            alternatives
-        } catch (e: Exception) {
-            Log.e(TAG, "Alternative routes failed", e)
-            emptyList()
         }
+        
+        Log.d(TAG, "Total unique alternatives found: ${allAlternatives.size}")
+        return allAlternatives
     }
     
     /**
