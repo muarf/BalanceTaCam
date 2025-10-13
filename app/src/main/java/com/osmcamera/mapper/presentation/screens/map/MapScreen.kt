@@ -292,25 +292,36 @@ fun MapScreen(
                         }
                     },
                     update = { map ->
-                        // Update route if selected
+                        // Update route if selected (non-blocking)
                         val route = mapViewModel.selectedRoute.value
                         if (route != null && route.points.isNotEmpty()) {
-                            // Remove old route
-                            map.overlays.removeAll { it is org.osmdroid.views.overlay.Polyline && it.id == "selected_route" }
-                            
-                            // Draw new route
-                            val routeLine = org.osmdroid.views.overlay.Polyline(map).apply {
-                                id = "selected_route"
-                                setPoints(route.points)
-                                outlinePaint.color = android.graphics.Color.parseColor("#2196F3")
-                                outlinePaint.strokeWidth = 10f
-                                title = "Itinéraire (${route.cameraCount} caméras)"
+                            map.post {
+                                try {
+                                    // Remove old route
+                                    map.overlays.removeAll { it is org.osmdroid.views.overlay.Polyline && it.id == "selected_route" }
+                                    
+                                    // Draw new route
+                                    val routeLine = org.osmdroid.views.overlay.Polyline(map).apply {
+                                        id = "selected_route"
+                                        setPoints(route.points)
+                                        outlinePaint.color = android.graphics.Color.parseColor("#2196F3")
+                                        outlinePaint.strokeWidth = 12f
+                                        outlinePaint.strokeCap = android.graphics.Paint.Cap.ROUND
+                                        title = "Itinéraire (${route.cameraCount} caméras)"
+                                    }
+                                    map.overlays.add(0, routeLine) // Add below markers
+                                    
+                                    // Center map on route (async)
+                                    map.postDelayed({
+                                        val bounds = org.osmdroid.util.BoundingBox.fromGeoPoints(route.points)
+                                        map.zoomToBoundingBox(bounds, true, 100)
+                                    }, 100)
+                                    
+                                    map.invalidate()
+                                } catch (e: Exception) {
+                                    android.util.Log.e("BalanceTaCam", "Error displaying route", e)
+                                }
                             }
-                            map.overlays.add(0, routeLine) // Add below markers
-                            
-                            // Center map on route
-                            val bounds = org.osmdroid.util.BoundingBox.fromGeoPoints(route.points)
-                            map.zoomToBoundingBox(bounds, true, 100)
                         }
                         
                         // Update camera markers
