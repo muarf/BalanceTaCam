@@ -110,8 +110,8 @@ fun AddCameraScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    // Detailed mode - all fields
-                    DetailedModeFields(
+                    // Detailed mode - all fields with all options
+                    DetailedModeFieldsComplete(
                         cameraData = cameraData,
                         onUpdateCameraType = { viewModel.updateCameraType(it) },
                         onUpdateCameraMount = { viewModel.updateCameraMount(it) },
@@ -169,7 +169,7 @@ fun AddCameraScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DetailedModeFields(
+private fun DetailedModeFieldsComplete(
     cameraData: CameraFormData,
     onUpdateCameraType: (String?) -> Unit,
     onUpdateCameraMount: (String?) -> Unit,
@@ -272,6 +272,132 @@ private fun DetailedModeFields(
     
     Spacer(modifier = Modifier.height(8.dp))
     
+    Spacer(modifier = Modifier.height(8.dp))
+    
+    // Surveillance Type dropdown
+    var surveillanceExpanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = surveillanceExpanded,
+        onExpandedChange = { surveillanceExpanded = it }
+    ) {
+        OutlinedTextField(
+            value = cameraData.surveillance ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.surveillance_type)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = surveillanceExpanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor()
+        )
+        ExposedDropdownMenu(
+            expanded = surveillanceExpanded,
+            onDismissRequest = { surveillanceExpanded = false }
+        ) {
+            SurveillanceTypes.all.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type) },
+                    onClick = {
+                        onUpdateSurveillance(type)
+                        surveillanceExpanded = false
+                    }
+                )
+            }
+        }
+    }
+    
+    Spacer(modifier = Modifier.height(8.dp))
+    
+    // Surveillance Zone dropdown
+    var zoneExpanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = zoneExpanded,
+        onExpandedChange = { zoneExpanded = it }
+    ) {
+        OutlinedTextField(
+            value = cameraData.surveillanceZone ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.surveillance_zone)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = zoneExpanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor()
+        )
+        ExposedDropdownMenu(
+            expanded = zoneExpanded,
+            onDismissRequest = { zoneExpanded = false }
+        ) {
+            SurveillanceZones.all.forEach { zone ->
+                DropdownMenuItem(
+                    text = { Text(zone) },
+                    onClick = {
+                        onUpdateZone(zone)
+                        zoneExpanded = false
+                    }
+                )
+            }
+        }
+    }
+    
+    Spacer(modifier = Modifier.height(8.dp))
+    
+    // Operator Type dropdown
+    var operatorTypeExpanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = operatorTypeExpanded,
+        onExpandedChange = { operatorTypeExpanded = it }
+    ) {
+        OutlinedTextField(
+            value = cameraData.operatorType ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.operator_type)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = operatorTypeExpanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor()
+        )
+        ExposedDropdownMenu(
+            expanded = operatorTypeExpanded,
+            onDismissRequest = { operatorTypeExpanded = false }
+        ) {
+            OperatorTypes.all.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type) },
+                    onClick = {
+                        onUpdateOperatorType(type)
+                        operatorTypeExpanded = false
+                    }
+                )
+            }
+        }
+    }
+    
+    Spacer(modifier = Modifier.height(8.dp))
+    
+    // Level
+    OutlinedTextField(
+        value = cameraData.level ?: "",
+        onValueChange = onUpdateLevel,
+        label = { Text(stringResource(R.string.level)) },
+        placeholder = { Text(stringResource(R.string.level_hint)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    
+    Spacer(modifier = Modifier.height(8.dp))
+    
+    // Height
+    OutlinedTextField(
+        value = cameraData.height ?: "",
+        onValueChange = onUpdateHeight,
+        label = { Text(stringResource(R.string.height)) },
+        placeholder = { Text(stringResource(R.string.height_hint)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    
+    Spacer(modifier = Modifier.height(8.dp))
+    
     // Description
     OutlinedTextField(
         value = cameraData.description ?: "",
@@ -279,8 +405,8 @@ private fun DetailedModeFields(
         label = { Text(stringResource(R.string.description)) },
         placeholder = { Text(stringResource(R.string.description_hint)) },
         modifier = Modifier.fillMaxWidth(),
-        minLines = 2,
-        maxLines = 4
+        minLines = 3,
+        maxLines = 6
     )
 }
 

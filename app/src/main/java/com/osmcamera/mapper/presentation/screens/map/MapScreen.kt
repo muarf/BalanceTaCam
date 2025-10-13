@@ -4,13 +4,17 @@ import android.Manifest
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.osmcamera.mapper.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -47,6 +51,14 @@ fun MapScreen(
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var isAddingCamera by remember { mutableStateOf(false) }
     var snackbarHostState = remember { SnackbarHostState() }
+    var showPublicOnly by remember { mutableStateOf(true) }
+    
+    // Filtered cameras - only public ones
+    val filteredCameras = if (showPublicOnly) {
+        cameras.filter { it.surveillance == "public" || it.surveillance == null }
+    } else {
+        cameras
+    }
     
     // Location permissions
     val locationPermissions = rememberMultiplePermissionsState(
@@ -73,6 +85,15 @@ fun MapScreen(
                         }
                     },
                     actions = {
+                        // Filter toggle
+                        IconButton(onClick = { showPublicOnly = !showPublicOnly }) {
+                            if (showPublicOnly) {
+                                Icon(Icons.Default.FilterAlt, contentDescription = "Toutes les caméras", tint = MaterialTheme.colorScheme.primary)
+                            } else {
+                                Icon(Icons.Default.FilterAltOff, contentDescription = "Seulement publiques")
+                            }
+                        }
+                        
                         // Auth button in top bar
                         if (!isAuthenticated) {
                             IconButton(onClick = onNavigateToAuth) {
@@ -200,32 +221,21 @@ fun MapScreen(
                         }
                     },
                     update = { map ->
+                        // Auto-load cameras when map moves
+                        val bounds = map.boundingBox
+                        if (bounds != null) {
+                            mapViewModel.refreshCameras(
+                                south = bounds.latSouth,
+                                west = bounds.lonWest,
+                                north = bounds.latNorth,
+                                east = bounds.lonEast
+                            )
+                        }
+                        
                         // Update camera markers
                         map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
                         
-                        // Add crosshair marker when in adding mode - ALWAYS update position
-                        map.overlays.removeAll { it is Marker && it.id == "crosshair" }
-                        
-                        if (isAddingCamera) {
-                            val center = map.mapCenter as GeoPoint
-                            val crosshair = Marker(map).apply {
-                                position = center
-                                id = "crosshair"
-                                title = "📍 Nouvelle caméra"
-                                snippet = "Lat: ${String.format("%.6f", center.latitude)}\nLon: ${String.format("%.6f", center.longitude)}\n\nTapez ici pour confirmer"
-                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                                setOnMarkerClickListener { marker, _ ->
-                                    val pos = marker.position
-                                    isAddingCamera = false
-                                    onAddCamera(pos.latitude, pos.longitude)
-                                    true
-                                }
-                            }
-                            map.overlays.add(0, crosshair) // Add as first overlay
-                            map.invalidate()
-                        }
-                        
-                        cameras.forEach { camera ->
+                        filteredCameras.forEach { camera ->
                             val marker = Marker(map).apply {
                                 position = GeoPoint(camera.latitude, camera.longitude)
                                 id = "camera_${camera.id}"
@@ -269,17 +279,49 @@ fun MapScreen(
                 )
                 
                 // Show camera count
-                if (cameras.isNotEmpty()) {
+                if (filteredCameras.isNotEmpty()) {
                     Card(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "${cameras.size} cameras",
+                            text = if (showPublicOnly) {
+                                "${filteredCameras.size} caméras publiques"
+                            } else {
+                                "${filteredCameras.size} caméras"
+                            },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.bodyMedium
                         )
+                    }
+                }
+                
+                // Show crosshair when adding camera
+                if (isAddingCamera) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_crosshair),
+                        contentDescription = "Crosshair",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(64.dp),
+                        tint = Color.Unspecified
+                    )
+                    
+                    // Show confirm button
+                    Button(
+                        onClick = {
+                            mapView?.let { map ->
+                                val center = map.mapCenter as GeoPoint
+                                isAddingCamera = false
+                                onAddCamera(center.latitude, center.longitude)
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 100.dp)
+                    ) {
+                        Text("Confirmer cette position")
                     }
                 }
             }
