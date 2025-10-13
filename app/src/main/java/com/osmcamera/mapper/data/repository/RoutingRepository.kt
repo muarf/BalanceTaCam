@@ -138,19 +138,23 @@ class RoutingRepository @Inject constructor(
             return emptyList()
         }
         
-        // Request 2 alternative routes from ORS
+        // Request MORE alternative routes from ORS
+        // shareFactor = how different routes must be (lower = more different)
+        // weightFactor = accept longer routes for alternatives (higher = longer OK)
         val request = ORSRouteRequest(
             coordinates = listOf(
                 listOf(start.longitude, start.latitude),
                 listOf(end.longitude, end.latitude)
             ),
             alternativeRoutes = ORSAlternativeRoutes(
-                targetCount = 2,
-                shareFactor = 0.5, // More different from main route
-                weightFactor = 1.5
+                targetCount = 10, // Request 10 alternatives (ORS will return what it can)
+                shareFactor = 0.3, // Routes must share <30% of their path (very different)
+                weightFactor = 2.5 // Accept routes up to 2.5x longer if they avoid cameras
             ),
             options = null // No avoidance - ORS gives alternatives naturally
         )
+        
+        Log.d(TAG, "Requesting up to 10 alternative routes (shareFactor=0.3)")
         
         return try {
             val response = orsApi.getRoute(
@@ -165,10 +169,10 @@ class RoutingRepository @Inject constructor(
             }
             
             val orsRoutes = response.body()?.routes ?: return emptyList()
-            Log.d(TAG, "Got ${orsRoutes.size} alternative routes from ORS")
+            Log.d(TAG, "Got ${orsRoutes.size} total routes from ORS (including direct)")
             
-            // Convert each ORS route and count cameras
-            orsRoutes.drop(1).mapIndexedNotNull { index, orsRoute ->
+            // Convert each ORS alternative route (skip first = direct) and count cameras
+            val alternatives = orsRoutes.drop(1).mapIndexedNotNull { index, orsRoute ->
                 val points = GeometryUtils.decodePolyline(orsRoute.geometry)
                 val cameraCount = GeometryUtils.countCamerasNearRoute(
                     routePoints = points,
@@ -176,7 +180,7 @@ class RoutingRepository @Inject constructor(
                     radiusMeters = CAMERA_AVOIDANCE_RADIUS
                 )
                 
-                Log.d(TAG, "Alternative route ${index + 1}: ${points.size} points, $cameraCount cameras")
+                Log.d(TAG, "Alternative route ${index + 1}: ${points.size} points, $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
                 
                 Route(
                     id = "alt_$index",
@@ -186,6 +190,9 @@ class RoutingRepository @Inject constructor(
                     cameraCount = cameraCount
                 )
             }
+            
+            Log.d(TAG, "Returning ${alternatives.size} alternative routes")
+            alternatives
         } catch (e: Exception) {
             Log.e(TAG, "Alternative routes failed", e)
             emptyList()
