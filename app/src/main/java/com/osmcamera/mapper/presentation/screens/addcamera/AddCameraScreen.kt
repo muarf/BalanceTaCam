@@ -32,7 +32,8 @@ fun AddCameraScreen(
     val cameraData by viewModel.cameraData.collectAsState()
     val isDetailedMode by viewModel.isDetailedMode.collectAsState()
     
-    LaunchedEffect(Unit) {
+    LaunchedEffect(initialLatitude, initialLongitude) {
+        android.util.Log.d("BalanceTaCam", "AddCameraScreen - Received position: $initialLatitude, $initialLongitude")
         viewModel.setPosition(initialLatitude, initialLongitude)
     }
     

@@ -203,25 +203,26 @@ fun MapScreen(
                         // Update camera markers
                         map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
                         
-                        // Add crosshair marker when in adding mode
+                        // Add crosshair marker when in adding mode - ALWAYS update position
+                        map.overlays.removeAll { it is Marker && it.id == "crosshair" }
+                        
                         if (isAddingCamera) {
-                            map.overlays.removeAll { it is Marker && it.id == "crosshair" }
                             val center = map.mapCenter as GeoPoint
                             val crosshair = Marker(map).apply {
                                 position = center
                                 id = "crosshair"
-                                title = "📍 Position de la nouvelle caméra"
-                                snippet = "Tapez ici pour confirmer"
+                                title = "📍 Nouvelle caméra"
+                                snippet = "Lat: ${String.format("%.6f", center.latitude)}\nLon: ${String.format("%.6f", center.longitude)}\n\nTapez ici pour confirmer"
                                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                                setOnMarkerClickListener { _, _ ->
+                                setOnMarkerClickListener { marker, _ ->
+                                    val pos = marker.position
                                     isAddingCamera = false
-                                    onAddCamera(center.latitude, center.longitude)
+                                    onAddCamera(pos.latitude, pos.longitude)
                                     true
                                 }
                             }
-                            map.overlays.add(crosshair)
-                        } else {
-                            map.overlays.removeAll { it is Marker && it.id == "crosshair" }
+                            map.overlays.add(0, crosshair) // Add as first overlay
+                            map.invalidate()
                         }
                         
                         cameras.forEach { camera ->
