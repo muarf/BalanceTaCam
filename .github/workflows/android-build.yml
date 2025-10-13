@@ -31,24 +31,25 @@ jobs:
       run: ./gradlew test --stacktrace
 
     - name: Decode keystore
-      if: ${{ env.KEYSTORE_FILE != '' }}
       env:
         KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
       run: |
         if [ ! -z "$KEYSTORE_FILE" ]; then
-          echo "$KEYSTORE_FILE" | base64 -d > keystore.jks
+          echo "$KEYSTORE_FILE" | base64 --decode > keystore.jks
+          ls -lh keystore.jks
           echo "✅ Keystore decoded"
+        else
+          echo "⚠️ No keystore secret found"
         fi
 
-    - name: Build signed debug APK
-      if: ${{ env.KEYSTORE_FILE != '' }}
+    - name: Build debug APK
       env:
-        KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
-        if [ ! -z "$KEYSTORE_FILE" ] && [ -f keystore.jks ]; then
+        if [ -f keystore.jks ] && [ ! -z "$KEYSTORE_PASSWORD" ]; then
+          echo "🔐 Building SIGNED APK..."
           ./gradlew assembleDebug \
             -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
             -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
@@ -57,8 +58,8 @@ jobs:
             --stacktrace
           echo "✅ Signed APK built"
         else
+          echo "⚠️ Building UNSIGNED APK (no keystore configured)"
           ./gradlew assembleDebug --stacktrace
-          echo "⚠️ Unsigned APK (no keystore)"
         fi
 
     - name: Upload debug APK
