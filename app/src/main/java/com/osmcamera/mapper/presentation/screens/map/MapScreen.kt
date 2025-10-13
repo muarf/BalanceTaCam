@@ -45,6 +45,8 @@ fun MapScreen(
     val user by authViewModel.user.collectAsState()
     
     var mapView by remember { mutableStateOf<MapView?>(null) }
+    var isAddingCamera by remember { mutableStateOf(false) }
+    var snackbarHostState = remember { SnackbarHostState() }
     
     // Location permissions
     val locationPermissions = rememberMultiplePermissionsState(
@@ -61,6 +63,7 @@ fun MapScreen(
     // Removed ModalNavigationDrawer to avoid swipe conflict with map
     Box {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.map_title)) },
@@ -121,13 +124,21 @@ fun MapScreen(
                     FloatingActionButton(
                         onClick = {
                             if (isAuthenticated) {
-                                mapView?.let { map ->
-                                    val center = map.mapCenter as GeoPoint
-                                    onAddCamera(center.latitude, center.longitude)
+                                isAddingCamera = true
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "📍 Tapez sur la carte pour choisir la position de la caméra",
+                                        duration = SnackbarDuration.Long
+                                    )
                                 }
                             } else {
                                 onNavigateToAuth()
                             }
+                        },
+                        containerColor = if (isAddingCamera) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.primaryContainer
                         }
                     ) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_camera))
@@ -169,6 +180,11 @@ fun MapScreen(
                                 overlays.add(locationOverlay)
                             }
                             
+                            // Add tap listener for adding cameras
+                            setOnClickListener {
+                                // This is handled by MapEventsOverlay below
+                            }
+                            
                             mapView = this
                             
                             // Load cameras when map is ready
@@ -184,6 +200,27 @@ fun MapScreen(
                         }
                     },
                     update = { map ->
+                        // Handle map tap for adding cameras
+                        map.overlays.removeAll { it is org.osmdroid.views.overlay.MapEventsOverlay }
+                        
+                        if (isAddingCamera) {
+                            val mapEventsOverlay = org.osmdroid.views.overlay.MapEventsOverlay(
+                                object : org.osmdroid.views.overlay.MapEventsReceiver {
+                                    override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                                        // User tapped on map - use this position for camera
+                                        isAddingCamera = false
+                                        onAddCamera(p.latitude, p.longitude)
+                                        return true
+                                    }
+                                    
+                                    override fun longPressHelper(p: GeoPoint): Boolean {
+                                        return false
+                                    }
+                                }
+                            )
+                            map.overlays.add(0, mapEventsOverlay) // Add as first overlay
+                        }
+                        
                         // Update camera markers
                         map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
                         
