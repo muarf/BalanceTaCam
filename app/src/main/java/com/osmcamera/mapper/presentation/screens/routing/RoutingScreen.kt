@@ -113,7 +113,9 @@ fun RoutingScreen(
                             placeholder = { Text("Ex: 10 rue de Rivoli, Paris") },
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
-                                IconButton(onClick = { /* TODO: Geocode */ }) {
+                                IconButton(onClick = { 
+                                    viewModel.searchAddress(startAddressQuery, isStart = true)
+                                }) {
                                     Icon(Icons.Default.Search, contentDescription = "Rechercher")
                                 }
                             }
@@ -217,9 +219,6 @@ fun RoutingScreen(
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium
                     )
-                }
-            }
-                    }
                 }
             }
             
