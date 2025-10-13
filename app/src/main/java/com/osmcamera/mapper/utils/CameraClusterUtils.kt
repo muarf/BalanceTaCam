@@ -29,9 +29,9 @@ object CameraClusterUtils {
             // Find all cameras within distance
             val nearby = cameras.filter { other ->
                 other.id !in assigned && 
-                GeometryUtils.distanceBetween(
-                    GeoPoint(camera.latitude, camera.longitude),
-                    GeoPoint(other.latitude, other.longitude)
+                GeometryUtils.distance(
+                    camera.latitude, camera.longitude,
+                    other.latitude, other.longitude
                 ) <= maxDistanceMeters
             }
             
@@ -94,7 +94,10 @@ object CameraClusterUtils {
                     
                     // Check if waypoint is not too close to any cluster
                     val tooClose = clusters.any { c ->
-                        GeometryUtils.distanceBetween(waypoint, c.center) < 100.0
+                        GeometryUtils.distance(
+                            waypoint.latitude, waypoint.longitude,
+                            c.center.latitude, c.center.longitude
+                        ) < 100.0
                     }
                     
                     if (!tooClose) {
