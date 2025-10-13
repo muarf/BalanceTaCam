@@ -89,3 +89,5 @@ keystore.properties
 balancetacam.keystore
 *.keystore
 *.keystore.base64
+*.jks
+*.jks.base64
