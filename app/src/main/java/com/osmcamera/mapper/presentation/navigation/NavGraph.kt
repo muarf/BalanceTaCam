@@ -105,23 +105,29 @@ fun AppNavigation(
         }
         
         composable(Screen.Routing.route) { backStackEntry ->
-            // Get user location from map screen if available
-            val savedStateHandle = backStackEntry.savedStateHandle
-            val userLat = savedStateHandle.get<Double>("userLat")
-            val userLon = savedStateHandle.get<Double>("userLon")
-            val userLocation = if (userLat != null && userLon != null) {
-                org.osmdroid.util.GeoPoint(userLat, userLon)
-            } else null
+            // Get MapViewModel from previous screen (Map)
+            val previousEntry = navController.previousBackStackEntry
+            val mapViewModel: com.osmcamera.mapper.presentation.viewmodel.MapViewModel? = 
+                if (previousEntry?.destination?.route == Screen.Map.route) {
+                    androidx.hilt.navigation.compose.hiltViewModel(previousEntry)
+                } else null
             
             RoutingScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
                 onShowRouteOnMap = { route ->
-                    // TODO: Show route on map
+                    // Set the route in MapViewModel to display it
+                    mapViewModel?.setSelectedRoute(route)
                     navController.popBackStack()
                 },
-                userLocation = userLocation
+                onSelectStartOnMap = {
+                    navController.popBackStack()
+                },
+                onSelectEndOnMap = {
+                    navController.popBackStack()
+                },
+                userLocation = mapViewModel?.userLocation?.value
             )
         }
     }
