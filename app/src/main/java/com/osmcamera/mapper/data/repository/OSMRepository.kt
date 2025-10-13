@@ -32,27 +32,51 @@ class OSMRepository @Inject constructor(
     suspend fun createCamera(cameraData: CameraFormData): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
+                android.util.Log.d("BalanceTaCam", "=== Starting camera creation ===")
+                
                 // Validate
                 val validation = cameraData.validate()
                 if (!validation.isValid) {
+                    android.util.Log.e("BalanceTaCam", "Validation failed: ${validation.error}")
                     return@withContext Result.failure(Exception(validation.error))
                 }
+                android.util.Log.d("BalanceTaCam", "✓ Validation OK")
                 
                 // Get OAuth tokens
                 val tokens = preferencesManager.getOAuthTokens()
-                    ?: return@withContext Result.failure(Exception("Not authenticated"))
+                if (tokens == null) {
+                    android.util.Log.e("BalanceTaCam", "No OAuth tokens found")
+                    return@withContext Result.failure(Exception("Not authenticated"))
+                }
+                android.util.Log.d("BalanceTaCam", "✓ OAuth tokens found")
                 
                 // 1. Create changeset
+                android.util.Log.d("BalanceTaCam", "Creating changeset...")
                 val changesetId = createChangeset()
-                    ?: return@withContext Result.failure(Exception("Failed to create changeset"))
+                if (changesetId == null) {
+                    android.util.Log.e("BalanceTaCam", "Changeset creation failed")
+                    return@withContext Result.failure(Exception("Failed to create changeset - Check OAuth permissions"))
+                }
+                android.util.Log.d("BalanceTaCam", "✓ Changeset created: $changesetId")
                 
                 try {
                     // 2. Create node
+                    android.util.Log.d("BalanceTaCam", "Creating node...")
+                    android.util.Log.d("BalanceTaCam", "Position: ${cameraData.latitude}, ${cameraData.longitude}")
+                    android.util.Log.d("BalanceTaCam", "Tags: ${cameraData.toOsmTags()}")
+                    
                     val nodeId = createNode(changesetId, cameraData)
-                        ?: return@withContext Result.failure(Exception("Failed to create node"))
+                    if (nodeId == null) {
+                        android.util.Log.e("BalanceTaCam", "Node creation failed")
+                        return@withContext Result.failure(Exception("Failed to create node - Check coordinates and tags"))
+                    }
+                    android.util.Log.d("BalanceTaCam", "✓ Node created: $nodeId")
                     
                     // 3. Close changeset
+                    android.util.Log.d("BalanceTaCam", "Closing changeset...")
                     closeChangeset(changesetId)
+                    android.util.Log.d("BalanceTaCam", "✓ Changeset closed")
+                    android.util.Log.d("BalanceTaCam", "=== Camera creation SUCCESS ===")
                     
                     Result.success(nodeId)
                 } catch (e: Exception) {
@@ -104,8 +128,12 @@ class OSMRepository @Inject constructor(
                 val response = okHttpClient.newCall(okHttpRequest).execute()
                 
                 if (response.isSuccessful) {
-                    response.body?.string()?.toLongOrNull()
+                    val body = response.body?.string()
+                    android.util.Log.d("BalanceTaCam", "Changeset response: $body")
+                    body?.toLongOrNull()
                 } else {
+                    val error = response.body?.string()
+                    android.util.Log.e("BalanceTaCam", "Changeset creation failed: ${response.code()} - $error")
                     null
                 }
             } catch (e: Exception) {
@@ -150,11 +178,16 @@ class OSMRepository @Inject constructor(
                 val response = okHttpClient.newCall(okHttpRequest).execute()
                 
                 if (response.isSuccessful) {
-                    response.body?.string()
+                    val body = response.body?.string()
+                    android.util.Log.d("BalanceTaCam", "Node response: $body")
+                    body
                 } else {
+                    val error = response.body?.string()
+                    android.util.Log.e("BalanceTaCam", "Node creation failed: ${response.code()} - $error")
                     null
                 }
             } catch (e: Exception) {
+                android.util.Log.e("BalanceTaCam", "Node creation exception", e)
                 e.printStackTrace()
                 null
             }
