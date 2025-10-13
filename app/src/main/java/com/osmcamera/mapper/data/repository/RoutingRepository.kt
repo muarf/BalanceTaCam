@@ -37,7 +37,8 @@ class RoutingRepository @Inject constructor(
      */
     suspend fun calculateAntiCameraRoutes(
         start: GeoPoint,
-        end: GeoPoint
+        end: GeoPoint,
+        transportMode: String = "foot-walking" // foot-walking, driving-car, cycling-regular
     ): Result<RouteComparison> {
         return withContext(Dispatchers.IO) {
             try {
@@ -50,11 +51,11 @@ class RoutingRepository @Inject constructor(
                 Log.d(TAG, "Found ${cameras.size} cameras in area")
                 
                 // 2. Calculate direct route (no avoidance)
-                val directRoute = calculateDirectRoute(start, end, cameras)
+                val directRoute = calculateDirectRoute(start, end, cameras, transportMode)
                 Log.d(TAG, "Direct route: ${directRoute?.cameraCount} cameras")
                 
                 // 3. Calculate routes avoiding cameras
-                val avoidingRoutes = calculateRoutesWithAvoidance(start, end, cameras)
+                val avoidingRoutes = calculateRoutesWithAvoidance(start, end, cameras, transportMode)
                 Log.d(TAG, "Calculated ${avoidingRoutes.size} avoiding routes")
                 
                 // 4. Combine and sort by camera count
@@ -108,7 +109,8 @@ class RoutingRepository @Inject constructor(
     private suspend fun calculateDirectRoute(
         start: GeoPoint,
         end: GeoPoint,
-        cameras: List<Camera>
+        cameras: List<Camera>,
+        transportMode: String = "foot-walking"
     ): Route? {
         val request = ORSRouteRequest(
             coordinates = listOf(
@@ -118,7 +120,7 @@ class RoutingRepository @Inject constructor(
             alternativeRoutes = null // Direct route only
         )
         
-        return executeRouteRequest(request, cameras, "direct")
+        return executeRouteRequest(request, cameras, "direct", transportMode)
     }
     
     /**
@@ -127,7 +129,8 @@ class RoutingRepository @Inject constructor(
     private suspend fun calculateRoutesWithAvoidance(
         start: GeoPoint,
         end: GeoPoint,
-        cameras: List<Camera>
+        cameras: List<Camera>,
+        transportMode: String = "foot-walking"
     ): List<Route> {
         if (cameras.isEmpty()) {
             return emptyList()
