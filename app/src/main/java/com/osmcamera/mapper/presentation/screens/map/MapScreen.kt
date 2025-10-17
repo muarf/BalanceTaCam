@@ -332,6 +332,16 @@ fun MapScreen(
                                 position = GeoPoint(camera.latitude, camera.longitude)
                                 id = "camera_${camera.id}"
                                 
+                                // Stylized camera icon based on surveillance type
+                                val iconRes = when (camera.surveillance) {
+                                    "public" -> R.drawable.ic_camera_public
+                                    "private" -> R.drawable.ic_camera_private
+                                    else -> R.drawable.ic_camera_small
+                                }
+                                
+                                // Set custom icon
+                                setIcon(android.content.ContextCompat.getDrawable(map.context, iconRes))
+                                
                                 // Complete info display
                                 val type = camera.cameraType ?: "non spécifié"
                                 val mount = camera.cameraMount ?: "non spécifié"
