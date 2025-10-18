@@ -113,16 +113,16 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.security:security-crypto:1.0.0")
 
     // Kotlin Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Accompanist (Compose utilities)
-    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
