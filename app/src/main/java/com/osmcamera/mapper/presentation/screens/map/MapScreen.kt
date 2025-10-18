@@ -340,7 +340,7 @@ fun MapScreen(
                                 }
                                 
                                 // Set custom icon
-                                setIcon(android.content.ContextCompat.getDrawable(map.context, iconRes))
+                                setIcon(androidx.core.content.ContextCompat.getDrawable(map.context, iconRes))
                                 
                                 // Complete info display
                                 val type = camera.cameraType ?: "non spécifié"

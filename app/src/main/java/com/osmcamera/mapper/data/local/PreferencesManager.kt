@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import androidx.security.crypto.MasterKeys
 import com.osmcamera.mapper.data.model.OAuthTokens
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -25,14 +25,12 @@ class PreferencesManager @Inject constructor(
     private val dataStore = context.dataStore
     
     // Encrypted SharedPreferences for OAuth tokens
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    private val masterKey = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
     
     private val encryptedPrefs = EncryptedSharedPreferences.create(
-        context,
         "oauth_prefs",
         masterKey,
+        context,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )

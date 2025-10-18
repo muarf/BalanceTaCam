@@ -84,7 +84,7 @@ class AuthRepository @Inject constructor(
                     
                 val response = okHttpClient.newCall(okHttpRequest).execute()
                 if (response.isSuccessful) {
-                    val json = JsonParser.parseString(response.body?.string() ?: "{}").asJsonObject
+                    val json = JsonParser().parse(response.body?.string() ?: "{}").asJsonObject
                     val userObj = json.getAsJsonObject("user")
                     
                     User(

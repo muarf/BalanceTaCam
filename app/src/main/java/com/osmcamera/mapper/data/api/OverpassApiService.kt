@@ -51,7 +51,7 @@ object OverpassResponseParser {
         val cameras = mutableListOf<Camera>()
         
         try {
-            val root = JsonParser.parseString(json).asJsonObject
+            val root = JsonParser().parse(json).asJsonObject
             val elements = root.getAsJsonArray("elements")
             
             for (element in elements) {
