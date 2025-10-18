@@ -1,10 +1,8 @@
-name: Build APK
+name: Build APK Simple
 
 on:
   push:
     branches: [ feature/*, main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -24,11 +22,9 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: 34
-        build-tools: 34.0.0
-        ndk-version: 25.1.8937393
-        additional-components: platform-tools
-      
+        api-level: 33
+        build-tools: 33.0.2
+        
     - name: Cache Gradle packages
       uses: actions/cache@v3
       with:
@@ -43,39 +39,38 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --stacktrace
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
         ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-      
+        
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-${{ github.ref_name }}-${{ github.sha }}
+        name: app-debug-${{ github.ref_name }}
         path: app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
         
-    - name: Create Release (on feature branches)
+    - name: Create Release
       if: startsWith(github.ref, 'refs/heads/feature/')
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref_name }}-${{ github.run_number }}
-        name: ${{ github.ref_name }} - Build ${{ github.run_number }}
+        tag_name: ${{ github.ref_name }}-build
+        name: ${{ github.ref_name }} - APK Build
         body: |
           ## 📱 APK Build - ${{ github.ref_name }}
           
           **Commit:** ${{ github.sha }}
           **Branch:** ${{ github.ref_name }}
-          **Build:** #${{ github.run_number }}
           
           ### 🚀 Téléchargement
           Téléchargez l'APK ci-dessous et installez-le sur votre appareil Android.
           
           ### 📋 Instructions d'installation
           1. Téléchargez le fichier APK
-          2. Sur votre téléphone, activez "Sources inconnues" dans les paramètres
+          2. Sur votre téléphone, activez "Sources inconnues"
           3. Installez l'APK téléchargé
-          4. Lancez l'application et testez les nouvelles fonctionnalités
+          4. Lancez l'application
           
           ### 🔍 Fonctionnalités incluses
           - Icônes de caméras stylisées
