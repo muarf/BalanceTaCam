@@ -429,6 +429,23 @@ fun MapScreen(
         }
     }
     
+    // Auto-center on user location when it becomes available
+    LaunchedEffect(userLocation) {
+        userLocation?.let { location ->
+            mapView?.let { map ->
+                map.controller.animateTo(location)
+                // Load cameras around user location
+                val bounds = map.boundingBox
+                mapViewModel.loadCamerasInBounds(
+                    south = location.latitude - 0.01,
+                    west = location.longitude - 0.01,
+                    north = location.latitude + 0.01,
+                    east = location.longitude + 0.01
+                )
+            }
+        }
+    }
+    
     // Cleanup
     DisposableEffect(Unit) {
         onDispose {
