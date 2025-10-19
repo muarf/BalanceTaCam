@@ -334,9 +334,8 @@ fun MapScreen(
                                 
                                 // Stylized camera icon based on surveillance type
                                 val iconRes = when (camera.surveillance) {
-                                    "public" -> R.drawable.ic_camera_public
                                     "private" -> R.drawable.ic_camera_private
-                                    else -> R.drawable.ic_camera_small
+                                    else -> R.drawable.ic_camera_small // Rouge pour public et non spécifié
                                 }
                                 
                                 // Set custom icon
