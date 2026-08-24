@@ -54,7 +54,7 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         working-directory: ${{ runner.temp }}
         run: |
-          wget -q https://download.geofabrik.de/${{ matrix.region.pbf }}
+          wget -q "https://download.geofabrik.de/${{ matrix.region.pbf }}" -O region.osm.pbf
           wget -q https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/5.3/graphhopper-web-5.3.jar
 
       - name: Build routing graph
@@ -62,16 +62,18 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           cat > config.yml <<'YAML'
-          graph:
-            location: graph-cache
-            dataaccess: MMAP
-          importers.ways: foot
-          profiles:
-            - name: foot
-              vehicle: foot
-              weighting: fastest
+          graphhopper:
+            datareader.file: region.osm.pbf
+            graph.location: graph-cache
+            graph.flag_encoders: foot
+            profiles:
+              - name: foot
+                vehicle: foot
+                weighting: fastest
           YAML
+          cat config.yml
           java -Xmx5g -jar graphhopper-web-5.3.jar import config.yml
+          test -f graph-cache/edges || { echo "graphe non généré"; exit 1; }
           WEEK=$(date +%Y.%V)
           zip -q -r region-${{ matrix.region.id }}-${WEEK}.ghz graph-cache
           echo "WEEK=$WEEK" >> $GITHUB_ENV
@@ -82,11 +84,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create region-${{ matrix.region.id }}-${{ env.WEEK }} \
-            "${{ runner.temp }}/region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz" \
+          ASSET="region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz"
+          gh release create "region-${{ matrix.region.id }}-${{ env.WEEK }}" \
+            "${{ runner.temp }}/$ASSET" \
             --title "Région hors-ligne : ${{ matrix.region.name }} (${{ env.WEEK }})" \
             --notes "Graphe piéton GraphHopper 5.3 — source OpenStreetMap (Geofabrik) ${{ env.WEEK }}" \
-            --latest=false
+            --latest=false \
+          || gh release upload "region-${{ matrix.region.id }}-${{ env.WEEK }}" "${{ runner.temp }}/$ASSET" --clobber
           echo "TAG=region-${{ matrix.region.id }}-${{ env.WEEK }}" >> $GITHUB_ENV
 
       - name: Update manifest
