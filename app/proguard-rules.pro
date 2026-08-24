@@ -19,4 +19,9 @@
 -keep class com.github.scribejava.** { *; }
 -dontwarn com.github.scribejava.**
 
+# DataStore : le protobuf embarqué est casse par R8 sinon (ClassCastException au demarrage)
+-keep class androidx.datastore.** { *; }
+-keepclassmembers class androidx.datastore.preferences.protobuf.** { *; }
+-dontwarn androidx.datastore.preferences.protobuf.**
+
 

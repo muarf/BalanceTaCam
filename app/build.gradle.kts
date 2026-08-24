@@ -40,8 +40,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Minification desactivee : R8 full mode casse le protobuf embarque de
+            // DataStore 1.0.0 (ClassCastException au demarrage), meme avec regles keep.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
