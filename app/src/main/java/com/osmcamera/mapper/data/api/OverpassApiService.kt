@@ -4,8 +4,12 @@ import com.osmcamera.mapper.data.model.Camera
 import com.google.gson.JsonParser
 import okhttp3.ResponseBody
 import retrofit2.Response
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 /**
  * Overpass API Service for querying existing cameras
@@ -13,16 +17,32 @@ import retrofit2.http.Query
 interface OverpassApiService {
     
     /**
-     * Execute Overpass query
+     * Execute Overpass query via POST (standard for large queries and avoiding GET DPI resets).
      */
-    @GET("api/interpreter")
-    suspend fun query(@Query("data") query: String): Response<ResponseBody>
+    @FormUrlEncoded
+    @POST
+    suspend fun queryPost(@Url url: String, @Field("data") query: String): Response<ResponseBody>
+    
+    /**
+     * Execute Overpass query via GET as fallback.
+     */
+    @GET
+    suspend fun query(@Url url: String, @Query("data") query: String): Response<ResponseBody>
     
     companion object {
         const val BASE_URL = "https://overpass-api.de/"
         
+        val ENDPOINTS = listOf(
+            "https://overpass.openstreetmap.fr/api/interpreter",
+            "https://overpass-api.de/api/interpreter",
+            "https://lz4.overpass-api.de/api/interpreter",
+            "https://z.overpass-api.de/api/interpreter",
+            "https://overpass.kumi.systems/api/interpreter",
+            "https://overpass.nchc.org.tw/api/interpreter"
+        )
+        
         /**
-         * Build query to get surveillance cameras in bounding box
+         * Build single-line compact query to get surveillance cameras in bounding box
          */
         fun buildCameraQuery(
             south: Double,
@@ -30,15 +50,7 @@ interface OverpassApiService {
             north: Double,
             east: Double
         ): String {
-            return """
-                [out:json][timeout:25];
-                (
-                  node["man_made"="surveillance"]["surveillance:type"="camera"]($south,$west,$north,$east);
-                );
-                out body;
-                >;
-                out skel qt;
-            """.trimIndent()
+            return "[out:json][timeout:15];node[\"man_made\"=\"surveillance\"]($south,$west,$north,$east);out body;"
         }
     }
 }

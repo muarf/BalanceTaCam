@@ -60,7 +60,7 @@ data class ORSAlternativeRoutes(
 
 data class ORSOptions(
     @SerializedName("avoid_polygons")
-    val avoidPolygons: ORSPolygon? = null
+    val avoidPolygons: Any? = null
 )
 
 data class ORSPolygon(
@@ -69,6 +69,14 @@ data class ORSPolygon(
     
     @SerializedName("coordinates")
     val coordinates: List<List<List<Double>>> // [[[lon, lat], [lon, lat], ...]]
+)
+
+data class ORSMultiPolygon(
+    @SerializedName("type")
+    val type: String = "MultiPolygon",
+    
+    @SerializedName("coordinates")
+    val coordinates: List<List<List<List<Double>>>> // [[[[lon, lat], ...]]]
 )
 
 /**

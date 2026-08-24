@@ -28,6 +28,21 @@ interface CameraDao {
         maxLon: Double
     ): Flow<List<Camera>>
     
+    @Query("""
+        SELECT * FROM cameras 
+        WHERE latitude BETWEEN :minLat AND :maxLat 
+        AND longitude BETWEEN :minLon AND :maxLon
+    """)
+    suspend fun getCamerasInBoundsList(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double
+    ): List<Camera>
+    
+    @Query("SELECT * FROM cameras")
+    suspend fun getAllCamerasList(): List<Camera>
+    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCamera(camera: Camera)
     

@@ -35,17 +35,56 @@ class MapViewModel @Inject constructor(
     // Route display
     private val _selectedRoute = MutableStateFlow<com.osmcamera.mapper.data.model.Route?>(null)
     val selectedRoute: StateFlow<com.osmcamera.mapper.data.model.Route?> = _selectedRoute.asStateFlow()
-    
+
     fun setSelectedRoute(route: com.osmcamera.mapper.data.model.Route?) {
         _selectedRoute.value = route
     }
-    
+
+    // Route points (start/end) - stored here because MapViewModel survives navigation
+    // between the map and the routing screen, unlike RoutingViewModel
+    private val _routeStartPoint = MutableStateFlow<GeoPoint?>(null)
+    val routeStartPoint: StateFlow<GeoPoint?> = _routeStartPoint.asStateFlow()
+
+    private val _routeEndPoint = MutableStateFlow<GeoPoint?>(null)
+    val routeEndPoint: StateFlow<GeoPoint?> = _routeEndPoint.asStateFlow()
+
+    // When non-null, the map is waiting for a tap to place this route point
+    private val _routePickTarget = MutableStateFlow<RoutePickTarget?>(null)
+    val routePickTarget: StateFlow<RoutePickTarget?> = _routePickTarget.asStateFlow()
+
+    fun setRoutePickTarget(target: RoutePickTarget?) {
+        _routePickTarget.value = target
+    }
+
+    fun setRoutePoint(target: RoutePickTarget, point: GeoPoint?) {
+        when (target) {
+            RoutePickTarget.START -> _routeStartPoint.value = point
+            RoutePickTarget.END -> _routeEndPoint.value = point
+        }
+    }
+
+    fun clearRoutePoints() {
+        _routeStartPoint.value = null
+        _routeEndPoint.value = null
+    }
+
     private val _isLoadingCameras = MutableStateFlow(false)
     val isLoadingCameras: StateFlow<Boolean> = _isLoadingCameras.asStateFlow()
     
     init {
         _uiState.value = MapUiState.Ready
         getUserLocation()
+        // Immediately load all cached cameras on launch so map is never empty
+        viewModelScope.launch {
+            try {
+                val cached = cameraRepository.getAllCamerasList()
+                if (cached.isNotEmpty()) {
+                    _cameras.value = cached
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
     }
     
     fun getUserLocation() {
@@ -65,14 +104,28 @@ class MapViewModel @Inject constructor(
     
     fun loadCamerasInBounds(south: Double, west: Double, north: Double, east: Double) {
         viewModelScope.launch {
+            // 1. Immediately show cached cameras in bounds (0 ms latency)
+            val local = try {
+                cameraRepository.getCamerasInBoundsList(south, west, north, east)
+            } catch (e: Exception) {
+                emptyList()
+            }
+            if (local.isNotEmpty()) {
+                _cameras.value = local
+            }
+            
+            // 2. Fetch fresh updates from Overpass in the background
             _isLoadingCameras.value = true
             try {
                 val result = cameraRepository.fetchCamerasFromOverpass(south, west, north, east)
                 if (result.isSuccess) {
-                    _cameras.value = result.getOrNull() ?: emptyList()
+                    val fresh = result.getOrNull()
+                    if (!fresh.isNullOrEmpty()) {
+                        _cameras.value = fresh
+                    }
                 }
             } catch (e: Exception) {
-                // Error loading cameras - keep existing cameras
+                // Keep existing cached cameras
             } finally {
                 _isLoadingCameras.value = false
             }
@@ -88,6 +141,14 @@ sealed class MapUiState {
     object Loading : MapUiState()
     object Ready : MapUiState()
     data class Error(val message: String) : MapUiState()
+}
+
+/**
+ * Which route point the user wants to pick by tapping the map
+ */
+enum class RoutePickTarget {
+    START,
+    END
 }
 
 

@@ -105,12 +105,13 @@ fun AppNavigation(
         }
         
         composable(Screen.Routing.route) { backStackEntry ->
-            // Get MapViewModel from previous screen (Map)
-            val previousEntry = navController.previousBackStackEntry
-            val mapViewModel: com.osmcamera.mapper.presentation.viewmodel.MapViewModel? = 
-                if (previousEntry?.destination?.route == Screen.Map.route) {
-                    androidx.hilt.navigation.compose.hiltViewModel(previousEntry)
-                } else null
+            // MapViewModel is scoped to the Map screen, which is always below Routing
+            // in the back stack - this lets route points survive navigation in both directions
+            val mapEntry = androidx.compose.runtime.remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Map.route)
+            }
+            val mapViewModel: com.osmcamera.mapper.presentation.viewmodel.MapViewModel =
+                androidx.hilt.navigation.compose.hiltViewModel(mapEntry)
             
             RoutingScreen(
                 onNavigateBack = {
@@ -118,10 +119,16 @@ fun AppNavigation(
                 },
                 onShowRouteOnMap = { route ->
                     // Set the route in MapViewModel to display it
-                    mapViewModel?.setSelectedRoute(route)
+                    mapViewModel.setSelectedRoute(route)
                     navController.popBackStack()
                 },
-                userLocation = mapViewModel?.userLocation?.value
+                userLocation = mapViewModel.userLocation.value,
+                mapViewModel = mapViewModel,
+                onPickPointOnMap = { target ->
+                    // Go back to the map, which will capture the next tap to place the point
+                    mapViewModel.setRoutePickTarget(target)
+                    navController.popBackStack()
+                }
             )
         }
     }

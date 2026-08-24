@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.osmcamera.mapper.data.model.Route
 import com.osmcamera.mapper.data.model.RouteComparison
+import com.osmcamera.mapper.presentation.viewmodel.MapViewModel
+import com.osmcamera.mapper.presentation.viewmodel.RoutePickTarget
 import com.osmcamera.mapper.presentation.viewmodel.RoutingUiState
 import com.osmcamera.mapper.presentation.viewmodel.RoutingViewModel
 
@@ -28,16 +32,16 @@ fun RoutingScreen(
     onNavigateBack: () -> Unit,
     onShowRouteOnMap: (Route) -> Unit,
     userLocation: org.osmdroid.util.GeoPoint? = null,
+    mapViewModel: MapViewModel,
+    onPickPointOnMap: (RoutePickTarget) -> Unit,
     viewModel: RoutingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val startPoint by viewModel.startPoint.collectAsState()
-    val endPoint by viewModel.endPoint.collectAsState()
+    val startPoint by mapViewModel.routeStartPoint.collectAsState()
+    val endPoint by mapViewModel.routeEndPoint.collectAsState()
     
     var startAddressQuery by remember { mutableStateOf("") }
     var endAddressQuery by remember { mutableStateOf("") }
-    var selectingStart by remember { mutableStateOf(false) }
-    var selectingEnd by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
@@ -49,8 +53,11 @@ fun RoutingScreen(
                     }
                 },
                 actions = {
-                    if (uiState is RoutingUiState.RoutesCalculated) {
-                        IconButton(onClick = { viewModel.clearPoints() }) {
+                    if (startPoint != null || endPoint != null) {
+                        IconButton(onClick = {
+                            mapViewModel.clearRoutePoints()
+                            viewModel.clearResults()
+                        }) {
                             Icon(Icons.Default.Clear, contentDescription = "Effacer")
                         }
                     }
@@ -63,19 +70,13 @@ fun RoutingScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             // Point selection cards
             
             // Start point
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (selectingStart) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -91,7 +92,7 @@ fun RoutingScreen(
                         
                         // Ma position button
                         if (userLocation != null) {
-                            IconButton(onClick = { viewModel.setStartPoint(userLocation) }) {
+                            IconButton(onClick = { mapViewModel.setRoutePoint(RoutePickTarget.START, userLocation) }) {
                                 Icon(Icons.Default.MyLocation, contentDescription = "Ma position")
                             }
                         }
@@ -101,7 +102,7 @@ fun RoutingScreen(
                     
                     if (startPoint != null) {
                         Text("${String.format("%.5f", startPoint!!.latitude)}, ${String.format("%.5f", startPoint!!.longitude)}")
-                        TextButton(onClick = { viewModel.setStartPoint(null) }) {
+                        TextButton(onClick = { mapViewModel.setRoutePoint(RoutePickTarget.START, null) }) {
                             Text("Effacer")
                         }
                     } else {
@@ -114,7 +115,9 @@ fun RoutingScreen(
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
                                 IconButton(onClick = { 
-                                    viewModel.searchAddress(startAddressQuery, isStart = true)
+                                    viewModel.searchAddress(startAddressQuery) { geo ->
+                                        geo?.let { mapViewModel.setRoutePoint(RoutePickTarget.START, it) }
+                                    }
                                 }) {
                                     Icon(Icons.Default.Search, contentDescription = "Rechercher")
                                 }
@@ -124,7 +127,7 @@ fun RoutingScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Button(
-                            onClick = { selectingStart = true },
+                            onClick = { onPickPointOnMap(RoutePickTarget.START) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Default.EditLocation, contentDescription = null)
@@ -139,14 +142,7 @@ fun RoutingScreen(
             
             // End point
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (selectingEnd) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -162,7 +158,7 @@ fun RoutingScreen(
                         
                         // Ma position button
                         if (userLocation != null) {
-                            IconButton(onClick = { viewModel.setEndPoint(userLocation) }) {
+                            IconButton(onClick = { mapViewModel.setRoutePoint(RoutePickTarget.END, userLocation) }) {
                                 Icon(Icons.Default.MyLocation, contentDescription = "Ma position")
                             }
                         }
@@ -172,7 +168,7 @@ fun RoutingScreen(
                     
                     if (endPoint != null) {
                         Text("${String.format("%.5f", endPoint!!.latitude)}, ${String.format("%.5f", endPoint!!.longitude)}")
-                        TextButton(onClick = { viewModel.setEndPoint(null) }) {
+                        TextButton(onClick = { mapViewModel.setRoutePoint(RoutePickTarget.END, null) }) {
                             Text("Effacer")
                         }
                     } else {
@@ -185,7 +181,9 @@ fun RoutingScreen(
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
                                 IconButton(onClick = { 
-                                    viewModel.searchAddress(endAddressQuery, isStart = false)
+                                    viewModel.searchAddress(endAddressQuery) { geo ->
+                                        geo?.let { mapViewModel.setRoutePoint(RoutePickTarget.END, it) }
+                                    }
                                 }) {
                                     Icon(Icons.Default.Search, contentDescription = "Rechercher")
                                 }
@@ -195,7 +193,7 @@ fun RoutingScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Button(
-                            onClick = { selectingEnd = true },
+                            onClick = { onPickPointOnMap(RoutePickTarget.END) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Default.EditLocation, contentDescription = null)
@@ -206,19 +204,56 @@ fun RoutingScreen(
                 }
             }
             
-            // Show instruction if selecting
-            if (selectingStart || selectingEnd) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Distance d'évitement des caméras
+            val avoidanceRadius by viewModel.avoidanceRadius.collectAsState()
+            
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Security, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Marge d'évitement", style = MaterialTheme.typography.titleMedium)
+                        }
+                        Text(
+                            "${avoidanceRadius.toInt()} mètres",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Slider(
+                        value = avoidanceRadius.toFloat(),
+                        onValueChange = { viewModel.setAvoidanceRadius(it.toDouble()) },
+                        valueRange = 15f..100f,
+                        steps = 16,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                ) {
-                    Text(
-                        "📍 Retournez sur la carte et tapez pour choisir ${if (selectingStart) "le départ" else "l'arrivée"}",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(25, 40, 60, 80).forEach { preset ->
+                            FilterChip(
+                                selected = avoidanceRadius.toInt() == preset,
+                                onClick = { viewModel.setAvoidanceRadius(preset.toDouble()) },
+                                label = { Text("${preset}m") },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
                 }
             }
             
@@ -226,7 +261,7 @@ fun RoutingScreen(
             
             // Calculate button
             Button(
-                onClick = { viewModel.calculateRoute() },
+                onClick = { viewModel.calculateRoute(startPoint, endPoint) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = startPoint != null && endPoint != null && uiState !is RoutingUiState.Calculating
             ) {

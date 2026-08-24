@@ -32,6 +32,24 @@ object GeometryUtils {
     fun distance(p1: GeoPoint, p2: GeoPoint): Double {
         return distance(p1.latitude, p1.longitude, p2.latitude, p2.longitude)
     }
+
+    /**
+     * Calculate distance from a point to a line segment in meters
+     */
+    fun distanceToSegment(point: GeoPoint, segA: GeoPoint, segB: GeoPoint): Double {
+        val pX = (point.longitude - segA.longitude) * cos(Math.toRadians(segA.latitude))
+        val pY = point.latitude - segA.latitude
+        val dX = (segB.longitude - segA.longitude) * cos(Math.toRadians(segA.latitude))
+        val dY = segB.latitude - segA.latitude
+        val segLen2 = dX * dX + dY * dY
+        if (segLen2 == 0.0) {
+            return distance(point, segA)
+        }
+        val t = maxOf(0.0, minOf(1.0, (pX * dX + pY * dY) / segLen2))
+        val projLat = segA.latitude + t * (segB.latitude - segA.latitude)
+        val projLon = segA.longitude + t * (segB.longitude - segA.longitude)
+        return distance(point.latitude, point.longitude, projLat, projLon)
+    }
     
     /**
      * Create a circular polygon around a point (for avoiding cameras)
@@ -62,12 +80,12 @@ object GeometryUtils {
     }
     
     /**
-     * Count cameras near a route
+     * Count cameras near a route (within 40m)
      */
     fun countCamerasNearRoute(
         routePoints: List<GeoPoint>,
         cameras: List<Camera>,
-        radiusMeters: Double = 50.0
+        radiusMeters: Double = 40.0
     ): Int {
         val camerasNear = mutableSetOf<String>()
         
@@ -87,12 +105,12 @@ object GeometryUtils {
     }
     
     /**
-     * Get cameras along a route
+     * Get cameras along a route (within 40m)
      */
     fun getCamerasAlongRoute(
         routePoints: List<GeoPoint>,
         cameras: List<Camera>,
-        radiusMeters: Double = 50.0
+        radiusMeters: Double = 40.0
     ): List<Camera> {
         val camerasAlong = mutableMapOf<String, Camera>()
         

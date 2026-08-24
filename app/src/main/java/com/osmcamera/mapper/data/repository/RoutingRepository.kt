@@ -9,14 +9,17 @@ import com.osmcamera.mapper.data.api.ORSRouteRequest
 import com.osmcamera.mapper.data.model.Camera
 import com.osmcamera.mapper.data.model.Route
 import com.osmcamera.mapper.data.model.RouteComparison
-import com.osmcamera.mapper.data.model.RouteInstruction
-import com.osmcamera.mapper.utils.GeometryUtils
 import com.osmcamera.mapper.utils.CameraClusterUtils
+import com.osmcamera.mapper.utils.GeometryUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.abs
 
 /**
  * Repository for routing with camera avoidance
@@ -29,51 +32,99 @@ class RoutingRepository @Inject constructor(
     
     companion object {
         private const val TAG = "BalanceTaCam-Routing"
-        private const val CAMERA_AVOIDANCE_RADIUS = 50.0 // meters
-        private const val MAX_CAMERAS_TO_AVOID = 30 // Limit to avoid 413 error
+        private const val CAMERA_AVOIDANCE_RADIUS = 40.0 // meters (expanded avoidance margin)
     }
     
     /**
      * Calculate routes avoiding cameras
-     * @return RouteComparison with multiple alternatives
+     * @return RouteComparison with multiple alternatives ranked by fewest cameras
      */
     suspend fun calculateAntiCameraRoutes(
         start: GeoPoint,
         end: GeoPoint,
-        transportMode: String = "foot-walking" // foot-walking, driving-car, cycling-regular
+        transportMode: String = "foot-walking",
+        avoidanceRadius: Double = 40.0
     ): Result<RouteComparison> {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d(TAG, "=== Calculating anti-camera routes ===")
+                Log.d(TAG, "=== Calculating anti-camera routes (radius: ${avoidanceRadius}m) ===")
                 Log.d(TAG, "Start: ${start.latitude}, ${start.longitude}")
                 Log.d(TAG, "End: ${end.latitude}, ${end.longitude}")
                 
-                // 1. Get cameras in the area (bounding box with padding)
-                val cameras = getCamerasInArea(start, end)
-                Log.d(TAG, "Found ${cameras.size} cameras in area")
+                // 1. Get cameras in the area, filtering strictly for PUBLIC surveillance only
+                val allCameras = getCamerasInArea(start, end)
+                val cameras = allCameras.filter { it.surveillance == "public" || it.surveillance == null }
+                Log.i(TAG, "Loaded ${allCameras.size} total cameras, filtering to ${cameras.size} PUBLIC surveillance cameras")
                 
-                // 2. Calculate direct route (no avoidance)
-                val directRoute = calculateDirectRoute(start, end, cameras, transportMode)
-                Log.d(TAG, "Direct route: ${directRoute?.cameraCount} cameras")
+                // 1. Calculate direct route
+                val directRoute = calculateDirectRoute(start, end, cameras, transportMode, avoidanceRadius)
                 
-                // 3. Calculate alternative routes (without avoid_polygons since ORS 500 error)
-                val alternativeRoutes = calculateAlternativeRoutes(start, end, cameras, transportMode)
-                Log.d(TAG, "Calculated ${alternativeRoutes.size} alternative routes")
+                // 2. Dynamic polygon avoidance (focused high-priority avoidance configs)
+                val polygonRoutes = calculatePolygonAvoidanceRoutes(
+                    start = start,
+                    end = end,
+                    directRoutePoints = directRoute?.points ?: emptyList(),
+                    cameras = cameras,
+                    transportMode = transportMode,
+                    avoidanceRadius = avoidanceRadius
+                )
                 
-                // 4. Combine and sort by camera count (best = fewer cameras)
-                val allRoutes = (listOf(directRoute) + alternativeRoutes).filterNotNull()
-                val sortedRoutes = allRoutes.sortedBy { it.cameraCount }
+                Log.i(TAG, "Calculated ${polygonRoutes.size} anti-camera polygon routes (direct route has ${directRoute?.cameraCount ?: 0} cameras)")
                 
-                val bestRoute = sortedRoutes.firstOrNull() 
-                    ?: return@withContext Result.failure(Exception("No routes found"))
+                // 3. Combine all candidate routes
+                val candidateRoutes = mutableListOf<Route>()
+                directRoute?.let { candidateRoutes.add(it) }
+                candidateRoutes.addAll(polygonRoutes)
+                
+                if (candidateRoutes.isEmpty()) {
+                    return@withContext Result.failure(Exception("Aucun itinéraire trouvé"))
+                }
+                
+                // 4. Iterative Refinement: If best route still has cameras, run a refinement pass targeting residual cameras
+                val currentBest = candidateRoutes.minByOrNull { it.cameraCount }
+                if (currentBest != null && currentBest.cameraCount > 0) {
+                    val residualCameras = GeometryUtils.getCamerasAlongRoute(currentBest.points, cameras, radiusMeters = avoidanceRadius)
+                    if (residualCameras.isNotEmpty()) {
+                        val directRouteCameras = if (directRoute?.points?.isNotEmpty() == true) {
+                            GeometryUtils.getCamerasAlongRoute(directRoute.points, cameras, radiusMeters = avoidanceRadius)
+                        } else emptyList()
+                        
+                        val refinedCameras = (directRouteCameras + residualCameras).distinctBy { it.id }
+                        val refinedPolygon = CameraClusterUtils.createAvoidanceMultiPolygon(refinedCameras, start, end, radiusMeters = avoidanceRadius)
+                        if (refinedPolygon != null) {
+                            val refinedRoutes = calculateSingleAvoidance(start, end, refinedPolygon, cameras, transportMode, "refined", avoidanceRadius)
+                            candidateRoutes.addAll(refinedRoutes)
+                        }
+                    }
+                }
+                
+                // 5. Deduplicate similar routes (similar distance and same camera count)
+                val uniqueRoutes = mutableListOf<Route>()
+                candidateRoutes.forEach { route ->
+                    val isDuplicate = uniqueRoutes.any { existing ->
+                        abs(existing.distance - route.distance) < 35 &&
+                        existing.cameraCount == route.cameraCount
+                    }
+                    if (!isDuplicate) {
+                        uniqueRoutes.add(route)
+                    }
+                }
+                
+                // 6. Sort by lowest camera count first, then shortest distance
+                val sortedRoutes = uniqueRoutes.sortedWith(
+                    compareBy<Route> { it.cameraCount }
+                        .thenBy { it.distance }
+                )
+                
+                val bestRoute = sortedRoutes.first()
                 
                 val comparison = RouteComparison(
-                    routes = sortedRoutes,
+                    routes = sortedRoutes.take(5),
                     bestRoute = bestRoute,
                     directRoute = directRoute
                 )
                 
-                Log.d(TAG, "Best route has ${bestRoute.cameraCount} cameras")
+                Log.d(TAG, "Best route has ${bestRoute.cameraCount} cameras (Direct had ${directRoute?.cameraCount})")
                 Log.d(TAG, "=== Routing calculation complete ===")
                 
                 Result.success(comparison)
@@ -88,21 +139,19 @@ class RoutingRepository @Inject constructor(
      * Get cameras in the area between start and end with padding
      */
     private suspend fun getCamerasInArea(start: GeoPoint, end: GeoPoint): List<Camera> {
-        val padding = 0.05 // ~5 km padding
+        val padding = 0.04 // ~4 km padding
         
         val minLat = minOf(start.latitude, end.latitude) - padding
         val maxLat = maxOf(start.latitude, end.latitude) + padding
         val minLon = minOf(start.longitude, end.longitude) - padding
         val maxLon = maxOf(start.longitude, end.longitude) + padding
         
-        val result = cameraRepository.fetchCamerasFromOverpass(
+        return cameraRepository.getCamerasForRouting(
             south = minLat,
             west = minLon,
             north = maxLat,
             east = maxLon
         )
-        
-        return result.getOrNull() ?: emptyList()
     }
     
     /**
@@ -112,200 +161,289 @@ class RoutingRepository @Inject constructor(
         start: GeoPoint,
         end: GeoPoint,
         cameras: List<Camera>,
-        transportMode: String = "foot-walking"
+        transportMode: String = "foot-walking",
+        avoidanceRadius: Double = 40.0
     ): Route? {
         val request = ORSRouteRequest(
             coordinates = listOf(
                 listOf(start.longitude, start.latitude),
                 listOf(end.longitude, end.latitude)
             ),
-            alternativeRoutes = null // Direct route only
+            alternativeRoutes = null
         )
         
-        return executeRouteRequest(request, cameras, "direct", transportMode)
+        return executeRouteRequest(request, cameras, "direct", transportMode, avoidanceRadius)
     }
     
     /**
-     * Calculate alternative routes by trying different parameters
-     * to get the most variety and find routes with fewer cameras
+     * Calculate standard ORS alternative routes
      */
-    private suspend fun calculateAlternativeRoutes(
+    private suspend fun calculateORSAlternatives(
         start: GeoPoint,
         end: GeoPoint,
         cameras: List<Camera>,
         transportMode: String = "foot-walking"
     ): List<Route> {
-        if (cameras.isEmpty()) {
-            return emptyList()
-        }
+        if (cameras.isEmpty()) return emptyList()
         
-        val allAlternatives = mutableListOf<Route>()
-        
-        // Try 3 different configurations to get more variety
-        val configurations = listOf(
-            ORSAlternativeRoutes(targetCount = 5, shareFactor = 0.3, weightFactor = 2.0),
-            ORSAlternativeRoutes(targetCount = 5, shareFactor = 0.4, weightFactor = 2.5),
-            ORSAlternativeRoutes(targetCount = 5, shareFactor = 0.5, weightFactor = 3.0)
-        )
-        
-        configurations.forEachIndexed { configIndex, altConfig ->
-            try {
-                val request = ORSRouteRequest(
-                    coordinates = listOf(
-                        listOf(start.longitude, start.latitude),
-                        listOf(end.longitude, end.latitude)
-                    ),
-                    alternativeRoutes = altConfig,
-                    options = null
-                )
-                
-                val response = orsApi.getRoute(
-                    profile = transportMode,
-                    apiKey = OpenRouteServiceApi.API_KEY,
-                    request = request
-                )
-                
-                if (response.isSuccessful) {
-                    val orsRoutes = response.body()?.routes ?: emptyList()
-                    Log.d(TAG, "Config $configIndex: Got ${orsRoutes.size} routes")
+        val alternatives = mutableListOf<Route>()
+        try {
+            val request = ORSRouteRequest(
+                coordinates = listOf(
+                    listOf(start.longitude, start.latitude),
+                    listOf(end.longitude, end.latitude)
+                ),
+                alternativeRoutes = ORSAlternativeRoutes(
+                    targetCount = 3,
+                    shareFactor = 0.6,
+                    weightFactor = 1.6
+                ),
+                options = null
+            )
+            
+            val response = orsApi.getRoute(
+                profile = transportMode,
+                apiKey = OpenRouteServiceApi.API_KEY,
+                request = request
+            )
+            
+            if (response.isSuccessful) {
+                val orsRoutes = response.body()?.routes ?: emptyList()
+                // Drop the first route (which is direct) and convert alternatives
+                orsRoutes.drop(1).forEachIndexed { idx, orsRoute ->
+                    val points = GeometryUtils.decodePolyline(orsRoute.geometry)
+                    val cameraCount = GeometryUtils.countCamerasNearRoute(
+                        routePoints = points,
+                        cameras = cameras,
+                        radiusMeters = CAMERA_AVOIDANCE_RADIUS
+                    )
                     
-                    // Skip first (direct) and convert others
-                    orsRoutes.drop(1).forEach { orsRoute ->
-                        val points = GeometryUtils.decodePolyline(orsRoute.geometry)
-                        val cameraCount = GeometryUtils.countCamerasNearRoute(
-                            routePoints = points,
-                            cameras = cameras,
-                            radiusMeters = CAMERA_AVOIDANCE_RADIUS
-                        )
-                        
-                        val route = Route(
-                            id = "alt_${configIndex}_${allAlternatives.size}",
-                            points = points,
-                            distance = orsRoute.summary.distance,
-                            duration = orsRoute.summary.duration,
-                            cameraCount = cameraCount
-                        )
-                        
-                        // Only add if significantly different from existing routes
-                        val isDuplicate = allAlternatives.any { existing ->
-                            kotlin.math.abs(existing.distance - route.distance) < 50 &&
-                            existing.cameraCount == route.cameraCount
-                        }
-                        
-                        if (!isDuplicate) {
-                            allAlternatives.add(route)
-                            Log.d(TAG, "Added alternative: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
-                        }
-                    }
+                    alternatives.add(Route(
+                        id = "ors_alt_$idx",
+                        points = points,
+                        distance = orsRoute.summary.distance,
+                        duration = orsRoute.summary.duration,
+                        cameraCount = cameraCount
+                    ))
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Config $configIndex failed", e)
             }
+        } catch (e: Exception) {
+            Log.w(TAG, "ORS alternatives query failed", e)
         }
         
-        Log.d(TAG, "Total unique alternatives found: ${allAlternatives.size}")
-        
-        // FALLBACK: If ORS didn't give us alternatives, create detour routes manually
-        if (allAlternatives.isEmpty()) {
-            Log.w(TAG, "No alternatives from ORS, generating detour routes manually")
-            return generateDetourRoutes(start, end, cameras, transportMode)
-        }
-        
-        return allAlternatives
+        return alternatives
     }
     
     /**
-     * Generate INTELLIGENT routes by adding waypoints to avoid camera zones
-     * This analyzes camera positions and creates strategic detours
+     * Generate routes dynamically avoiding camera zones via ORS avoid_polygons
      */
-    private suspend fun generateDetourRoutes(
+    private suspend fun calculatePolygonAvoidanceRoutes(
         start: GeoPoint,
         end: GeoPoint,
+        directRoutePoints: List<GeoPoint>,
         cameras: List<Camera>,
-        transportMode: String
-    ): List<Route> {
-        Log.d(TAG, "=== Generating intelligent detour routes ===")
+        transportMode: String,
+        avoidanceRadius: Double = 40.0
+    ): List<Route> = coroutineScope {
+        if (cameras.isEmpty()) return@coroutineScope emptyList()
         
-        // 1. Find camera clusters (hotspots)
-        val clusters = CameraClusterUtils.findCameraClusters(
-            cameras = cameras,
-            maxDistanceMeters = 150.0,
-            minCamerasPerCluster = 3
-        )
-        
-        Log.d(TAG, "Found ${clusters.size} camera clusters")
-        clusters.take(5).forEach { cluster ->
-            Log.d(TAG, "  Cluster: ${cluster.cameraCount} cameras at (${String.format("%.4f", cluster.center.latitude)}, ${String.format("%.4f", cluster.center.longitude)})")
+        // 1. Identify cameras directly along the direct path
+        val directRouteCameras = if (directRoutePoints.isNotEmpty()) {
+            GeometryUtils.getCamerasAlongRoute(directRoutePoints, cameras, radiusMeters = avoidanceRadius)
+        } else {
+            emptyList()
         }
         
-        // 2. Generate intelligent waypoints that avoid clusters
-        val waypoints = CameraClusterUtils.generateAvoidanceWaypoints(
+        // 2. Identify dense clusters in the corridor
+        val clusters = CameraClusterUtils.findCameraClusters(cameras, maxDistanceMeters = 100.0, minCamerasPerCluster = 2)
+        val clusterCameras = clusters.flatMap { it.cameras }.distinctBy { it.id }
+        
+        // 3. Identify all cameras in the navigation corridor between start and end (prioritizing direct path and public cameras)
+        val corridorCameras = CameraClusterUtils.getCamerasInCorridor(
+            cameras = cameras,
             start = start,
             end = end,
-            clusters = clusters,
-            distances = listOf(200.0, 400.0, 600.0)
+            directRoutePoints = directRoutePoints,
+            paddingMeters = 600.0
         )
         
-        Log.d(TAG, "Generated ${waypoints.size} intelligent waypoints")
+        // 4. Define multi-polygon configurations to test in parallel around the user-specified radius
+        val radiusBase = avoidanceRadius
+        val radiusTight = maxOf(18.0, avoidanceRadius - 6.0)
+        val radiusWide = avoidanceRadius + 5.0
         
-        // 3. Calculate routes via each waypoint
-        val routes = mutableListOf<Route>()
+        val configs = listOfNotNull(
+            // Config A: Avoid ALL corridor cameras (user-selected radius)
+            if (corridorCameras.isNotEmpty()) {
+                CameraClusterUtils.createAvoidanceMultiPolygon(corridorCameras, start, end, radiusMeters = radiusBase, maxPolygons = 85)
+            } else null,
+            // Config B: Avoid ALL corridor cameras (tighter radius for dense areas)
+            if (corridorCameras.isNotEmpty()) {
+                CameraClusterUtils.createAvoidanceMultiPolygon(corridorCameras, start, end, radiusMeters = radiusTight, maxPolygons = 85)
+            } else null,
+            // Config C: Avoid ALL corridor cameras (wider radius for extra margin)
+            if (corridorCameras.isNotEmpty()) {
+                CameraClusterUtils.createAvoidanceMultiPolygon(corridorCameras, start, end, radiusMeters = radiusWide, maxPolygons = 85)
+            } else null,
+            // Config D: Avoid union of direct cameras + clusters
+            if (directRouteCameras.isNotEmpty() || clusterCameras.isNotEmpty()) {
+                val union = (directRouteCameras + clusterCameras).distinctBy { it.id }
+                CameraClusterUtils.createAvoidanceMultiPolygon(union, start, end, radiusMeters = radiusBase, maxPolygons = 85)
+            } else null
+        ).distinct()
         
-        waypoints.take(10).forEachIndexed { index, waypoint ->
-            try {
-                val request = ORSRouteRequest(
-                    coordinates = listOf(
-                        listOf(start.longitude, start.latitude),
-                        listOf(waypoint.longitude, waypoint.latitude),
-                        listOf(end.longitude, end.latitude)
-                    ),
-                    alternativeRoutes = null
-                )
-                
-                val response = orsApi.getRoute(
-                    profile = transportMode,
-                    apiKey = OpenRouteServiceApi.API_KEY,
-                    request = request
-                )
-                
-                if (response.isSuccessful) {
-                    val orsRoute = response.body()?.routes?.firstOrNull()
-                    if (orsRoute != null) {
-                        val points = GeometryUtils.decodePolyline(orsRoute.geometry)
-                        val cameraCount = GeometryUtils.countCamerasNearRoute(
-                            routePoints = points,
-                            cameras = cameras,
-                            radiusMeters = CAMERA_AVOIDANCE_RADIUS
-                        )
-                        
-                        routes.add(Route(
-                            id = "intelligent_$index",
-                            points = points,
-                            distance = orsRoute.summary.distance,
-                            duration = orsRoute.summary.duration,
-                            cameraCount = cameraCount
-                        ))
-                        
-                        Log.d(TAG, "Smart detour $index: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Smart detour $index failed", e)
+        Log.d(TAG, "Testing ${configs.size} dynamic avoid_polygon configurations in parallel (including corridor cameras: ${corridorCameras.size})")
+        
+        val deferredRoutes = configs.mapIndexed { index, multiPolygon ->
+            async {
+                calculateSingleAvoidance(start, end, multiPolygon, cameras, transportMode, "polygon_avoid_$index", avoidanceRadius)
             }
         }
         
-        Log.d(TAG, "Generated ${routes.size} intelligent detour routes")
-        return routes.sortedBy { it.cameraCount }.take(5) // Keep best 5
+        deferredRoutes.awaitAll().flatten()
     }
     
     /**
-     * Execute ORS request and parse response
+     * Execute an ORS request with a specific avoid_polygons GeoJSON and return scored routes
+     */
+    private suspend fun calculateSingleAvoidance(
+        start: GeoPoint,
+        end: GeoPoint,
+        multiPolygon: com.osmcamera.mapper.data.api.ORSMultiPolygon,
+        cameras: List<Camera>,
+        transportMode: String,
+        label: String,
+        avoidanceRadius: Double = 40.0
+    ): List<Route> {
+        return try {
+            val request = ORSRouteRequest(
+                coordinates = listOf(
+                    listOf(start.longitude, start.latitude),
+                    listOf(end.longitude, end.latitude)
+                ),
+                alternativeRoutes = null,
+                options = ORSOptions(avoidPolygons = multiPolygon)
+            )
+            
+            val response = orsApi.getRoute(
+                profile = transportMode,
+                apiKey = OpenRouteServiceApi.API_KEY,
+                request = request
+            )
+            
+            if (response.isSuccessful) {
+                val orsRoutes = response.body()?.routes ?: emptyList()
+                orsRoutes.mapIndexed { rIdx, orsRoute ->
+                    val points = GeometryUtils.decodePolyline(orsRoute.geometry)
+                    val cameraCount = GeometryUtils.countCamerasNearRoute(
+                        routePoints = points,
+                        cameras = cameras,
+                        radiusMeters = avoidanceRadius
+                    )
+                    
+                    Log.i(TAG, "Dynamic avoid_polygon $label-$rIdx: $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
+                    
+                    Route(
+                        id = "${label}_$rIdx",
+                        points = points,
+                        distance = orsRoute.summary.distance,
+                        duration = orsRoute.summary.duration,
+                        cameraCount = cameraCount
+                    )
+                }
+            } else {
+                Log.w(TAG, "Polygon avoidance $label failed: ${response.code()} ${response.errorBody()?.string()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Polygon avoidance $label error", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * Generate intelligent routes bypassing camera bottlenecks on the direct path
+     */
+    private suspend fun calculateSmartDetours(
+        start: GeoPoint,
+        end: GeoPoint,
+        directRoutePoints: List<GeoPoint>,
+        cameras: List<Camera>,
+        transportMode: String
+    ): List<Route> = coroutineScope {
+        if (cameras.isEmpty()) return@coroutineScope emptyList()
+        
+        val waypoints = CameraClusterUtils.generateSmartAvoidanceWaypoints(
+            start = start,
+            end = end,
+            directRoutePoints = directRoutePoints,
+            cameras = cameras,
+            detourDistances = listOf(160.0, 300.0, 480.0, 700.0)
+        )
+        
+        Log.d(TAG, "Testing ${waypoints.size} smart avoidance waypoints in parallel")
+        
+        val deferredRoutes = waypoints.mapIndexed { index, waypoint ->
+            async {
+                try {
+                    val request = ORSRouteRequest(
+                        coordinates = listOf(
+                            listOf(start.longitude, start.latitude),
+                            listOf(waypoint.longitude, waypoint.latitude),
+                            listOf(end.longitude, end.latitude)
+                        ),
+                        alternativeRoutes = null
+                    )
+                    
+                    val response = orsApi.getRoute(
+                        profile = transportMode,
+                        apiKey = OpenRouteServiceApi.API_KEY,
+                        request = request
+                    )
+                    
+                    if (response.isSuccessful) {
+                        val orsRoute = response.body()?.routes?.firstOrNull()
+                        if (orsRoute != null) {
+                            val points = GeometryUtils.decodePolyline(orsRoute.geometry)
+                            val cameraCount = GeometryUtils.countCamerasNearRoute(
+                                routePoints = points,
+                                cameras = cameras,
+                                radiusMeters = CAMERA_AVOIDANCE_RADIUS
+                            )
+                            
+                            Log.d(TAG, "Smart detour $index (via ${String.format("%.4f", waypoint.latitude)}, ${String.format("%.4f", waypoint.longitude)}): $cameraCount cameras, ${String.format("%.1f", orsRoute.summary.distance/1000)}km")
+                            
+                            Route(
+                                id = "smart_detour_$index",
+                                points = points,
+                                distance = orsRoute.summary.distance,
+                                duration = orsRoute.summary.duration,
+                                cameraCount = cameraCount
+                            )
+                        } else null
+                    } else {
+                        Log.w(TAG, "Detour $index failed: ${response.code()}")
+                        null
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Detour $index error", e)
+                    null
+                }
+            }
+        }
+        
+        deferredRoutes.awaitAll().filterNotNull()
+    }
+    
+    /**
+     * Execute direct ORS request and parse response
      */
     private suspend fun executeRouteRequest(
         request: ORSRouteRequest,
         cameras: List<Camera>,
         routeType: String,
-        transportMode: String = "foot-walking"
+        transportMode: String = "foot-walking",
+        avoidanceRadius: Double = 40.0
     ): Route? {
         try {
             val response = orsApi.getRoute(
@@ -323,15 +461,11 @@ class RoutingRepository @Inject constructor(
             if (orsRoutes.isEmpty()) return null
             
             val orsRoute = orsRoutes.first()
-            
-            // Decode geometry to points
             val points = GeometryUtils.decodePolyline(orsRoute.geometry)
-            
-            // Count cameras along route
             val cameraCount = GeometryUtils.countCamerasNearRoute(
                 routePoints = points,
                 cameras = cameras,
-                radiusMeters = CAMERA_AVOIDANCE_RADIUS
+                radiusMeters = avoidanceRadius
             )
             
             Log.d(TAG, "Route $routeType: ${points.size} points, $cameraCount cameras")
@@ -349,4 +483,3 @@ class RoutingRepository @Inject constructor(
         }
     }
 }
-

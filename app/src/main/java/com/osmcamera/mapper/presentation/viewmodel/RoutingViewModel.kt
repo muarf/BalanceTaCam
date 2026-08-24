@@ -16,95 +16,77 @@ import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
 
 /**
- * ViewModel for routing with camera avoidance
+ * ViewModel for routing with camera avoidance.
+ * Route points live in MapViewModel so they survive navigation to/from the map.
  */
 @HiltViewModel
 class RoutingViewModel @Inject constructor(
     private val routingRepository: RoutingRepository,
     private val nominatimApi: NominatimApi
 ) : ViewModel() {
-    
+
     private val _uiState = MutableStateFlow<RoutingUiState>(RoutingUiState.Idle)
     val uiState: StateFlow<RoutingUiState> = _uiState.asStateFlow()
-    
-    private val _startPoint = MutableStateFlow<GeoPoint?>(null)
-    val startPoint: StateFlow<GeoPoint?> = _startPoint.asStateFlow()
-    
-    private val _endPoint = MutableStateFlow<GeoPoint?>(null)
-    val endPoint: StateFlow<GeoPoint?> = _endPoint.asStateFlow()
-    
-    private val _addressSearchResults = MutableStateFlow<List<String>>(emptyList())
-    val addressSearchResults: StateFlow<List<String>> = _addressSearchResults.asStateFlow()
-    
+
+    private val _avoidanceRadius = MutableStateFlow(40.0)
+    val avoidanceRadius: StateFlow<Double> = _avoidanceRadius.asStateFlow()
+
+    fun setAvoidanceRadius(radius: Double) {
+        _avoidanceRadius.value = radius
+    }
+
     private var searchJob: Job? = null
-    
-    fun setStartPoint(point: GeoPoint?) {
-        _startPoint.value = point
-    }
-    
-    fun setEndPoint(point: GeoPoint?) {
-        _endPoint.value = point
-    }
-    
+
     /**
-     * Search address using Nominatim
+     * Search address using Nominatim, result delivered via callback
      */
-    fun searchAddress(query: String, isStart: Boolean) {
-        if (query.length < 3) return
-        
+    fun searchAddress(query: String, onResult: (GeoPoint?) -> Unit) {
+        if (query.length < 3) {
+            onResult(null)
+            return
+        }
+
         // Cancel previous search
         searchJob?.cancel()
-        
+
         searchJob = viewModelScope.launch {
             delay(500) // Debounce
-            
+
             try {
                 val response = nominatimApi.search(query)
-                if (response.isSuccessful) {
-                    val results = response.body() ?: emptyList()
-                    if (results.isNotEmpty()) {
-                        val result = results.first()
-                        val lat = result.lat.toDouble()
-                        val lon = result.lon.toDouble()
-                        
-                        if (isStart) {
-                            setStartPoint(GeoPoint(lat, lon))
-                        } else {
-                            setEndPoint(GeoPoint(lat, lon))
-                        }
-                    }
-                }
+                val first = if (response.isSuccessful) response.body()?.firstOrNull() else null
+                onResult(first?.let { GeoPoint(it.lat.toDouble(), it.lon.toDouble()) })
             } catch (e: Exception) {
                 android.util.Log.e("BalanceTaCam", "Address search failed", e)
+                onResult(null)
             }
         }
     }
-    
-    fun clearPoints() {
-        _startPoint.value = null
-        _endPoint.value = null
+
+    fun clearResults() {
         _uiState.value = RoutingUiState.Idle
     }
-    
-    fun calculateRoute() {
-        val start = _startPoint.value
-        val end = _endPoint.value
-        
+
+    fun calculateRoute(start: GeoPoint?, end: GeoPoint?) {
         if (start == null || end == null) {
             _uiState.value = RoutingUiState.Error("Points de départ et d'arrivée requis")
             return
         }
-        
+
         viewModelScope.launch {
-            android.util.Log.d("BalanceTaCam", "ViewModel: Setting Calculating state")
+            android.util.Log.d("BalanceTaCam", "ViewModel: Setting Calculating state (radius: ${_avoidanceRadius.value}m)")
             _uiState.value = RoutingUiState.Calculating
-            
+
             try {
                 android.util.Log.d("BalanceTaCam", "ViewModel: Calling repository")
-                val result = routingRepository.calculateAntiCameraRoutes(start, end)
-                
+                val result = routingRepository.calculateAntiCameraRoutes(
+                    start = start,
+                    end = end,
+                    avoidanceRadius = _avoidanceRadius.value
+                )
+
                 android.util.Log.d("BalanceTaCam", "ViewModel: Got result, isSuccess=${result.isSuccess}")
-                
+
                 if (result.isSuccess) {
                     val comparison = result.getOrNull()!!
                     android.util.Log.d("BalanceTaCam", "ViewModel: Got ${comparison.routes.size} routes")
@@ -129,4 +111,3 @@ sealed class RoutingUiState {
     data class RoutesCalculated(val comparison: RouteComparison) : RoutingUiState()
     data class Error(val message: String) : RoutingUiState()
 }
-

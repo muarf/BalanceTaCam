@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="10dp"
+    android:height="10dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Outer White Border -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,12m-11,0a11,11 0,1 1,22 0a11,11 0,1 1,-22 0" />
+    <!-- Red Surveillance Dot -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M12,12m-8.5,0a8.5,8.5 0,1 1,17 0a8.5,8.5 0,1 1,-17 0" />
+    <!-- Center Lens Target Dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,12m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+</vector>

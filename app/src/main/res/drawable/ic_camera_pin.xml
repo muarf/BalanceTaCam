@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="40dp"
+    android:viewportWidth="32"
+    android:viewportHeight="40">
+    <!-- Pin White Outline / Shadow -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,40 C14,35.8 4.5,24.8 4.5,14 A11.5,11.5 0 0,1 27.5,14 C27.5,24.8 18,35.8 16,40 Z" />
+    <!-- Pin Red Body -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M16,38 C14.5,34.2 6,23.8 6,14 A10,10 0 0,1 26,14 C26,23.8 17.5,34.2 16,38 Z" />
+    <!-- Inner White Circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,14m-7,0a7,7 0 1,0 14,0a7,7 0 1,0 -14,0" />
+    <!-- Camera Icon Body -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M12.5,11.5 L13.5,10.5 L18.5,10.5 L19.5,11.5 L21,11.5 C21.55,11.5 22,11.95 22,12.5 L22,16.5 C22,17.05 21.55,17.5 21,17.5 L11,17.5 C10.45,17.5 10,17.05 10,16.5 L10,12.5 C10,11.95 10.45,11.5 11,11.5 Z" />
+    <!-- Camera Lens Inner Cutout (White) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,14m-2.2,0a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0" />
+    <!-- Camera Lens Center (Red) -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M16,14m-1.2,0a1.2,1.2 0 1,0 2.4,0a1.2,1.2 0 1,0 -2.4,0" />
+</vector>

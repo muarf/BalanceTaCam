@@ -17,13 +17,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.osmcamera.mapper.R
 import com.osmcamera.mapper.presentation.viewmodel.AuthViewModel
 import com.osmcamera.mapper.presentation.viewmodel.MapViewModel
 import kotlinx.coroutines.launch
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -40,18 +44,28 @@ fun MapScreen(
     mapViewModel: MapViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     
     val cameras by mapViewModel.cameras.collectAsState()
     val userLocation by mapViewModel.userLocation.collectAsState()
+    val routePickTarget by mapViewModel.routePickTarget.collectAsState()
     val isAuthenticated = authViewModel.isAuthenticated()
     val user by authViewModel.user.collectAsState()
     
     var mapView by remember { mutableStateOf<MapView?>(null) }
+    var currentZoom by remember { mutableDoubleStateOf(15.0) }
+    val dotDrawable = remember(context) { ContextCompat.getDrawable(context, R.drawable.ic_camera_dot) }
+    val pinDrawable = remember(context) { ContextCompat.getDrawable(context, R.drawable.ic_camera_pin) }
     var isAddingCamera by remember { mutableStateOf(false) }
     var snackbarHostState = remember { SnackbarHostState() }
     var showPublicOnly by remember { mutableStateOf(true) }
+    
+    val selectedRoute by mapViewModel.selectedRoute.collectAsState()
+    var lastDrawnRouteId by remember { mutableStateOf<String?>(null) }
+    var lastRenderedCameras by remember { mutableStateOf<List<com.osmcamera.mapper.data.model.Camera>?>(null) }
+    var lastRenderedZoomOutState by remember { mutableStateOf<Boolean?>(null) }
     
     // Filtered cameras - only public ones
     val filteredCameras = if (showPublicOnly) {
@@ -245,6 +259,30 @@ fun MapScreen(
                                 )
                             }
                             
+                            // Capture map taps for route point selection
+                            overlays.add(0, MapEventsOverlay(object : MapEventsReceiver {
+                                override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                                    val target = mapViewModel.routePickTarget.value ?: return false
+                                    if (p != null) {
+                                        mapViewModel.setRoutePoint(target, p)
+                                        mapViewModel.setRoutePickTarget(null)
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                if (target == com.osmcamera.mapper.presentation.viewmodel.RoutePickTarget.START) {
+                                                    "📍 Départ défini"
+                                                } else {
+                                                    "📍 Destination définie"
+                                                }
+                                            )
+                                        }
+                                        onNavigateToRouting()
+                                    }
+                                    return true
+                                }
+
+                                override fun longPressHelper(p: GeoPoint?): Boolean = false
+                            }))
+
                             // Add scroll listener to load cameras when map moves
                             addMapListener(object : org.osmdroid.events.MapListener {
                                 private var lastUpdate = 0L
@@ -270,9 +308,12 @@ fun MapScreen(
                                 }
                                 
                                 override fun onZoom(event: org.osmdroid.events.ZoomEvent?): Boolean {
-                                    // Also reload on zoom
+                                    val newZoom = event?.zoomLevel ?: zoomLevelDouble
+                                    if (kotlin.math.abs(newZoom - currentZoom) >= 0.5 || (newZoom < 16.0) != (currentZoom < 16.0)) {
+                                        currentZoom = newZoom
+                                    }
                                     val now = System.currentTimeMillis()
-                                    if (now - lastUpdate > 2000) {
+                                    if (now - lastUpdate > 2500) {
                                         lastUpdate = now
                                         post {
                                             val bounds = boundingBox
@@ -292,83 +333,136 @@ fun MapScreen(
                         }
                     },
                     update = { map ->
-                        // Update route if selected (non-blocking)
-                        val route = mapViewModel.selectedRoute.value
-                        if (route != null && route.points.isNotEmpty()) {
-                            map.post {
-                                try {
-                                    // Remove old route
-                                    map.overlays.removeAll { it is org.osmdroid.views.overlay.Polyline && it.id == "selected_route" }
-                                    
-                                    // Draw new route
-                                    val routeLine = org.osmdroid.views.overlay.Polyline(map).apply {
-                                        id = "selected_route"
-                                        setPoints(route.points)
-                                        outlinePaint.color = android.graphics.Color.parseColor("#2196F3")
-                                        outlinePaint.strokeWidth = 12f
-                                        outlinePaint.strokeCap = android.graphics.Paint.Cap.ROUND
-                                        title = "Itinéraire (${route.cameraCount} caméras)"
-                                    }
-                                    map.overlays.add(0, routeLine) // Add below markers
-                                    
-                                    // Center map on route (async)
-                                    map.postDelayed({
+                        // 1. Update route ONLY when the selected route actually changes
+                        if (selectedRoute?.id != lastDrawnRouteId) {
+                            lastDrawnRouteId = selectedRoute?.id
+                            val route = selectedRoute
+                            if (route != null && route.points.isNotEmpty()) {
+                                map.post {
+                                    try {
+                                        map.overlays.removeAll { it is org.osmdroid.views.overlay.Polyline && it.id == "selected_route" }
+                                        
+                                        val routeLine = org.osmdroid.views.overlay.Polyline(map).apply {
+                                            id = "selected_route"
+                                            setPoints(route.points)
+                                            outlinePaint.color = android.graphics.Color.parseColor("#2196F3")
+                                            outlinePaint.strokeWidth = 12f
+                                            outlinePaint.strokeCap = android.graphics.Paint.Cap.ROUND
+                                            title = "Itinéraire (${route.cameraCount} caméras)"
+                                        }
+                                        map.overlays.add(0, routeLine) // Add below markers
+                                        
+                                        // Zoom to route bounds ONLY ONCE when newly set
                                         val bounds = org.osmdroid.util.BoundingBox.fromGeoPoints(route.points)
-                                        map.zoomToBoundingBox(bounds, true, 100)
-                                    }, 100)
-                                    
+                                        map.zoomToBoundingBox(bounds, true, 120)
+                                        map.invalidate()
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("BalanceTaCam", "Error displaying route", e)
+                                    }
+                                }
+                            } else {
+                                map.post {
+                                    map.overlays.removeAll { it is org.osmdroid.views.overlay.Polyline && it.id == "selected_route" }
                                     map.invalidate()
-                                } catch (e: Exception) {
-                                    android.util.Log.e("BalanceTaCam", "Error displaying route", e)
                                 }
                             }
                         }
                         
-                        // Update camera markers
-                        map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
-                        
-                        filteredCameras.forEach { camera ->
-                            val marker = Marker(map).apply {
-                                position = GeoPoint(camera.latitude, camera.longitude)
-                                id = "camera_${camera.id}"
-                                
-                                // Complete info display
-                                val type = camera.cameraType ?: "non spécifié"
-                                val mount = camera.cameraMount ?: "non spécifié"
-                                title = "📷 Caméra de Surveillance"
-                                
-                                val infos = mutableListOf<String>()
-                                infos.add("━━━━━━━━━━━━━━━━")
-                                infos.add("Type: $type")
-                                infos.add("Support: $mount")
-                                camera.cameraDirection?.let { infos.add("Direction: ${it}° (0=Nord)") }
-                                camera.surveillance?.let { infos.add("Surveillance: $it") }
-                                camera.operator?.let { infos.add("Opérateur: $it") }
-                                camera.operatorType?.let { infos.add("Type opérateur: $it") }
-                                camera.surveillanceZone?.let { infos.add("Zone: $it") }
-                                camera.height?.let { infos.add("Hauteur: $it") }
-                                camera.level?.let { infos.add("Niveau: $it") }
-                                camera.description?.let { infos.add("Description: $it") }
-                                infos.add("━━━━━━━━━━━━━━━━")
-                                infos.add("ID OSM: ${camera.id}")
-                                snippet = infos.joinToString("\n")
-                                
-                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                
-                                // Force info window to show on click
-                                setOnMarkerClickListener { clickedMarker, _ ->
-                                    clickedMarker.showInfoWindow()
-                                    map.controller.animateTo(clickedMarker.position)
-                                    true
+                        // 2. Update camera markers ONLY when cameras or icon state actually changes
+                        val isZoomedOut = currentZoom < 16.0
+                        if (filteredCameras !== lastRenderedCameras || isZoomedOut != lastRenderedZoomOutState) {
+                            lastRenderedCameras = filteredCameras
+                            lastRenderedZoomOutState = isZoomedOut
+                            
+                            map.overlays.removeAll { it is Marker && it.id?.startsWith("camera_") == true }
+                            
+                            val markerIcon = if (isZoomedOut) dotDrawable else pinDrawable
+                            
+                            filteredCameras.forEach { camera ->
+                                val marker = Marker(map).apply {
+                                    position = GeoPoint(camera.latitude, camera.longitude)
+                                    id = "camera_${camera.id}"
+                                    
+                                    markerIcon?.let { icon = it }
+                                    
+                                    if (isZoomedOut) {
+                                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                                    } else {
+                                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                    }
+                                    
+                                    val type = camera.cameraType ?: "non spécifié"
+                                    val mount = camera.cameraMount ?: "non spécifié"
+                                    title = "📷 Caméra de Surveillance"
+                                    
+                                    val infos = mutableListOf<String>()
+                                    infos.add("━━━━━━━━━━━━━━━━")
+                                    infos.add("Type: $type")
+                                    infos.add("Support: $mount")
+                                    camera.cameraDirection?.let { infos.add("Direction: ${it}° (0=Nord)") }
+                                    camera.surveillance?.let { infos.add("Surveillance: $it") }
+                                    camera.operator?.let { infos.add("Opérateur: $it") }
+                                    camera.operatorType?.let { infos.add("Type opérateur: $it") }
+                                    camera.surveillanceZone?.let { infos.add("Zone: $it") }
+                                    camera.height?.let { infos.add("Hauteur: $it") }
+                                    camera.level?.let { infos.add("Niveau: $it") }
+                                    camera.description?.let { infos.add("Description: $it") }
+                                    infos.add("━━━━━━━━━━━━━━━━")
+                                    infos.add("ID OSM: ${camera.id}")
+                                    snippet = infos.joinToString("\n")
+                                    
+                                    setOnMarkerClickListener { clickedMarker, _ ->
+                                        clickedMarker.showInfoWindow()
+                                        map.controller.animateTo(clickedMarker.position)
+                                        true
+                                    }
                                 }
+                                map.overlays.add(marker)
                             }
-                            map.overlays.add(marker)
+                            
+                            map.invalidate()
                         }
-                        
-                        map.invalidate()
                     },
                     modifier = Modifier.fillMaxSize()
                 )
+                
+                // Show route point selection banner
+                if (routePickTarget != null) {
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 64.dp)
+                    ) {
+                        Text(
+                            text = if (routePickTarget == com.osmcamera.mapper.presentation.viewmodel.RoutePickTarget.START) {
+                                "📍 Touchez la carte pour placer le DÉPART"
+                            } else {
+                                "📍 Touchez la carte pour placer l'ARRIVÉE"
+                            },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    
+                    // Show crosshair for precise placement
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_crosshair),
+                        contentDescription = "Crosshair",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(64.dp),
+                        tint = Color.Unspecified
+                    )
+                    
+                    Button(
+                        onClick = { mapViewModel.setRoutePickTarget(null) },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 48.dp)
+                    ) {
+                        Text("Annuler la sélection")
+                    }
+                }
                 
                 // Show camera count
                 if (filteredCameras.isNotEmpty()) {
