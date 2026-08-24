@@ -1,0 +1,17 @@
+graphhopper:
+  datareader.file: ile-de-france-latest.osm.pbf
+  graph.location: graph-cache
+  graph.flag_encoders: foot
+
+  profiles:
+    - name: foot
+      vehicle: foot
+      weighting: fastest
+
+server:
+  application_connectors:
+    - type: http
+      port: 8989
+  admin_connectors:
+    - type: http
+      port: 8990

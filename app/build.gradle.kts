@@ -117,6 +117,9 @@ dependencies {
     // OSMDroid - Map library
     implementation("org.osmdroid:osmdroid-android:6.1.18")
 
+    // GraphHopper - routage offline embarqué (PoC)
+    implementation("com.graphhopper:graphhopper-core:5.3")
+
     // Location Services
     implementation("com.google.android.gms:play-services-location:21.1.0")
 

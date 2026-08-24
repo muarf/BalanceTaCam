@@ -38,7 +38,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <!-- OAuth callback -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -49,6 +48,10 @@
                     android:host="oauth" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".offline.PocOfflineActivity"
+            android:exported="true" />
     </application>
 
 </manifest>
