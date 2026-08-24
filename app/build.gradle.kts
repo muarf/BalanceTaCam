@@ -51,11 +51,9 @@ android {
             if (!System.getenv("KEYSTORE_FILE").isNullOrEmpty()) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            buildConfigField("String", "REGION_SERVER_URL", "\"http://152.67.130.241:8991\"")
         }
         debug {
             isMinifyEnabled = false
-            buildConfigField("String", "REGION_SERVER_URL", "\"http://172.17.0.1:8991\"")
         }
     }
 

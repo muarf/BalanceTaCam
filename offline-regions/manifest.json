@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "regions": [
+    {
+      "id": "idf",
+      "name": "Île-de-France",
+      "country": "FR",
+      "graphUrl": "https://github.com/muarf/BalanceTaCam/releases/download/region-idf-2026.34/idf-2026.34.ghz",
+      "graphBytes": 56994522,
+      "bbox": [48.12, 2.22, 49.0, 2.98],
+      "builtAt": "2026-08-24"
+    }
+  ]
+}

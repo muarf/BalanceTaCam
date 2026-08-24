@@ -1,0 +1,125 @@
+name: Rebuild offline regions
+
+# Reconstruit les graphes de routage hors-ligne chaque mardi depuis les
+# données OSM Geofabrik de la semaine, et publie sur GitHub Releases.
+# Le manifest offline-regions/manifest.json est mis à jour automatiquement.
+
+on:
+  schedule:
+    - cron: "0 4 * * 2" # tous les mardis 04:00 UTC
+  workflow_dispatch:
+    inputs:
+      regions:
+        description: "Régions à reconstruire (ids séparés par virgules, vide = toutes)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        region:
+          - id: idf
+            name: Île-de-France
+            country: FR
+            pbf: europe/france/ile-de-france-latest.osm.pbf
+            bbox: [48.12, 2.22, 49.00, 2.98]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip if not requested
+        id: gate
+        run: |
+          WANT="${{ inputs.regions }}"
+          ID="${{ matrix.region.id }}"
+          if [ -z "$WANT" ] || echo "$WANT" | grep -q "$ID"; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up JDK 17
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Download OSM extract and GraphHopper
+        if: steps.gate.outputs.run == 'true'
+        working-directory: ${{ runner.temp }}
+        run: |
+          wget -q https://download.geofabrik.de/${{ matrix.region.pbf }}
+          wget -q https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/5.3/graphhopper-web-5.3.jar
+
+      - name: Build routing graph
+        if: steps.gate.outputs.run == 'true'
+        working-directory: ${{ runner.temp }}
+        run: |
+          cat > config.yml <<'YAML'
+          graph:
+            location: graph-cache
+            dataaccess: MMAP
+          importers.ways: foot
+          profiles:
+            - name: foot
+              vehicle: foot
+              weighting: fastest
+          YAML
+          java -Xmx5g -jar graphhopper-web-5.3.jar import config.yml
+          WEEK=$(date +%Y.%V)
+          zip -q -r region-${{ matrix.region.id }}-${WEEK}.ghz graph-cache
+          echo "WEEK=$WEEK" >> $GITHUB_ENV
+          ls -lh region-*.ghz
+
+      - name: Publish release
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create region-${{ matrix.region.id }}-${{ env.WEEK }} \
+            "${{ runner.temp }}/region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz" \
+            --title "Région hors-ligne : ${{ matrix.region.name }} (${{ env.WEEK }})" \
+            --notes "Graphe piéton GraphHopper 5.3 — source OpenStreetMap (Geofabrik) ${{ env.WEEK }}" \
+            --latest=false
+          echo "TAG=region-${{ matrix.region.id }}-${{ env.WEEK }}" >> $GITHUB_ENV
+
+      - name: Update manifest
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SIZE=$(stat -c%s "${{ runner.temp }}/region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz")
+          python3 << EOF
+          import json
+          m = json.load(open("offline-regions/manifest.json"))
+          entry = {
+              "id": "${{ matrix.region.id }}",
+              "name": "${{ matrix.region.name }}",
+              "country": "${{ matrix.region.country }}",
+              "graphUrl": "https://github.com/muarf/BalanceTaCam/releases/download/${{ env.TAG }}/region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz",
+              "graphBytes": $SIZE,
+              "bbox": ${{ toJSON(matrix.region.bbox) }},
+              "builtAt": "$(date +%Y-%m-%d)",
+          }
+          regions = [r for r in m["regions"] if r["id"] != entry["id"]]
+          regions.append(entry)
+          m["regions"] = sorted(regions, key=lambda r: r["id"])
+          m["version"] = m.get("version", 1) + 1
+          json.dump(m, open("offline-regions/manifest.json", "w"), indent=2, ensure_ascii=False)
+          print(json.dumps(m, indent=2, ensure_ascii=False))
+          EOF
+
+      - name: Commit manifest
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add offline-regions/manifest.json
+          git commit -m "chore(regions): update manifest for ${{ matrix.region.id }} ${{ env.WEEK }}" || echo "rien à mettre à jour"
+          git push

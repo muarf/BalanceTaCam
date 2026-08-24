@@ -27,8 +27,15 @@ class OfflineRegionManager @Inject constructor(
 
     companion object {
         private const val TAG = "OfflineRegions"
-        private val BASE_URL = com.osmcamera.mapper.BuildConfig.REGION_SERVER_URL
-        private val MANIFEST_URL = "$BASE_URL/manifest.json"
+
+        /**
+         * Regions are hosted on GitHub Releases (HTTPS, no personal server):
+         * - manifest: versioned in-repo at offline-regions/manifest.json
+         * - graphs: attached to region-<id>-<week> releases
+         * Rebuilt weekly by .github/workflows/offline-regions.yml
+         */
+        const val MANIFEST_URL =
+            "https://raw.githubusercontent.com/muarf/BalanceTaCam/main/offline-regions/manifest.json"
     }
 
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
@@ -49,15 +56,11 @@ class OfflineRegionManager @Inject constructor(
                 val arr = root.getJSONArray("regions")
                 for (i in 0 until arr.length()) {
                     val r = arr.getJSONObject(i)
-                    // graphUrl may be relative (resolved against the manifest location)
-                    val graphUrl = r.getString("graphUrl").let {
-                        if (it.startsWith("http")) it else "$BASE_URL/$it"
-                    }
                     regions.add(RegionInfo(
                         id = r.getString("id"),
                         name = r.getString("name"),
                         country = r.getString("country"),
-                        graphUrl = graphUrl,
+                        graphUrl = r.getString("graphUrl"),
                         graphBytes = r.getLong("graphBytes"),
                         bbox = r.getJSONArray("bbox").let { b ->
                             (0 until b.length()).map { b.getDouble(it) }
