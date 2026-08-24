@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of OSM Camera Mapper
 
+## [3.4.0] - 2026-08-24
+
+### Added
+- Évitement dynamique des caméras publiques avec marge de distance configurable (itinéraires)
+- Nouvelles icônes caméra (pin + dot) pour la carte
+
+### Fixed
+- Crash lors du rendu de la liste des caméras (remplacement LazyColumn imbriquée par Column/forEach)
+
+### Changed
+- Refactor du moteur de routage (RoutingRepository, CameraClusterUtils) et mise à jour du Gradle wrapper
+
 ## [1.0.0] - TBD
 
 ### Added
