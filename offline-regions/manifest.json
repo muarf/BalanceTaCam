@@ -15,5 +15,19 @@
       ],
       "builtAt": "2026-08-24"
     }
+  ],
+  "basemaps": [
+    {
+      "id": "idf-map",
+      "name": "Île-de-France (carte)",
+      "url": "https://download.mapsforge.org/maps/v5/europe/france/ile-de-france.map",
+      "bytes": 208854411,
+      "bbox": [
+        48.12,
+        2.22,
+        49.0,
+        2.98
+      ]
+    }
   ]
 }
