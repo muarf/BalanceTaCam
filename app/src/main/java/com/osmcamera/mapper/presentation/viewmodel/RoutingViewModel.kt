@@ -37,13 +37,30 @@ class RoutingViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
+    private companion object {
+        val COORD_REGEX = Regex("^\\s*(-?\\d+(?:\\.\\d+)?)\\s*[,; ]\\s*(-?\\d+(?:\\.\\d+)?)\\s*$")
+    }
+
     /**
-     * Search address using Nominatim, result delivered via callback
+     * Search address using Nominatim, result delivered via callback.
+     * Raw "lat,lon" / "lat lon" input is handled locally without any network call.
      */
     fun searchAddress(query: String, onResult: (GeoPoint?) -> Unit) {
         if (query.length < 3) {
             onResult(null)
             return
+        }
+
+        // Direct coordinate entry: "48.8674,2.3636", "48.8674 2.3636", "48.8674; 2.3636"
+        val coordMatch = COORD_REGEX.find(query)
+        if (coordMatch != null) {
+            val lat = coordMatch.groupValues[1].toDouble()
+            val lon = coordMatch.groupValues[2].toDouble()
+            if (lat in -90.0..90.0 && lon in -180.0..180.0) {
+                android.util.Log.d("BalanceTaCam", "Coordonnées directes: $lat, $lon")
+                onResult(GeoPoint(lat, lon))
+                return
+            }
         }
 
         // Cancel previous search

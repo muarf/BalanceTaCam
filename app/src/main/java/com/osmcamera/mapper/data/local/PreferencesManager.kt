@@ -42,6 +42,8 @@ class PreferencesManager @Inject constructor(
         val LANGUAGE = stringPreferencesKey("language")
         val THEME = stringPreferencesKey("theme")
         val FIRST_LAUNCH = booleanPreferencesKey("first_launch")
+        val OFFLINE_MODE = booleanPreferencesKey("offline_mode")
+        val TOR_PROXY_ENABLED = booleanPreferencesKey("tor_proxy_enabled")
     }
     
     // OAuth token keys
@@ -82,6 +84,28 @@ class PreferencesManager @Inject constructor(
     suspend fun setFirstLaunchComplete() {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.FIRST_LAUNCH] = false
+        }
+    }
+
+    // Offline routing mode
+    val offlineMode: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.OFFLINE_MODE] ?: false
+    }
+
+    suspend fun setOfflineMode(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.OFFLINE_MODE] = enabled
+        }
+    }
+
+    // Tor (Orbot) proxy for privacy-sensitive network calls
+    val torProxyEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TOR_PROXY_ENABLED] ?: false
+    }
+
+    suspend fun setTorProxyEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TOR_PROXY_ENABLED] = enabled
         }
     }
     

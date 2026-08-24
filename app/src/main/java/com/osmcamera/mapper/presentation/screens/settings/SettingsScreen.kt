@@ -21,6 +21,7 @@ import com.osmcamera.mapper.presentation.viewmodel.AuthViewModel
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToAbout: () -> Unit,
+    onNavigateToOfflineRegions: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val user by authViewModel.user.collectAsState()
@@ -124,6 +125,51 @@ fun SettingsScreen(
                 )
             }
             
+            Divider()
+            
+            // Offline routing section
+            val offlineViewModel: com.osmcamera.mapper.presentation.viewmodel.OfflineSettingsViewModel =
+                androidx.hilt.navigation.compose.hiltViewModel()
+            val offlineMode by offlineViewModel.offlineMode.collectAsState(initial = false)
+            val torProxy by offlineViewModel.torProxyEnabled.collectAsState(initial = false)
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clickable { onNavigateToOfflineRegions() }
+            ) {
+                ListItem(
+                    headlineContent = { Text("Régions hors-ligne") },
+                    supportingContent = { Text("Itinéraires anti-caméras sans Internet") },
+                    leadingContent = {
+                        Icon(Icons.Default.CloudDownload, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(Icons.Default.ChevronRight, contentDescription = null)
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text("Mode hors-ligne") },
+                    supportingContent = {
+                        Text(
+                            if (offlineMode) "Routage 100% local activé"
+                            else "Désactivé — routage via serveurs en ligne"
+                        )
+                    },
+                    trailingContent = {
+                        Switch(checked = offlineMode, onCheckedChange = { offlineViewModel.setOfflineMode(it) })
+                    }
+                )
+                ListItem(
+                    headlineContent = { Text("Proxy Tor (Orbot)") },
+                    supportingContent = { Text("Requêtes réseau via 127.0.0.1:9050") },
+                    trailingContent = {
+                        Switch(checked = torProxy, onCheckedChange = { offlineViewModel.setTorProxy(it) })
+                    }
+                )
+            }
+
             Divider()
             
             // About section

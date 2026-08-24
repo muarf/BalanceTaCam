@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- INTERIM: cleartext autorisé car le serveur de régions est encore en HTTP
+     (NSC ne matche pas les IP litterales). Le telechargement de graphe n'est pas
+     sensible (donnees publiques OSM). TODO phase 2: HTTPS via domaine + Caddy,
+     puis repasser cleartextTrafficPermitted="false". -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

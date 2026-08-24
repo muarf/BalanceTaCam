@@ -25,6 +25,7 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object About : Screen("about")
     object Routing : Screen("routing")
+    object OfflineRegions : Screen("offline_regions")
 }
 
 /**
@@ -92,6 +93,17 @@ fun AppNavigation(
                 },
                 onNavigateToAbout = {
                     navController.navigate(Screen.About.route)
+                },
+                onNavigateToOfflineRegions = {
+                    navController.navigate(Screen.OfflineRegions.route)
+                }
+            )
+        }
+
+        composable(Screen.OfflineRegions.route) {
+            com.osmcamera.mapper.presentation.screens.offline.OfflineRegionsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

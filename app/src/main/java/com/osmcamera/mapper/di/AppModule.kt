@@ -65,6 +65,17 @@ object AppModule {
     
     @Provides
     @Singleton
+    @DownloadClient
+    fun provideDownloadOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
     @OSMRetrofit
     fun provideOSMRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
@@ -147,5 +158,9 @@ annotation class ORSRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class NominatimRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DownloadClient
 
 

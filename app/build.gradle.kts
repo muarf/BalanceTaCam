@@ -51,9 +51,11 @@ android {
             if (!System.getenv("KEYSTORE_FILE").isNullOrEmpty()) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            buildConfigField("String", "REGION_SERVER_URL", "\"http://152.67.130.241:8991\"")
         }
         debug {
             isMinifyEnabled = false
+            buildConfigField("String", "REGION_SERVER_URL", "\"http://172.17.0.1:8991\"")
         }
     }
 
@@ -119,6 +121,9 @@ dependencies {
 
     // GraphHopper - routage offline embarqué (PoC)
     implementation("com.graphhopper:graphhopper-core:5.3")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.hilt:hilt-work:1.1.0")
+    ksp("androidx.hilt:hilt-compiler:1.1.0")
 
     // Location Services
     implementation("com.google.android.gms:play-services-location:21.1.0")

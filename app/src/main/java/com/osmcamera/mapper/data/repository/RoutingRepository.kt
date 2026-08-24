@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
@@ -27,7 +28,10 @@ import kotlin.math.abs
 @Singleton
 class RoutingRepository @Inject constructor(
     private val orsApi: OpenRouteServiceApi,
-    private val cameraRepository: CameraRepository
+    private val cameraRepository: CameraRepository,
+    private val preferencesManager: com.osmcamera.mapper.data.local.PreferencesManager,
+    private val offlineEngine: com.osmcamera.mapper.offline.OfflineRoutingEngine,
+    private val regionManager: com.osmcamera.mapper.offline.OfflineRegionManager
 ) {
     
     companion object {
@@ -45,6 +49,10 @@ class RoutingRepository @Inject constructor(
         transportMode: String = "foot-walking",
         avoidanceRadius: Double = 40.0
     ): Result<RouteComparison> {
+        // Offline mode: embedded GraphHopper, zero network
+        if (preferencesManager.offlineMode.first()) {
+            return calculateOfflineRoutes(start, end, avoidanceRadius)
+        }
         return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "=== Calculating anti-camera routes (radius: ${avoidanceRadius}m) ===")
@@ -135,6 +143,47 @@ class RoutingRepository @Inject constructor(
         }
     }
     
+    /**
+     * Fully offline routing: embedded GraphHopper + local Room cameras
+     */
+    private suspend fun calculateOfflineRoutes(
+        start: GeoPoint,
+        end: GeoPoint,
+        avoidanceRadius: Double
+    ): Result<RouteComparison> = withContext(Dispatchers.IO) {
+        try {
+            val regionId = regionManager.findInstalledRegionFor(start.latitude, start.longitude)
+                ?: regionManager.findInstalledRegionFor(end.latitude, end.longitude)
+            if (regionId == null) {
+                return@withContext Result.failure(Exception(
+                    "Aucune région hors-ligne installée ici. Téléchargez une région dans Réglages."
+                ))
+            }
+            val graphDir = regionManager.graphCacheDir(regionId)
+                ?: return@withContext Result.failure(Exception("Graphe $regionId introuvable"))
+
+            if (!offlineEngine.ensureLoaded(graphDir, regionId)) {
+                return@withContext Result.failure(Exception("Échec du chargement du graphe hors-ligne"))
+            }
+
+            // Cameras from Room only (no Overpass)
+            val padding = 0.04
+            val cameras = cameraRepository.getCamerasInBoundsList(
+                minOf(start.latitude, end.latitude) - padding,
+                minOf(start.longitude, end.longitude) - padding,
+                maxOf(start.latitude, end.latitude) + padding,
+                maxOf(start.longitude, end.longitude) + padding
+            ).filter { it.surveillance == "public" || it.surveillance == null }
+
+            Log.i(TAG, "[OFFLINE] ${cameras.size} caméras locales, région $regionId")
+
+            offlineEngine.calculateAntiCameraRoutes(start, end, cameras)
+        } catch (e: Exception) {
+            Log.e(TAG, "[OFFLINE] Échec", e)
+            Result.failure(e)
+        }
+    }
+
     /**
      * Get cameras in the area between start and end with padding
      */
