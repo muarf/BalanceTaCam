@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
   release:
     types: [created]
 
@@ -90,9 +91,23 @@ jobs:
       run: chmod +x gradlew
 
     - name: Decode keystore
+      env:
+        KEYSTORE_B64: ${{ secrets.KEYSTORE_FILE }}
       run: |
         mkdir -p keystore
-        echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > keystore/balancetacam.keystore
+        CLEAN=$(printf '%s' "$KEYSTORE_B64" | tr -d '\r\n "')
+        if printf '%s' "$CLEAN" | base64 -d -i > keystore/balancetacam.keystore 2>/dev/null; then
+          echo "Decodage base64 OK"
+        else
+          echo "::warning::Le secret KEYSTORE_FILE n'est pas du base64 valide, tentative en tant que binaire brut"
+          printf '%s' "$KEYSTORE_B64" > keystore/balancetacam.keystore
+        fi
+        ls -la keystore/
+        if ! keytool -list -keystore keystore/balancetacam.keystore -storepass "${{ secrets.KEYSTORE_PASSWORD }}" >/dev/null 2>&1; then
+          echo "::error::Keystore invalide. Regenerer le secret avec: base64 -w0 balancetacam.keystore"
+          exit 1
+        fi
+        echo "Keystore valide"
 
     - name: Build release APK
       run: ./gradlew assembleRelease --stacktrace
