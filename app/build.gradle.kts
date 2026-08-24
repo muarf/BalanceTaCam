@@ -10,6 +10,18 @@ android {
     namespace = "com.osmcamera.mapper"
     compileSdk = 34
 
+    signingConfigs {
+        create("release") {
+            val ksPath = System.getenv("KEYSTORE_FILE")
+            if (!ksPath.isNullOrEmpty()) {
+                storeFile = rootProject.file(ksPath)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.osmcamera.mapper"
         minSdk = 24
@@ -34,6 +46,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (!System.getenv("KEYSTORE_FILE").isNullOrEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false
