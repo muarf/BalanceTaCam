@@ -346,10 +346,10 @@ private fun RouteComparisonView(
             modifier = Modifier.padding(bottom = 8.dp)
         )
         
-        LazyColumn(
+        Column(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(comparison.routes) { route ->
+            comparison.routes.forEach { route ->
                 RouteCard(
                     route = route,
                     isBest = route.id == comparison.bestRoute.id,
