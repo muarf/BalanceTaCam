@@ -41,6 +41,7 @@ sealed class DownloadState {
     object Idle : DownloadState()
     data class Downloading(val progress: Float, val downloadedBytes: Long, val totalBytes: Long) : DownloadState()
     data class Extracting(val fileIndex: Int, val fileCount: Int) : DownloadState()
+    data class DownloadingTiles(val tilesDone: Int, val tilesTotal: Int) : DownloadState()
     object Done : DownloadState()
     data class Error(val message: String) : DownloadState()
 }

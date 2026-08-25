@@ -17,8 +17,23 @@ object OfflineBasemapHelper {
 
     data class ForgeMap(val source: MapsForgeTileSource, val provider: MapsForgeTileProvider)
 
-    fun prepare(context: android.content.Context, mapFiles: List<File>, lat: Double, lon: Double): ForgeMap? {
+    /**
+     * Prépare la carte vectorielle si et seulement si on veut l'affichage
+     * hors-ligne : mode hors-ligne actif, ou pas de réseau validé (Auto).
+     * Sinon renvoie null -> la carte en ligne (raster MAPNIK) est utilisée.
+     */
+    fun prepare(
+        context: android.content.Context,
+        mapFiles: List<File>,
+        lat: Double,
+        lon: Double,
+        preferOffline: Boolean
+    ): ForgeMap? {
         if (mapFiles.isEmpty()) return null
+        if (!preferOffline && isOnline(context)) {
+            Log.i(TAG, "Réseau disponible + mode Auto : carte en ligne MAPNIK")
+            return null
+        }
         return try {
             if (!graphicFactoryReady) {
                 MapsForgeTileSource.createInstance(context.applicationContext as Application)
@@ -26,7 +41,7 @@ object OfflineBasemapHelper {
             }
             val source = MapsForgeTileSource.createFromFiles(
                 mapFiles.toTypedArray(),
-                InternalRenderTheme.OSMARENDER,
+                InternalRenderTheme.DEFAULT,
                 "mapsforge"
             )
             val bounds = source.boundsOsmdroid
@@ -42,6 +57,15 @@ object OfflineBasemapHelper {
             Log.e(TAG, "Préparation carte hors-ligne impossible", e)
             null
         }
+    }
+
+    private fun isOnline(context: android.content.Context): Boolean = try {
+        val cm = context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE)
+                as android.net.ConnectivityManager
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork)
+        caps != null && caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    } catch (e: Exception) {
+        false
     }
 
     fun dispose(source: MapsForgeTileSource?) {

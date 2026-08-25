@@ -6,6 +6,7 @@ import com.osmcamera.mapper.offline.BasemapInfo
 import com.osmcamera.mapper.offline.DownloadState
 import com.osmcamera.mapper.offline.OfflineRegionManager
 import com.osmcamera.mapper.offline.RegionInfo
+import com.osmcamera.mapper.offline.WorldCatalog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,18 +20,31 @@ data class RegionUiState(
     val basemaps: List<BasemapInfo> = emptyList(),
     val installed: Set<String> = emptySet(),
     val installedBasemaps: Set<String> = emptySet(),
+    val installedTileCaches: Set<String> = emptySet(),
     val updatable: Set<String> = emptySet(),
     val updatableBasemaps: Set<String> = emptySet(),
     val loading: Boolean = true,
     val error: String? = null,
     val downloadingId: String? = null,
+    val downloadingType: String? = null,  // "graph", "basemap", or "tiles"
     val downloadProgress: Float = 0f,
-    val statusText: String = ""
+    val statusText: String = "",
+    val query: String = "",
+    val searchResults: List<CatalogMatch> = emptyList()
+)
+
+/** Zone du catalogue mondial + sa disponibilité éventuelle dans le manifest */
+data class CatalogMatch(
+    val slug: String,
+    val name: String,
+    val continent: String,
+    val region: RegionInfo?
 )
 
 @HiltViewModel
 class OfflineRegionsViewModel @Inject constructor(
-    private val regionManager: OfflineRegionManager
+    private val regionManager: OfflineRegionManager,
+    private val worldCatalog: WorldCatalog
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RegionUiState())
@@ -49,12 +63,21 @@ class OfflineRegionsViewModel @Inject constructor(
                             statusText = "Extraction ${dl.fileIndex}/${dl.fileCount}…"
                         )
                     }
+                    is DownloadState.DownloadingTiles -> {
+                        val pct = if (dl.tilesTotal > 0) dl.tilesDone.toFloat() / dl.tilesTotal else 0f
+                        _state.value = _state.value.copy(
+                            downloadProgress = pct,
+                            statusText = "Tuiles ${dl.tilesDone}/${dl.tilesTotal}"
+                        )
+                    }
                     DownloadState.Done -> {
                         _state.value = _state.value.copy(
                             downloadingId = null,
+                            downloadingType = null,
                             statusText = "",
                             installed = regionManager.installedRegionIds().toSet(),
                             installedBasemaps = regionManager.installedBasemapIds().toSet(),
+                            installedTileCaches = regionManager.installedTileCacheIds().toSet(),
                             updatable = computeUpdatable(_state.value.regions, regionManager.installedRegionIds().toSet()),
                             updatableBasemaps = computeUpdatableBasemaps(_state.value.basemaps)
                         )
@@ -77,6 +100,7 @@ class OfflineRegionsViewModel @Inject constructor(
                         basemaps = basemaps,
                         installed = installed,
                         installedBasemaps = regionManager.installedBasemapIds().toSet(),
+                        installedTileCaches = regionManager.installedTileCacheIds().toSet(),
                         updatable = computeUpdatable(regions, installed),
                         updatableBasemaps = computeUpdatableBasemaps(basemaps),
                         loading = false
@@ -86,12 +110,29 @@ class OfflineRegionsViewModel @Inject constructor(
                     _state.value = RegionUiState(
                         regions = emptyList(),
                         installed = regionManager.installedRegionIds().toSet(),
+                        installedTileCaches = regionManager.installedTileCacheIds().toSet(),
                         loading = false,
                         error = "Impossible de charger la liste : ${e.message}. Vérifiez la connexion."
                     )
                 }
             )
         }
+    }
+
+    fun onQueryChange(q: String) {
+        val results = if (q.isBlank()) {
+            emptyList()
+        } else {
+            worldCatalog.search(q).map { e ->
+                CatalogMatch(
+                    slug = e.slug,
+                    name = e.name,
+                    continent = e.continent,
+                    region = _state.value.regions.firstOrNull { it.id == e.slug }
+                )
+            }
+        }
+        _state.value = _state.value.copy(query = q, searchResults = results)
     }
 
     private fun computeUpdatable(regions: List<RegionInfo>, installed: Set<String>): Set<String> {
@@ -109,7 +150,7 @@ class OfflineRegionsViewModel @Inject constructor(
 
     fun download(region: RegionInfo, overwrite: Boolean = false) {
         if (_state.value.downloadingId != null) return
-        beginDownload(region.id, region.graphBytes)
+        beginDownload(region.id, region.graphBytes, "graph")
         viewModelScope.launch {
             regionManager.downloadRegion(region, overwrite)
             finishDownload(region.id)
@@ -118,10 +159,32 @@ class OfflineRegionsViewModel @Inject constructor(
 
     fun downloadBasemap(basemap: BasemapInfo, overwrite: Boolean = false) {
         if (_state.value.downloadingId != null) return
-        beginDownload(basemap.id, basemap.bytes)
+        beginDownload(basemap.id, basemap.bytes, "basemap")
         viewModelScope.launch {
             regionManager.downloadBasemap(basemap, overwrite)
             finishDownload(basemap.id)
+        }
+    }
+
+    fun downloadTiles(region: RegionInfo) {
+        if (_state.value.downloadingId != null) return
+        _state.value = _state.value.copy(
+            downloadingId = region.id,
+            downloadingType = "tiles",
+            downloadProgress = 0f,
+            statusText = "Préparation tuiles MAPNIK…"
+        )
+        viewModelScope.launch {
+            regionManager.downloadMapTiles(region.id, region.bbox) { done, total ->
+                regionManager.tileDownloadState.value = DownloadState.DownloadingTiles(done, total)
+            }
+            regionManager.tileDownloadState.value = DownloadState.Done
+            _state.value = _state.value.copy(
+                downloadingId = null,
+                downloadingType = null,
+                statusText = "",
+                installedTileCaches = regionManager.installedTileCacheIds().toSet()
+            )
         }
     }
 
@@ -135,8 +198,13 @@ class OfflineRegionsViewModel @Inject constructor(
         _state.value = _state.value.copy(installedBasemaps = regionManager.installedBasemapIds().toSet())
     }
 
-    private fun beginDownload(id: String, bytes: Long) {
-        _state.value = _state.value.copy(downloadingId = id, downloadProgress = 0f, statusText = formatBytes(0, bytes))
+    fun deleteTileCache(region: RegionInfo) {
+        regionManager.deleteTileCache(region.id)
+        _state.value = _state.value.copy(installedTileCaches = regionManager.installedTileCacheIds().toSet())
+    }
+
+    private fun beginDownload(id: String, bytes: Long, type: String = "graph") {
+        _state.value = _state.value.copy(downloadingId = id, downloadingType = type, downloadProgress = 0f, statusText = formatBytes(0, bytes))
     }
 
     private suspend fun finishDownload(id: String) {
@@ -160,4 +228,7 @@ class OfflineRegionsViewModel @Inject constructor(
         val nf = NumberFormat.getPercentInstance(Locale.FRENCH)
         return "Téléchargement ${nf.format(if (total > 0) done.toDouble() / total else 0.0)}"
     }
+
+    fun tileCacheFile(regionId: String): java.io.File = regionManager.tileCacheFile(regionId)
+    fun installedTileCacheIds(): Set<String> = regionManager.installedTileCacheIds().toSet()
 }

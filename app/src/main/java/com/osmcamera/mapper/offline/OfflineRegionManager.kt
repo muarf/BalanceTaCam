@@ -1,6 +1,8 @@
 package com.osmcamera.mapper.offline
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -12,9 +14,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.cos
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.tan
 
 /**
  * Manages offline routing regions: manifest fetch, graph download/extract, deletion
@@ -40,6 +47,9 @@ class OfflineRegionManager @Inject constructor(
 
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
     val downloadState: StateFlow<DownloadState> = _downloadState
+
+    /** Expose mutable state for tile download progress updates from ViewModel */
+    internal val tileDownloadState: MutableStateFlow<DownloadState> get() = _downloadState
 
     private fun regionsDir(): File = File(context.filesDir, "regions").apply { mkdirs() }
 
@@ -328,5 +338,126 @@ class OfflineRegionManager @Inject constructor(
     fun deleteRegion(regionId: String) {
         File(regionsDir(), regionId).deleteRecursively()
         Log.i(TAG, "Région $regionId supprimée")
+    }
+
+    // ── MAPNIK Tile Cache (raster tiles for offline basemap) ──────────────
+
+    private fun tileCacheDir(): File = File(context.filesDir, "tile-cache").apply { mkdirs() }
+
+    fun tileCacheFile(regionId: String): File = File(tileCacheDir(), "$regionId.mbtiles")
+
+    fun installedTileCacheIds(): List<String> =
+        tileCacheDir().listFiles()
+            ?.filter { it.extension == "mbtiles" && it.length() > 0 }
+            ?.map { it.nameWithoutExtension }
+            ?: emptyList()
+
+    fun tileCacheSize(regionId: String): Long =
+        tileCacheFile(regionId).let { if (it.isFile) it.length() else 0L }
+
+    fun deleteTileCache(regionId: String) {
+        tileCacheFile(regionId).delete()
+        Log.i(TAG, "Cache tuiles $regionId supprimé")
+    }
+
+    /**
+     * Download MAPNIK raster tiles for a region bbox into an MBTiles SQLite file.
+     * Zoom range 8-14 gives a good balance: ~5-50 Mo per region.
+     */
+    suspend fun downloadMapTiles(
+        regionId: String,
+        bbox: List<Double>,
+        zoomMin: Int = 8,
+        zoomMax: Int = 14,
+        onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        val target = tileCacheFile(regionId)
+        if (target.isFile && target.length() > 0) {
+            return@withContext Result.success(Unit)
+        }
+        if (bbox.size < 4) return@withContext Result.failure(IOException("BBOX invalide"))
+
+        val latS = bbox[0]; val lonW = bbox[1]; val latN = bbox[2]; val lonE = bbox[3]
+
+        val tmp = File(context.cacheDir, "$regionId.mbtiles.part")
+        try {
+            val db = SQLiteDatabase.create(null)
+            db.execSQL("CREATE TABLE IF NOT EXISTS metadata (name TEXT, value TEXT)")
+            db.execSQL("INSERT INTO metadata (name, value) VALUES ('name', ?)", arrayOf(regionId))
+            db.execSQL("INSERT INTO metadata (name, value) VALUES ('type', 'overlay')")
+            db.execSQL("INSERT INTO metadata (name, value) VALUES ('version', '1')")
+            db.execSQL("CREATE TABLE IF NOT EXISTS tiles (zoom_level INTEGER, tile_column INTEGER, tile_row INTEGER, tile_data BLOB)")
+
+            var totalTiles = 0
+            for (z in zoomMin..zoomMax) {
+                val n = 2.0.pow(z.toDouble())
+                val xMin = ((lonW + 180) / 360 * n).toInt().coerceIn(0, n.toInt() - 1)
+                val xMax = ((lonE + 180) / 360 * n).toInt().coerceIn(0, n.toInt() - 1)
+                val yMin = ((1 - ln(tan(Math.toRadians(latN)) + 1 / cos(Math.toRadians(latN))) / Math.PI) / 2 * n).toInt().coerceIn(0, n.toInt() - 1)
+                val yMax = ((1 - ln(tan(Math.toRadians(latS)) + 1 / cos(Math.toRadians(latS))) / Math.PI) / 2 * n).toInt().coerceIn(0, n.toInt() - 1)
+                totalTiles += (xMax - xMin + 1) * (yMax - yMin + 1)
+            }
+            if (totalTiles == 0) {
+                db.close()
+                tmp.delete()
+                return@withContext Result.failure(IOException("Aucune tuile à télécharger"))
+            }
+
+            Log.i(TAG, "Téléchargement tuiles MAPNIK $regionId: $totalTiles tuiles (z$zoomMin-z$zoomMax)")
+            var done = 0
+            val insertStmt = db.compileStatement("INSERT INTO tiles VALUES (?, ?, ?, ?)")
+
+            for (z in zoomMin..zoomMax) {
+                val n = 2.0.pow(z.toDouble())
+                val xMin = ((lonW + 180) / 360 * n).toInt().coerceIn(0, n.toInt() - 1)
+                val xMax = ((lonE + 180) / 360 * n).toInt().coerceIn(0, n.toInt() - 1)
+                val yMin = ((1 - ln(tan(Math.toRadians(latN)) + 1 / cos(Math.toRadians(latN))) / Math.PI) / 2 * n).toInt().coerceIn(0, n.toInt() - 1)
+                val yMax = ((1 - ln(tan(Math.toRadians(latS)) + 1 / cos(Math.toRadians(latS))) / Math.PI) / 2 * n).toInt().coerceIn(0, n.toInt() - 1)
+
+                for (x in xMin..xMax) {
+                    for (y in yMin..yMax) {
+                        try {
+                            val url = "https://tile.openstreetmap.org/$z/$x/$y.png"
+                            val request = Request.Builder().url(url)
+                                .header("User-Agent", "BalanceTaCam/4.1 (offline map tiles)")
+                                .build()
+                            val response = okHttpClient.newCall(request).execute()
+                            if (response.isSuccessful) {
+                                val bytes = response.body?.bytes()
+                                if (bytes != null && bytes.isNotEmpty()) {
+                                    // MBTiles uses TMS y-flipping: y_tms = 2^z - 1 - y
+                                    val yTms = (1 shl z) - 1 - y
+                                    insertStmt.bindLong(1, z.toLong())
+                                    insertStmt.bindLong(2, x.toLong())
+                                    insertStmt.bindLong(3, yTms.toLong())
+                                    insertStmt.bindBlob(4, bytes)
+                                    insertStmt.executeInsert()
+                                }
+                            }
+                            response.close()
+                        } catch (_: Exception) {
+                            // skip failed tiles
+                        }
+                        done++
+                        if (done % 20 == 0 || done == totalTiles) {
+                            onProgress(done, totalTiles)
+                        }
+                    }
+                }
+            }
+            insertStmt.close()
+            db.close()
+
+            tmp.copyTo(target, overwrite = true)
+            tmp.delete()
+            Log.i(TAG, "Cache tuiles $regionId: ${target.length() / 1024} Ko")
+            onProgress(totalTiles, totalTiles)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            tmp.delete()
+            target.delete()
+            Log.e(TAG, "Échec téléchargement tuiles $regionId", e)
+            Result.failure(e)
+        }
     }
 }

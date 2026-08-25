@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.osmcamera.mapper.offline.BasemapInfo
 import com.osmcamera.mapper.offline.RegionInfo
+import com.osmcamera.mapper.presentation.viewmodel.CatalogMatch
 import com.osmcamera.mapper.presentation.viewmodel.OfflineRegionsViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -91,21 +92,71 @@ fun OfflineRegionsScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(state.regions, key = { "region_${it.id}" }) { region ->
-                            RegionCard(
-                                region = region,
-                                installed = region.id in state.installed,
-                                updatable = region.id in state.updatable,
-                                downloading = state.downloadingId == region.id,
-                                progress = state.downloadProgress,
-                                statusText = if (state.downloadingId == region.id) state.statusText else "",
-                                onDownload = { viewModel.download(region) },
-                                onUpdate = { viewModel.download(region, overwrite = true) },
-                                onDelete = { viewModel.delete(region) }
+                        item {
+                            OutlinedTextField(
+                                value = state.query,
+                                onValueChange = viewModel::onQueryChange,
+                                label = { Text("Rechercher un pays ou une région dans le monde") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
-                        if (state.basemaps.isNotEmpty()) {
+                        if (state.query.isNotBlank()) {
+                            if (state.searchResults.isEmpty()) {
+                                item {
+                                    Text(
+                                        "Aucun résultat pour « ${state.query} »",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            items(state.searchResults, key = { "search_${it.slug}" }) { match ->
+                                SearchMatchCard(
+                                    match = match,
+                                    installed = match.slug in state.installed,
+                                    tileCacheInstalled = match.slug in state.installedTileCaches,
+                                    updatable = match.slug in state.updatable,
+                                    downloading = state.downloadingId == match.slug,
+                                    progress = state.downloadProgress,
+                                    statusText = if (state.downloadingId == match.slug) state.statusText else "",
+                                    onDownload = { match.region?.let { viewModel.download(it) } },
+                                    onDownloadTiles = { match.region?.let { viewModel.downloadTiles(it) } },
+                                    onUpdate = { match.region?.let { viewModel.download(it, overwrite = true) } },
+                                    onDelete = {
+                                        match.region?.let { region ->
+                                            viewModel.delete(region)
+                                            viewModel.onQueryChange(state.query)
+                                        }
+                                    },
+                                    onDeleteTiles = {
+                                        match.region?.let { region ->
+                                            viewModel.deleteTileCache(region)
+                                            viewModel.onQueryChange(state.query)
+                                        }
+                                    }
+                                )
+                            }
+                        } else {
+                            items(state.regions, key = { "region_${it.id}" }) { region ->
+                                RegionCard(
+                                    region = region,
+                                    installed = region.id in state.installed,
+                                    tileCacheInstalled = region.id in state.installedTileCaches,
+                                    updatable = region.id in state.updatable,
+                                    downloading = state.downloadingId == region.id,
+                                    progress = state.downloadProgress,
+                                    statusText = if (state.downloadingId == region.id) state.statusText else "",
+                                    onDownload = { viewModel.download(region) },
+                                    onDownloadTiles = { viewModel.downloadTiles(region) },
+                                    onUpdate = { viewModel.download(region, overwrite = true) },
+                                    onDelete = { viewModel.delete(region) },
+                                    onDeleteTiles = { viewModel.deleteTileCache(region) }
+                                )
+                            }
+
+                            if (state.basemaps.isNotEmpty()) {
                             item {
                                 Text(
                                     "Cartes hors-ligne (affichage)",
@@ -123,12 +174,13 @@ fun OfflineRegionsScreen(
                                     statusText = if (state.downloadingId == basemap.id) state.statusText else "",
                                     onDownload = { viewModel.downloadBasemap(basemap) },
                                     onUpdate = { viewModel.downloadBasemap(basemap, overwrite = true) },
-                                    onDelete = { viewModel.deleteBasemap(basemap) }
+                                     onDelete = { viewModel.deleteBasemap(basemap) }
                                 )
-                            }
-                        }
-                    }
                 }
+            }
+        }
+    }
+}
             }
         }
     }
@@ -138,13 +190,16 @@ fun OfflineRegionsScreen(
 private fun RegionCard(
     region: RegionInfo,
     installed: Boolean,
+    tileCacheInstalled: Boolean = false,
     updatable: Boolean,
     downloading: Boolean,
     progress: Float,
     statusText: String,
     onDownload: () -> Unit,
+    onDownloadTiles: () -> Unit = {},
     onUpdate: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onDeleteTiles: () -> Unit = {}
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
@@ -233,6 +288,31 @@ private fun RegionCard(
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelMedium
                     )
+                }
+            }
+
+            if (!downloading && installed) {
+                Spacer(Modifier.height(4.dp))
+                if (tileCacheInstalled) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "🗺️ Carte OSM installée",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(onClick = onDeleteTiles, enabled = !downloading) {
+                            Text("Supprimer carte", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = onDownloadTiles,
+                        enabled = !downloading,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Télécharger la carte (OSM)")
+                    }
                 }
             }
         }
@@ -339,4 +419,66 @@ private fun BasemapCard(
             }
         }
     }
+}
+
+@Composable
+private fun SearchMatchCard(
+    match: CatalogMatch,
+    installed: Boolean,
+    tileCacheInstalled: Boolean = false,
+    updatable: Boolean,
+    downloading: Boolean,
+    progress: Float,
+    statusText: String,
+    onDownload: () -> Unit,
+    onDownloadTiles: () -> Unit = {},
+    onUpdate: () -> Unit,
+    onDelete: () -> Unit,
+    onDeleteTiles: () -> Unit = {}
+) {
+    val region = match.region
+    if (region != null) {
+        RegionCard(
+            region = region,
+            installed = installed,
+            tileCacheInstalled = tileCacheInstalled,
+            updatable = updatable,
+            downloading = downloading,
+            progress = progress,
+            statusText = statusText,
+            onDownload = onDownload,
+            onDownloadTiles = onDownloadTiles,
+            onUpdate = onUpdate,
+            onDelete = onDelete,
+            onDeleteTiles = onDeleteTiles
+        )
+    } else {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text(match.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    continentLabel(match.continent),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Pas encore construite — disponible après la prochaine construction mensuelle",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+private fun continentLabel(code: String): String = when (code) {
+    "AF" -> "Afrique"
+    "AS" -> "Asie"
+    "CA" -> "Amérique centrale"
+    "EU" -> "Europe"
+    "NA" -> "Amérique du Nord"
+    "SA" -> "Amérique du Sud"
+    "OC" -> "Océanie"
+    else -> ""
 }

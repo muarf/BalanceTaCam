@@ -223,21 +223,46 @@ fun MapScreen(
                 AndroidView(
                     factory = { context ->
                         val startPoint = userLocation ?: GeoPoint(48.8566, 2.3522) // Paris default
+                        val preferOffline = mapViewModel.offlineMode.value
+
+                        // 1. Try Mapsforge vector basemap
                         val forge = OfflineBasemapHelper.prepare(
                             context, mapViewModel.installedBasemapFiles(),
-                            startPoint.latitude, startPoint.longitude
+                            startPoint.latitude, startPoint.longitude,
+                            preferOffline
                         )
+
+                        // 2. Try MBTiles raster tiles (exact OSM look)
+                        val tileCaches = mapViewModel.installedTileCacheIds()
+                        val mbTilesFile = if (forge == null && tileCaches.isNotEmpty()) {
+                            tileCaches.firstOrNull()?.let { mapViewModel.tileCacheFile(it) }
+                        } else null
+
                         val mv = if (forge != null) {
                             forgeSource.value = forge.source
                             MapView(context, forge.provider).apply {
                                 setUseDataConnection(false)
                                 setTileSource(forge.source)
                             }
+                        } else if (mbTilesFile != null && mbTilesFile.isFile && mbTilesFile.length() > 0) {
+                            try {
+                                val tileProvider = org.osmdroid.tileprovider.modules.OfflineTileProvider(
+                                    org.osmdroid.tileprovider.util.SimpleRegisterReceiver(context),
+                                    arrayOf(mbTilesFile)
+                                )
+                                MapView(context).apply {
+                                    setTileProvider(tileProvider)
+                                    setUseDataConnection(false)
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("MapScreen", "MBTiles charge impossible", e)
+                                MapView(context)
+                            }
                         } else {
                             MapView(context)
                         }
                         mv.apply {
-                            if (forge == null) {
+                            if (forge == null && mbTilesFile == null) {
                                 setTileSource(TileSourceFactory.MAPNIK)
                                 setUseDataConnection(true)
                             }

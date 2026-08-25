@@ -9,8 +9,10 @@ import com.osmcamera.mapper.data.repository.CameraRepository
 import com.osmcamera.mapper.offline.OfflineRegionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
@@ -22,10 +24,24 @@ import javax.inject.Inject
 class MapViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
     private val locationService: LocationService,
-    private val regionManager: OfflineRegionManager
+    private val regionManager: OfflineRegionManager,
+    preferences: com.osmcamera.mapper.data.local.PreferencesManager
 ) : ViewModel() {
 
     fun installedBasemapFiles(): List<java.io.File> = regionManager.installedBasemapFiles()
+
+    fun tileCacheFile(regionId: String): java.io.File = regionManager.tileCacheFile(regionId)
+
+    fun installedTileCacheIds(): List<String> = regionManager.installedTileCacheIds()
+
+    fun findTileCacheFor(lat: Double, lon: Double): String? {
+        return regionManager.installedTileCacheIds().firstOrNull { id ->
+            regionManager.tileCacheFile(id).let { it.isFile && it.length() > 0 }
+        }
+    }
+
+    val offlineMode: StateFlow<Boolean> = preferences.offlineMode
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Eagerly, false)
     
     private val _uiState = MutableStateFlow<MapUiState>(MapUiState.Loading)
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
