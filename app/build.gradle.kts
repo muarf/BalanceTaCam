@@ -28,8 +28,8 @@ android {
         applicationId = "com.osmcamera.mapper"
         minSdk = 24
         targetSdk = 34
-        versionCode = 34
-        versionName = "3.4.0"
+        versionCode = 40
+        versionName = "4.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
