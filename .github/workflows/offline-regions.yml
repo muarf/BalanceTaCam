@@ -1,66 +1,84 @@
 name: Rebuild offline regions
 
-# Reconstruit les graphes de routage hors-ligne chaque mardi depuis les
-# données OSM Geofabrik de la semaine, et publie sur GitHub Releases.
-# Le manifest offline-regions/manifest.json est mis à jour automatiquement.
+# Reconstruit TOUS les graphes de routage hors-ligne du monde chaque mois
+# (premier mardi 04:00 UTC) depuis les donnees OSM Geofabrik, et publie sur
+# GitHub Releases. Le manifest offline-regions/manifest.json est regenere
+# une seule fois en fin de course (job finalize), avec les cartes Mapsforge
+# verifiees par requete HEAD chez download.mapsforge.org.
 
 on:
   schedule:
-    - cron: "0 4 * * 2" # tous les mardis 04:00 UTC
+    - cron: "0 4 1-7 * 2" # premier mardi du mois, 04:00 UTC
   workflow_dispatch:
     inputs:
       regions:
-        description: "Régions à reconstruire (ids séparés par virgules, vide = toutes)"
+        description: "Ids a reconstruire (separees par virgules, vide = toutes)"
         required: false
         default: ""
 
 permissions:
   contents: write
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        region:
-          - id: idf
-            name: Île-de-France
-            country: FR
-            pbf: europe/france/ile-de-france-latest.osm.pbf
-            bbox: [48.12, 2.22, 49.00, 2.98]
+env:
+  GH_VERSION: "5.3"
+  TOTAL_CHUNKS: "24"
 
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      chunks: ${{ steps.gen.outputs.chunks }}
+      chunk_count: ${{ steps.gen.outputs.chunk_count }}
+      month: ${{ steps.gen.outputs.month }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Skip if not requested
-        id: gate
+      - name: Genere la matrice de chunks
+        id: gen
         run: |
-          WANT="${{ inputs.regions }}"
-          ID="${{ matrix.region.id }}"
-          if [ -z "$WANT" ] || echo "$WANT" | grep -q "$ID"; then
-            echo "run=true" >> $GITHUB_OUTPUT
-          else
-            echo "run=false" >> $GITHUB_OUTPUT
-          fi
+          MONTH=$(date +%Y.%m)
+          N=$(( $(python3 -c "import yaml;print(len(yaml.safe_load(open('offline-regions/regions.yml'))['regions']))") ))
+          CHUNKS=$(( (N + 17) / 18 ))
+          [ "$CHUNKS" -lt 1 ] && CHUNKS=1
+          SEQ=$(seq -s, 0 $((CHUNKS - 1)))
+          {
+            echo "chunks=[$SEQ]"
+            echo "chunk_count=$CHUNKS"
+            echo "month=$MONTH"
+          } >> $GITHUB_OUTPUT
+          echo "$N regions -> $CHUNKS chunks (mois $MONTH)"
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        chunk: ${{ fromJSON(needs.prepare.outputs.chunks) }}
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        if: steps.gate.outputs.run == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Download OSM extract and GraphHopper
-        if: steps.gate.outputs.run == 'true'
-        working-directory: ${{ runner.temp }}
-        run: |
-          wget -q "https://download.geofabrik.de/${{ matrix.region.pbf }}" -O region.osm.pbf
-          wget -q https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/5.3/graphhopper-web-5.3.jar
+      - name: Install osmium (bbox)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
 
-      - name: Build routing graph
-        if: steps.gate.outputs.run == 'true'
+      - name: Build des regions du chunk ${{ matrix.chunk }}
         working-directory: ${{ runner.temp }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WANT: ${{ inputs.regions }}
+          MONTH: ${{ needs.prepare.outputs.month }}
+          CHUNK: ${{ matrix.chunk }}
+          TOTAL_CHUNKS: ${{ needs.prepare.outputs.chunk_count }}
         run: |
+          set -euo pipefail
           cat > config.yml <<'YAML'
           graphhopper:
             datareader.file: region.osm.pbf
@@ -71,59 +89,190 @@ jobs:
                 vehicle: foot
                 weighting: fastest
           YAML
-          cat config.yml
-          java -Xmx5g -jar graphhopper-web-5.3.jar import config.yml
-          test -f graph-cache/edges || { echo "graphe non généré"; exit 1; }
-          WEEK=$(date +%Y.%V)
-          zip -q -r region-${{ matrix.region.id }}-${WEEK}.ghz graph-cache
-          echo "WEEK=$WEEK" >> $GITHUB_ENV
-          ls -lh region-*.ghz
 
-      - name: Publish release
-        if: steps.gate.outputs.run == 'true'
+          REPO="$GITHUB_REPOSITORY"
+          FRAG="$RUNNER_TEMP/frag-${CHUNK}.jsonl"
+          : > "$FRAG"
+
+          # Extraction de la part du chunk depuis regions.yml (deterministe)
+          SLICE=$(python3 - <<PYEOF
+          import yaml, json, os
+          regions = yaml.safe_load(open("$GITHUB_WORKSPACE/offline-regions/regions.yml"))["regions"]
+          mine = regions[int(os.environ["CHUNK"])::int(os.environ["TOTAL_CHUNKS"])]
+          print(json.dumps(mine))
+          PYEOF
+          )
+
+          echo "$SLICE" | jq -c '.[]' | while read -r R; do
+            ID=$(jq -r .id <<<"$R")
+            NAME=$(jq -r .name <<<"$R")
+            COUNTRY=$(jq -r .country <<<"$R")
+            GEOPATH=$(jq -r .geopath <<<"$R")
+            if [ -n "$WANT" ] && [[ ",$WANT," != *",$ID,"* ]]; then
+              echo "== skip $ID (non demandee)"
+              continue
+            fi
+            echo "== $ID ($GEOPATH)"
+            TAG="region-$ID-$MONTH"
+            ASSET="region-$ID-$MONTH.ghz"
+            URL="https://github.com/$REPO/releases/download/$TAG/$ASSET"
+
+            # Deja publie ce mois-ci ?
+            if gh release view "$TAG" -R "$REPO" --json assets -q '.assets[].name' 2>/dev/null | grep -q "^$ASSET$"; then
+              echo "== $ID deja publie ce mois"
+              SIZE=$(gh release view "$TAG" -R "$REPO" --json assets -q ".assets[] | select(.name==\"$ASSET\") | .size")
+              jq -nc --arg id "$ID" --arg name "$NAME" --arg country "$COUNTRY" \
+                 --arg url "$URL" --argjson bytes "$SIZE" \
+                 '{id:$id,name:$name,country:$country,graphUrl:$url,graphBytes:$bytes,bbox:[],builtAt:""}' >> "$FRAG"
+              continue
+            fi
+
+            wget -q "https://download.geofabrik.de/$GEOPATH-latest.osm.pbf" -O region.osm.pbf
+            BBOX=$(osmium fileinfo region.osm.pbf | grep -iE '^(bounding )?box:' | head -1 \
+                   | sed 's/^[^:]*: (//;s/)//' | awk -F', ' '{printf "[%.4f, %.4f, %.4f, %.4f]", $2, $1, $4, $3}')
+            if [ -z "$BBOX" ]; then BBOX="[0,0,0,0]"; echo "WARN pas de bbox pour $ID"; fi
+
+            wget -q "https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/${GH_VERSION}/graphhopper-web-${GH_VERSION}.jar"
+            rm -rf graph-cache
+            java -Xmx12g -jar "graphhopper-web-${GH_VERSION}.jar" import config.yml
+            test -f graph-cache/edges || { echo "graphe non genere pour $ID"; exit 1; }
+            zip -q -r "$ASSET" graph-cache
+            gh release create "$TAG" "$ASSET" -R "$REPO" \
+              --title "Region hors-ligne : $NAME ($MONTH)" \
+              --notes "Graphe pieton GraphHopper ${GH_VERSION} — source OpenStreetMap (Geofabrik) $MONTH" \
+              --latest=false \
+            || gh release upload "$TAG" "$ASSET" -R "$REPO" --clobber
+
+            SIZE=$(stat -c%s "$ASSET")
+            TODAY=$(date +%Y-%m-%d)
+            jq -nc --arg id "$ID" --arg name "$NAME" --arg country "$COUNTRY" \
+               --arg url "$URL" --argjson bytes "$SIZE" --argjson bbox "$BBOX" \
+               --arg today "$TODAY" \
+               '{id:$id,name:$name,country:$country,graphUrl:$url,graphBytes:$bytes,bbox:$bbox,builtAt:$today}' >> "$FRAG"
+            rm -rf graph-cache region.osm.pbf "$ASSET"
+          done
+
+          ls -la "$FRAG"
+
+      - name: Upload fragment
+        uses: actions/upload-artifact@v4
+        with:
+          name: frag-${{ matrix.chunk }}
+          path: ${{ runner.temp }}/frag-${{ matrix.chunk }}.jsonl
+          retention-days: 7
+
+  finalize:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: offline-regions-finalize
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download fragments
+        uses: actions/download-artifact@v4
+        with:
+          path: frags
+          pattern: frag-*
+
+      - name: Regeneration du manifest + purge anciennes releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MONTH: ${{ needs.prepare.outputs.month }}
         run: |
-          ASSET="region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz"
-          gh release create "region-${{ matrix.region.id }}-${{ env.WEEK }}" \
-            "${{ runner.temp }}/$ASSET" \
-            --title "Région hors-ligne : ${{ matrix.region.name }} (${{ env.WEEK }})" \
-            --notes "Graphe piéton GraphHopper 5.3 — source OpenStreetMap (Geofabrik) ${{ env.WEEK }}" \
-            --latest=false \
-          || gh release upload "region-${{ matrix.region.id }}-${{ env.WEEK }}" "${{ runner.temp }}/$ASSET" --clobber
-          echo "TAG=region-${{ matrix.region.id }}-${{ env.WEEK }}" >> $GITHUB_ENV
+          set -euo pipefail
+          cat frags/frag-*/*.jsonl > all-regions.jsonl
+          wc -l all-regions.jsonl
 
-      - name: Update manifest
-        if: steps.gate.outputs.run == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          SIZE=$(stat -c%s "${{ runner.temp }}/region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz")
-          python3 << EOF
-          import json
+          python3 - <<PYEOF
+          import json, urllib.request
+
+          MONTH = "$MONTH"
+          entries = [json.loads(l) for l in open("all-regions.jsonl") if l.strip()]
           m = json.load(open("offline-regions/manifest.json"))
-          entry = {
-              "id": "${{ matrix.region.id }}",
-              "name": "${{ matrix.region.name }}",
-              "country": "${{ matrix.region.country }}",
-              "graphUrl": "https://github.com/muarf/BalanceTaCam/releases/download/${{ env.TAG }}/region-${{ matrix.region.id }}-${{ env.WEEK }}.ghz",
-              "graphBytes": $SIZE,
-              "bbox": ${{ toJSON(matrix.region.bbox) }},
-              "builtAt": "$(date +%Y-%m-%d)",
-          }
-          regions = [r for r in m["regions"] if r["id"] != entry["id"]]
-          regions.append(entry)
-          m["regions"] = sorted(regions, key=lambda r: r["id"])
-          m["version"] = m.get("version", 1) + 1
-          json.dump(m, open("offline-regions/manifest.json", "w"), indent=2, ensure_ascii=False)
-          print(json.dumps(m, indent=2, ensure_ascii=False))
-          EOF
+          old_regions = {r["id"]: r for r in m.get("regions", [])}
 
-      - name: Commit manifest
-        if: steps.gate.outputs.run == 'true'
-        run: |
+          # fusion : les nouvelles entrees gagnent, on conserve bbox/builtAt
+          # des anciennes si la nouvelle est vide (deja-publie shortcut)
+          merged = {}
+          for r in old_regions.values():
+              merged[r["id"]] = dict(r)
+          for r in entries:
+              cur = merged.get(r["id"], {})
+              cur.update({k: v for k, v in r.items() if v})
+              if not cur.get("builtAt"):
+                  cur["builtAt"] = r.get("builtAt") or cur.get("builtAt") or ""
+              cur.setdefault("bbox", [])
+              merged[r["id"]] = cur
+
+          # basemaps Mapsforge derives du chemin Geofabrik, verifies par HEAD
+          def head(url):
+              try:
+                  req = urllib.request.Request(url, method="HEAD")
+                  with urllib.request.urlopen(req, timeout=20) as resp:
+                      return int(resp.headers.get("Content-Length") or 0)
+              except Exception:
+                  return 0
+
+          basemaps = []
+          slugmap = {"idf": "ile-de-france"}
+          for rid, r in sorted(merged.items()):
+              pass  # geopath non stocke dans le manifest ; reconstruit ci-dessous
+
+          # reconstruction du chemin geofabrik : on relit regions.yml
+          import re
+          geopaths = {}
+          txt = open("offline-regions/regions.yml").read()
+          for mm in re.finditer(r'id:\s*(\S+),\s*name:\s*"([^"]*)",\s*country:\s*"(\w+)",\s*geopath:\s*"([^"]+)"', txt):
+              geopaths[mm.group(1)] = mm.group(4)
+
+          for rid in sorted(merged):
+              gp = geopaths.get(rid)
+              if not gp:
+                  continue
+              leaf = slugmap.get(rid, gp.split("/")[-1])
+              url = f"https://download.mapsforge.org/maps/v5/{gp.rsplit('/', 1)[0]}/{leaf}.map"
+              size = head(url)
+              if size <= 0:
+                  continue
+              bid = rid + "-map"
+              prev = next((b for b in m.get("basemaps", []) if b["id"] == bid), {})
+              basemaps.append({
+                  "id": bid,
+                  "name": merged[rid]["name"] + " (carte)",
+                  "url": url,
+                  "bytes": size,
+                  "bbox": merged[rid].get("bbox") or prev.get("bbox") or [],
+              })
+
+          m["version"] = int(m.get("version", 1)) + 1
+          m["regions"] = sorted(merged.values(), key=lambda x: (x.get("country", ""), x["id"]))
+          m["basemaps"] = sorted(basemaps, key=lambda x: x["id"])
+          json.dump(m, open("offline-regions/manifest.json", "w"), indent=2, ensure_ascii=False)
+          print(f"manifest v{m['version']}: {len(m['regions'])} regions, {len(m['basemaps'])} basemaps")
+          PYEOF
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add offline-regions/manifest.json
-          git commit -m "chore(regions): update manifest for ${{ matrix.region.id }} ${{ env.WEEK }}" || echo "rien à mettre à jour"
+          git commit -m "chore(regions): manifest mensuel $MONTH" || echo "manifest inchangé"
+          git pull --rebase origin main || true
           git push
+
+      - name: Purge des releases des mois precedents
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MONTH: ${{ needs.prepare.outputs.month }}
+        run: |
+          REPO="$GITHUB_REPOSITORY"
+          gh api "repos/$REPO/releases?per_page=100" --paginate -q '
+            .[] | select(.tag_name | startswith("region-")) |
+            "\(.tag_name)|\(.id)"' | while IFS='|' read -r TAG RID; do
+            SUFFIX="${TAG##*-}"
+            if [[ ! "$SUFFIX" =~ ^[0-9]{4}\.[0-9]{2}$ ]] || [ "$SUFFIX" != "$MONTH" ]; then
+              echo "purge $TAG"
+              gh api -X DELETE "repos/$REPO/releases/$RID" || true
+              git push origin ":refs/tags/$TAG" || true
+            fi
+          done

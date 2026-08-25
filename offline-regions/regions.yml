@@ -1,0 +1,434 @@
+# Genere par offline-regions/tools/gen_regions.py - NE PAS EDITER A LA MAIN
+regions:
+  - { id: africa-algeria, name: "Algeria", country: "AF", geopath: "africa/algeria" }
+  - { id: africa-angola, name: "Angola", country: "AF", geopath: "africa/angola" }
+  - { id: africa-benin, name: "Benin", country: "AF", geopath: "africa/benin" }
+  - { id: africa-botswana, name: "Botswana", country: "AF", geopath: "africa/botswana" }
+  - { id: africa-burkina-faso, name: "Burkina Faso", country: "AF", geopath: "africa/burkina-faso" }
+  - { id: africa-burundi, name: "Burundi", country: "AF", geopath: "africa/burundi" }
+  - { id: africa-cameroon, name: "Cameroon", country: "AF", geopath: "africa/cameroon" }
+  - { id: africa-canary-islands, name: "Canary Islands", country: "AF", geopath: "africa/canary-islands" }
+  - { id: africa-cape-verde, name: "Cape Verde", country: "AF", geopath: "africa/cape-verde" }
+  - { id: africa-central-african-republic, name: "Central African Republic", country: "AF", geopath: "africa/central-african-republic" }
+  - { id: africa-chad, name: "Chad", country: "AF", geopath: "africa/chad" }
+  - { id: africa-comores, name: "Comores", country: "AF", geopath: "africa/comores" }
+  - { id: africa-congo-brazzaville, name: "Congo (Republic/Brazzaville)", country: "AF", geopath: "africa/congo-brazzaville" }
+  - { id: africa-congo-democratic-republic, name: "Congo (Democratic Republic/Kinshasa)", country: "AF", geopath: "africa/congo-democratic-republic" }
+  - { id: africa-djibouti, name: "Djibouti", country: "AF", geopath: "africa/djibouti" }
+  - { id: africa-egypt, name: "Egypt", country: "AF", geopath: "africa/egypt" }
+  - { id: africa-equatorial-guinea, name: "Equatorial Guinea", country: "AF", geopath: "africa/equatorial-guinea" }
+  - { id: africa-eritrea, name: "Eritrea", country: "AF", geopath: "africa/eritrea" }
+  - { id: africa-ethiopia, name: "Ethiopia", country: "AF", geopath: "africa/ethiopia" }
+  - { id: africa-gabon, name: "Gabon", country: "AF", geopath: "africa/gabon" }
+  - { id: africa-ghana, name: "Ghana", country: "AF", geopath: "africa/ghana" }
+  - { id: africa-guinea, name: "Guinea", country: "AF", geopath: "africa/guinea" }
+  - { id: africa-guinea-bissau, name: "Guinea-Bissau", country: "AF", geopath: "africa/guinea-bissau" }
+  - { id: africa-ivory-coast, name: "Ivory Coast", country: "AF", geopath: "africa/ivory-coast" }
+  - { id: africa-kenya, name: "Kenya", country: "AF", geopath: "africa/kenya" }
+  - { id: africa-lesotho, name: "Lesotho", country: "AF", geopath: "africa/lesotho" }
+  - { id: africa-liberia, name: "Liberia", country: "AF", geopath: "africa/liberia" }
+  - { id: africa-libya, name: "Libya", country: "AF", geopath: "africa/libya" }
+  - { id: africa-madagascar, name: "Madagascar", country: "AF", geopath: "africa/madagascar" }
+  - { id: africa-malawi, name: "Malawi", country: "AF", geopath: "africa/malawi" }
+  - { id: africa-mali, name: "Mali", country: "AF", geopath: "africa/mali" }
+  - { id: africa-mauritania, name: "Mauritania", country: "AF", geopath: "africa/mauritania" }
+  - { id: africa-mauritius, name: "Mauritius", country: "AF", geopath: "africa/mauritius" }
+  - { id: africa-morocco, name: "Morocco", country: "AF", geopath: "africa/morocco" }
+  - { id: africa-mozambique, name: "Mozambique", country: "AF", geopath: "africa/mozambique" }
+  - { id: africa-namibia, name: "Namibia", country: "AF", geopath: "africa/namibia" }
+  - { id: africa-niger, name: "Niger", country: "AF", geopath: "africa/niger" }
+  - { id: africa-nigeria, name: "Nigeria", country: "AF", geopath: "africa/nigeria" }
+  - { id: africa-rwanda, name: "Rwanda", country: "AF", geopath: "africa/rwanda" }
+  - { id: africa-saint-helena-ascension-and-tristan-da-cunha, name: "Saint Helena, Ascension, and Tristan da Cunha", country: "AF", geopath: "africa/saint-helena-ascension-and-tristan-da-cunha" }
+  - { id: africa-sao-tome-and-principe, name: "Sao Tome and Principe", country: "AF", geopath: "africa/sao-tome-and-principe" }
+  - { id: africa-senegal-and-gambia, name: "Senegal and Gambia", country: "AF", geopath: "africa/senegal-and-gambia" }
+  - { id: africa-seychelles, name: "Seychelles", country: "AF", geopath: "africa/seychelles" }
+  - { id: africa-sierra-leone, name: "Sierra Leone", country: "AF", geopath: "africa/sierra-leone" }
+  - { id: africa-somalia, name: "Somalia", country: "AF", geopath: "africa/somalia" }
+  - { id: africa-south-africa, name: "South Africa", country: "AF", geopath: "africa/south-africa" }
+  - { id: africa-south-africa-and-lesotho, name: "South Africa (includes Lesotho)", country: "AF", geopath: "africa/south-africa-and-lesotho" }
+  - { id: africa-south-sudan, name: "South Sudan", country: "AF", geopath: "africa/south-sudan" }
+  - { id: africa-sudan, name: "Sudan", country: "AF", geopath: "africa/sudan" }
+  - { id: africa-swaziland, name: "Swaziland", country: "AF", geopath: "africa/swaziland" }
+  - { id: africa-tanzania, name: "Tanzania", country: "AF", geopath: "africa/tanzania" }
+  - { id: africa-togo, name: "Togo", country: "AF", geopath: "africa/togo" }
+  - { id: africa-tunisia, name: "Tunisia", country: "AF", geopath: "africa/tunisia" }
+  - { id: africa-uganda, name: "Uganda", country: "AF", geopath: "africa/uganda" }
+  - { id: africa-zambia, name: "Zambia", country: "AF", geopath: "africa/zambia" }
+  - { id: africa-zimbabwe, name: "Zimbabwe", country: "AF", geopath: "africa/zimbabwe" }
+  - { id: asia-afghanistan, name: "Afghanistan", country: "AS", geopath: "asia/afghanistan" }
+  - { id: asia-armenia, name: "Armenia", country: "AS", geopath: "asia/armenia" }
+  - { id: asia-azerbaijan, name: "Azerbaijan", country: "AS", geopath: "asia/azerbaijan" }
+  - { id: asia-bangladesh, name: "Bangladesh", country: "AS", geopath: "asia/bangladesh" }
+  - { id: asia-bhutan, name: "Bhutan", country: "AS", geopath: "asia/bhutan" }
+  - { id: asia-cambodia, name: "Cambodia", country: "AS", geopath: "asia/cambodia" }
+  - { id: asia-china-anhui, name: "Anhui", country: "AS", geopath: "asia/china/anhui" }
+  - { id: asia-china-beijing, name: "Beijing", country: "AS", geopath: "asia/china/beijing" }
+  - { id: asia-china-chongqing, name: "Chongqing", country: "AS", geopath: "asia/china/chongqing" }
+  - { id: asia-china-fujian, name: "Fujian", country: "AS", geopath: "asia/china/fujian" }
+  - { id: asia-china-gansu, name: "Gansu", country: "AS", geopath: "asia/china/gansu" }
+  - { id: asia-china-guangdong, name: "Guangdong (with Hong Kong and Macau)", country: "AS", geopath: "asia/china/guangdong" }
+  - { id: asia-china-guangxi, name: "Guangxi", country: "AS", geopath: "asia/china/guangxi" }
+  - { id: asia-china-guizhou, name: "Guizhou", country: "AS", geopath: "asia/china/guizhou" }
+  - { id: asia-china-hainan, name: "Hainan", country: "AS", geopath: "asia/china/hainan" }
+  - { id: asia-china-hebei, name: "Hebei (with Beijing and Tianjin)", country: "AS", geopath: "asia/china/hebei" }
+  - { id: asia-china-heilongjiang, name: "Heilongjiang", country: "AS", geopath: "asia/china/heilongjiang" }
+  - { id: asia-china-henan, name: "Henan", country: "AS", geopath: "asia/china/henan" }
+  - { id: asia-china-hong-kong, name: "Hong Kong", country: "AS", geopath: "asia/china/hong-kong" }
+  - { id: asia-china-hubei, name: "Hubei", country: "AS", geopath: "asia/china/hubei" }
+  - { id: asia-china-hunan, name: "Hunan", country: "AS", geopath: "asia/china/hunan" }
+  - { id: asia-china-inner-mongolia, name: "Inner Mongolia", country: "AS", geopath: "asia/china/inner-mongolia" }
+  - { id: asia-china-jiangsu, name: "Jiangsu", country: "AS", geopath: "asia/china/jiangsu" }
+  - { id: asia-china-jiangxi, name: "Jiangxi", country: "AS", geopath: "asia/china/jiangxi" }
+  - { id: asia-china-jilin, name: "Jilin", country: "AS", geopath: "asia/china/jilin" }
+  - { id: asia-china-liaoning, name: "Liaoning", country: "AS", geopath: "asia/china/liaoning" }
+  - { id: asia-china-macau, name: "Macau", country: "AS", geopath: "asia/china/macau" }
+  - { id: asia-china-ningxia, name: "Ningxia", country: "AS", geopath: "asia/china/ningxia" }
+  - { id: asia-china-qinghai, name: "Qinghai", country: "AS", geopath: "asia/china/qinghai" }
+  - { id: asia-china-shaanxi, name: "Shaanxi", country: "AS", geopath: "asia/china/shaanxi" }
+  - { id: asia-china-shandong, name: "Shandong", country: "AS", geopath: "asia/china/shandong" }
+  - { id: asia-china-shanghai, name: "Shanghai", country: "AS", geopath: "asia/china/shanghai" }
+  - { id: asia-china-shanxi, name: "Shanxi", country: "AS", geopath: "asia/china/shanxi" }
+  - { id: asia-china-sichuan, name: "Sichuan", country: "AS", geopath: "asia/china/sichuan" }
+  - { id: asia-china-tianjin, name: "Tianjin", country: "AS", geopath: "asia/china/tianjin" }
+  - { id: asia-china-tibet, name: "Tibet", country: "AS", geopath: "asia/china/tibet" }
+  - { id: asia-china-xinjiang, name: "Xinjiang", country: "AS", geopath: "asia/china/xinjiang" }
+  - { id: asia-china-yunnan, name: "Yunnan", country: "AS", geopath: "asia/china/yunnan" }
+  - { id: asia-china-zhejiang, name: "Zhejiang", country: "AS", geopath: "asia/china/zhejiang" }
+  - { id: asia-east-timor, name: "East Timor", country: "AS", geopath: "asia/east-timor" }
+  - { id: asia-gcc-states, name: "GCC States", country: "AS", geopath: "asia/gcc-states" }
+  - { id: asia-india-central-zone, name: "Central Zone", country: "AS", geopath: "asia/india/central-zone" }
+  - { id: asia-india-eastern-zone, name: "Eastern Zone", country: "AS", geopath: "asia/india/eastern-zone" }
+  - { id: asia-india-north-eastern-zone, name: "North-Eastern Zone", country: "AS", geopath: "asia/india/north-eastern-zone" }
+  - { id: asia-india-northern-zone, name: "Northern Zone", country: "AS", geopath: "asia/india/northern-zone" }
+  - { id: asia-india-southern-zone, name: "Southern Zone", country: "AS", geopath: "asia/india/southern-zone" }
+  - { id: asia-india-western-zone, name: "Western Zone", country: "AS", geopath: "asia/india/western-zone" }
+  - { id: asia-indonesia-java, name: "Java", country: "AS", geopath: "asia/indonesia/java" }
+  - { id: asia-indonesia-kalimantan, name: "Kalimantan", country: "AS", geopath: "asia/indonesia/kalimantan" }
+  - { id: asia-indonesia-maluku, name: "Maluku", country: "AS", geopath: "asia/indonesia/maluku" }
+  - { id: asia-indonesia-nusa-tenggara, name: "Nusa-Tenggara", country: "AS", geopath: "asia/indonesia/nusa-tenggara" }
+  - { id: asia-indonesia-papua, name: "Papua", country: "AS", geopath: "asia/indonesia/papua" }
+  - { id: asia-indonesia-sulawesi, name: "Sulawesi", country: "AS", geopath: "asia/indonesia/sulawesi" }
+  - { id: asia-indonesia-sumatra, name: "Sumatra", country: "AS", geopath: "asia/indonesia/sumatra" }
+  - { id: asia-iran, name: "Iran", country: "AS", geopath: "asia/iran" }
+  - { id: asia-iraq, name: "Iraq", country: "AS", geopath: "asia/iraq" }
+  - { id: asia-israel-and-palestine, name: "Israel and Palestine", country: "AS", geopath: "asia/israel-and-palestine" }
+  - { id: asia-japan-chubu, name: "Chūbu region", country: "AS", geopath: "asia/japan/chubu" }
+  - { id: asia-japan-chugoku, name: "Chūgoku region", country: "AS", geopath: "asia/japan/chugoku" }
+  - { id: asia-japan-hokkaido, name: "Hokkaidō", country: "AS", geopath: "asia/japan/hokkaido" }
+  - { id: asia-japan-kansai, name: "Kansai region (a.k.a. Kinki region)", country: "AS", geopath: "asia/japan/kansai" }
+  - { id: asia-japan-kanto, name: "Kantō region", country: "AS", geopath: "asia/japan/kanto" }
+  - { id: asia-japan-kyushu, name: "Kyūshū", country: "AS", geopath: "asia/japan/kyushu" }
+  - { id: asia-japan-shikoku, name: "Shikoku", country: "AS", geopath: "asia/japan/shikoku" }
+  - { id: asia-japan-tohoku, name: "Tōhoku region", country: "AS", geopath: "asia/japan/tohoku" }
+  - { id: asia-jordan, name: "Jordan", country: "AS", geopath: "asia/jordan" }
+  - { id: asia-kazakhstan, name: "Kazakhstan", country: "AS", geopath: "asia/kazakhstan" }
+  - { id: asia-kyrgyzstan, name: "Kyrgyzstan", country: "AS", geopath: "asia/kyrgyzstan" }
+  - { id: asia-laos, name: "Laos", country: "AS", geopath: "asia/laos" }
+  - { id: asia-lebanon, name: "Lebanon", country: "AS", geopath: "asia/lebanon" }
+  - { id: asia-malaysia-singapore-brunei, name: "Malaysia, Singapore, and Brunei", country: "AS", geopath: "asia/malaysia-singapore-brunei" }
+  - { id: asia-maldives, name: "Maldives", country: "AS", geopath: "asia/maldives" }
+  - { id: asia-mongolia, name: "Mongolia", country: "AS", geopath: "asia/mongolia" }
+  - { id: asia-myanmar, name: "Myanmar (a.k.a. Burma)", country: "AS", geopath: "asia/myanmar" }
+  - { id: asia-nepal, name: "Nepal", country: "AS", geopath: "asia/nepal" }
+  - { id: asia-north-korea, name: "North Korea", country: "AS", geopath: "asia/north-korea" }
+  - { id: asia-pakistan, name: "Pakistan", country: "AS", geopath: "asia/pakistan" }
+  - { id: asia-philippines, name: "Philippines", country: "AS", geopath: "asia/philippines" }
+  - { id: asia-south-korea, name: "South Korea", country: "AS", geopath: "asia/south-korea" }
+  - { id: asia-sri-lanka, name: "Sri Lanka", country: "AS", geopath: "asia/sri-lanka" }
+  - { id: asia-syria, name: "Syria", country: "AS", geopath: "asia/syria" }
+  - { id: asia-taiwan, name: "Taiwan", country: "AS", geopath: "asia/taiwan" }
+  - { id: asia-tajikistan, name: "Tajikistan", country: "AS", geopath: "asia/tajikistan" }
+  - { id: asia-thailand, name: "Thailand", country: "AS", geopath: "asia/thailand" }
+  - { id: asia-turkmenistan, name: "Turkmenistan", country: "AS", geopath: "asia/turkmenistan" }
+  - { id: asia-uzbekistan, name: "Uzbekistan", country: "AS", geopath: "asia/uzbekistan" }
+  - { id: asia-vietnam, name: "Vietnam", country: "AS", geopath: "asia/vietnam" }
+  - { id: asia-yemen, name: "Yemen", country: "AS", geopath: "asia/yemen" }
+  - { id: russia-central-fed-district, name: "Central Federal District", country: "AS", geopath: "russia/central-fed-district" }
+  - { id: russia-crimean-fed-district, name: "Crimean Federal District", country: "AS", geopath: "russia/crimean-fed-district" }
+  - { id: russia-far-eastern-fed-district, name: "Far Eastern Federal District", country: "AS", geopath: "russia/far-eastern-fed-district" }
+  - { id: russia-kaliningrad, name: "Kaliningrad", country: "AS", geopath: "russia/kaliningrad" }
+  - { id: russia-north-caucasus-fed-district, name: "North Caucasus Federal District", country: "AS", geopath: "russia/north-caucasus-fed-district" }
+  - { id: russia-northwestern-fed-district, name: "Northwestern Federal District", country: "AS", geopath: "russia/northwestern-fed-district" }
+  - { id: russia-siberian-fed-district, name: "Siberian Federal District", country: "AS", geopath: "russia/siberian-fed-district" }
+  - { id: russia-south-fed-district, name: "South Federal District", country: "AS", geopath: "russia/south-fed-district" }
+  - { id: russia-ural-fed-district, name: "Ural Federal District", country: "AS", geopath: "russia/ural-fed-district" }
+  - { id: russia-volga-fed-district, name: "Volga Federal District", country: "AS", geopath: "russia/volga-fed-district" }
+  - { id: central-america-bahamas, name: "Bahamas", country: "CA", geopath: "central-america/bahamas" }
+  - { id: central-america-belize, name: "Belize", country: "CA", geopath: "central-america/belize" }
+  - { id: central-america-costa-rica, name: "Costa Rica", country: "CA", geopath: "central-america/costa-rica" }
+  - { id: central-america-cuba, name: "Cuba", country: "CA", geopath: "central-america/cuba" }
+  - { id: central-america-el-salvador, name: "El Salvador", country: "CA", geopath: "central-america/el-salvador" }
+  - { id: central-america-guatemala, name: "Guatemala", country: "CA", geopath: "central-america/guatemala" }
+  - { id: central-america-haiti-and-domrep, name: "Haiti and Dominican Republic", country: "CA", geopath: "central-america/haiti-and-domrep" }
+  - { id: central-america-honduras, name: "Honduras", country: "CA", geopath: "central-america/honduras" }
+  - { id: central-america-jamaica, name: "Jamaica", country: "CA", geopath: "central-america/jamaica" }
+  - { id: central-america-nicaragua, name: "Nicaragua", country: "CA", geopath: "central-america/nicaragua" }
+  - { id: central-america-panama, name: "Panama", country: "CA", geopath: "central-america/panama" }
+  - { id: europe-albania, name: "Albania", country: "EU", geopath: "europe/albania" }
+  - { id: europe-andorra, name: "Andorra", country: "EU", geopath: "europe/andorra" }
+  - { id: europe-austria, name: "Austria", country: "EU", geopath: "europe/austria" }
+  - { id: europe-azores, name: "Azores", country: "EU", geopath: "europe/azores" }
+  - { id: europe-belarus, name: "Belarus", country: "EU", geopath: "europe/belarus" }
+  - { id: europe-belgium, name: "Belgium", country: "EU", geopath: "europe/belgium" }
+  - { id: europe-bosnia-herzegovina, name: "Bosnia-Herzegovina", country: "EU", geopath: "europe/bosnia-herzegovina" }
+  - { id: europe-bulgaria, name: "Bulgaria", country: "EU", geopath: "europe/bulgaria" }
+  - { id: europe-croatia, name: "Croatia", country: "EU", geopath: "europe/croatia" }
+  - { id: europe-cyprus, name: "Cyprus", country: "EU", geopath: "europe/cyprus" }
+  - { id: europe-czech-republic, name: "Czech Republic", country: "EU", geopath: "europe/czech-republic" }
+  - { id: europe-denmark, name: "Denmark", country: "EU", geopath: "europe/denmark" }
+  - { id: europe-estonia, name: "Estonia", country: "EU", geopath: "europe/estonia" }
+  - { id: europe-faroe-islands, name: "Faroe Islands", country: "EU", geopath: "europe/faroe-islands" }
+  - { id: europe-finland, name: "Finland", country: "EU", geopath: "europe/finland" }
+  - { id: europe-france-alsace, name: "Alsace", country: "EU", geopath: "europe/france/alsace" }
+  - { id: europe-france-aquitaine, name: "Aquitaine", country: "EU", geopath: "europe/france/aquitaine" }
+  - { id: europe-france-auvergne, name: "Auvergne", country: "EU", geopath: "europe/france/auvergne" }
+  - { id: europe-france-basse-normandie, name: "Basse-Normandie", country: "EU", geopath: "europe/france/basse-normandie" }
+  - { id: europe-france-bourgogne, name: "Bourgogne", country: "EU", geopath: "europe/france/bourgogne" }
+  - { id: europe-france-bretagne, name: "Bretagne", country: "EU", geopath: "europe/france/bretagne" }
+  - { id: europe-france-centre, name: "Centre", country: "EU", geopath: "europe/france/centre" }
+  - { id: europe-france-champagne-ardenne, name: "Champagne Ardenne", country: "EU", geopath: "europe/france/champagne-ardenne" }
+  - { id: europe-france-corse, name: "Corse", country: "EU", geopath: "europe/france/corse" }
+  - { id: europe-france-franche-comte, name: "Franche-Comté", country: "EU", geopath: "europe/france/franche-comte" }
+  - { id: europe-france-guadeloupe, name: "Guadeloupe", country: "EU", geopath: "europe/france/guadeloupe" }
+  - { id: europe-france-guyane, name: "Guyane", country: "EU", geopath: "europe/france/guyane" }
+  - { id: europe-france-haute-normandie, name: "Haute-Normandie", country: "EU", geopath: "europe/france/haute-normandie" }
+  - { id: idf, name: "Île-de-France", country: "EU", geopath: "europe/france/ile-de-france" }
+  - { id: europe-france-languedoc-roussillon, name: "Languedoc-Roussillon", country: "EU", geopath: "europe/france/languedoc-roussillon" }
+  - { id: europe-france-limousin, name: "Limousin", country: "EU", geopath: "europe/france/limousin" }
+  - { id: europe-france-lorraine, name: "Lorraine", country: "EU", geopath: "europe/france/lorraine" }
+  - { id: europe-france-martinique, name: "Martinique", country: "EU", geopath: "europe/france/martinique" }
+  - { id: europe-france-mayotte, name: "Mayotte", country: "EU", geopath: "europe/france/mayotte" }
+  - { id: europe-france-midi-pyrenees, name: "Midi-Pyrénées", country: "EU", geopath: "europe/france/midi-pyrenees" }
+  - { id: europe-france-nord-pas-de-calais, name: "Nord-Pas-de-Calais", country: "EU", geopath: "europe/france/nord-pas-de-calais" }
+  - { id: europe-france-pays-de-la-loire, name: "Pays de la Loire", country: "EU", geopath: "europe/france/pays-de-la-loire" }
+  - { id: europe-france-picardie, name: "Picardie", country: "EU", geopath: "europe/france/picardie" }
+  - { id: europe-france-poitou-charentes, name: "Poitou-Charentes", country: "EU", geopath: "europe/france/poitou-charentes" }
+  - { id: europe-france-provence-alpes-cote-d-azur, name: "Provence-Alpes-Côte d'Azur", country: "EU", geopath: "europe/france/provence-alpes-cote-d-azur" }
+  - { id: europe-france-reunion, name: "Reunion", country: "EU", geopath: "europe/france/reunion" }
+  - { id: europe-france-rhone-alpes, name: "Rhône-Alpes", country: "EU", geopath: "europe/france/rhone-alpes" }
+  - { id: europe-georgia, name: "Georgia", country: "EU", geopath: "europe/georgia" }
+  - { id: europe-germany-baden-wuerttemberg, name: "Baden-Württemberg", country: "EU", geopath: "europe/germany/baden-wuerttemberg" }
+  - { id: europe-germany-bayern, name: "Bayern", country: "EU", geopath: "europe/germany/bayern" }
+  - { id: europe-germany-berlin, name: "Berlin", country: "EU", geopath: "europe/germany/berlin" }
+  - { id: europe-germany-brandenburg, name: "Brandenburg (mit Berlin)", country: "EU", geopath: "europe/germany/brandenburg" }
+  - { id: europe-germany-bremen, name: "Bremen", country: "EU", geopath: "europe/germany/bremen" }
+  - { id: europe-germany-hamburg, name: "Hamburg", country: "EU", geopath: "europe/germany/hamburg" }
+  - { id: europe-germany-hessen, name: "Hessen", country: "EU", geopath: "europe/germany/hessen" }
+  - { id: europe-germany-mecklenburg-vorpommern, name: "Mecklenburg-Vorpommern", country: "EU", geopath: "europe/germany/mecklenburg-vorpommern" }
+  - { id: europe-germany-niedersachsen, name: "Niedersachsen (mit Bremen)", country: "EU", geopath: "europe/germany/niedersachsen" }
+  - { id: europe-germany-nordrhein-westfalen, name: "Nordrhein-Westfalen", country: "EU", geopath: "europe/germany/nordrhein-westfalen" }
+  - { id: europe-germany-rheinland-pfalz, name: "Rheinland-Pfalz", country: "EU", geopath: "europe/germany/rheinland-pfalz" }
+  - { id: europe-germany-saarland, name: "Saarland", country: "EU", geopath: "europe/germany/saarland" }
+  - { id: europe-germany-sachsen, name: "Sachsen", country: "EU", geopath: "europe/germany/sachsen" }
+  - { id: europe-germany-sachsen-anhalt, name: "Sachsen-Anhalt", country: "EU", geopath: "europe/germany/sachsen-anhalt" }
+  - { id: europe-germany-schleswig-holstein, name: "Schleswig-Holstein", country: "EU", geopath: "europe/germany/schleswig-holstein" }
+  - { id: europe-germany-thueringen, name: "Thüringen", country: "EU", geopath: "europe/germany/thueringen" }
+  - { id: europe-greece, name: "Greece", country: "EU", geopath: "europe/greece" }
+  - { id: europe-guernsey-jersey, name: "Guernsey and Jersey", country: "EU", geopath: "europe/guernsey-jersey" }
+  - { id: europe-hungary, name: "Hungary", country: "EU", geopath: "europe/hungary" }
+  - { id: europe-iceland, name: "Iceland", country: "EU", geopath: "europe/iceland" }
+  - { id: europe-ireland-and-northern-ireland, name: "Ireland and Northern Ireland", country: "EU", geopath: "europe/ireland-and-northern-ireland" }
+  - { id: europe-isle-of-man, name: "Isle of Man", country: "EU", geopath: "europe/isle-of-man" }
+  - { id: europe-italy-centro, name: "Centro", country: "EU", geopath: "europe/italy/centro" }
+  - { id: europe-italy-isole, name: "Isole", country: "EU", geopath: "europe/italy/isole" }
+  - { id: europe-italy-nord-est, name: "Nord-Est", country: "EU", geopath: "europe/italy/nord-est" }
+  - { id: europe-italy-nord-ovest, name: "Nord-Ovest", country: "EU", geopath: "europe/italy/nord-ovest" }
+  - { id: europe-italy-sud, name: "Sud", country: "EU", geopath: "europe/italy/sud" }
+  - { id: europe-kosovo, name: "Kosovo", country: "EU", geopath: "europe/kosovo" }
+  - { id: europe-latvia, name: "Latvia", country: "EU", geopath: "europe/latvia" }
+  - { id: europe-liechtenstein, name: "Liechtenstein", country: "EU", geopath: "europe/liechtenstein" }
+  - { id: europe-lithuania, name: "Lithuania", country: "EU", geopath: "europe/lithuania" }
+  - { id: europe-luxembourg, name: "Luxembourg", country: "EU", geopath: "europe/luxembourg" }
+  - { id: europe-macedonia, name: "Macedonia", country: "EU", geopath: "europe/macedonia" }
+  - { id: europe-malta, name: "Malta", country: "EU", geopath: "europe/malta" }
+  - { id: europe-moldova, name: "Moldova", country: "EU", geopath: "europe/moldova" }
+  - { id: europe-monaco, name: "Monaco", country: "EU", geopath: "europe/monaco" }
+  - { id: europe-montenegro, name: "Montenegro", country: "EU", geopath: "europe/montenegro" }
+  - { id: europe-netherlands-drenthe, name: "Drenthe", country: "EU", geopath: "europe/netherlands/drenthe" }
+  - { id: europe-netherlands-flevoland, name: "Flevoland", country: "EU", geopath: "europe/netherlands/flevoland" }
+  - { id: europe-netherlands-friesland, name: "Friesland", country: "EU", geopath: "europe/netherlands/friesland" }
+  - { id: europe-netherlands-gelderland, name: "Gelderland", country: "EU", geopath: "europe/netherlands/gelderland" }
+  - { id: europe-netherlands-groningen, name: "Groningen", country: "EU", geopath: "europe/netherlands/groningen" }
+  - { id: europe-netherlands-limburg, name: "Limburg", country: "EU", geopath: "europe/netherlands/limburg" }
+  - { id: europe-netherlands-noord-brabant, name: "Noord-Brabant", country: "EU", geopath: "europe/netherlands/noord-brabant" }
+  - { id: europe-netherlands-noord-holland, name: "Noord-Holland", country: "EU", geopath: "europe/netherlands/noord-holland" }
+  - { id: europe-netherlands-overijssel, name: "Overijssel", country: "EU", geopath: "europe/netherlands/overijssel" }
+  - { id: europe-netherlands-utrecht, name: "Utrecht", country: "EU", geopath: "europe/netherlands/utrecht" }
+  - { id: europe-netherlands-zeeland, name: "Zeeland", country: "EU", geopath: "europe/netherlands/zeeland" }
+  - { id: europe-netherlands-zuid-holland, name: "Zuid-Holland", country: "EU", geopath: "europe/netherlands/zuid-holland" }
+  - { id: europe-norway-nord-norge, name: "Nord-Norge<br />(Northern Norway)", country: "EU", geopath: "europe/norway/nord-norge" }
+  - { id: europe-norway-ostlandet, name: "Østlandet<br />(Eastern Norway)", country: "EU", geopath: "europe/norway/ostlandet" }
+  - { id: europe-norway-sorlandet, name: "Sørlandet<br />(Southern Norway)", country: "EU", geopath: "europe/norway/sorlandet" }
+  - { id: europe-norway-svalbard-janmayen, name: "Svalbard and Jan Mayen", country: "EU", geopath: "europe/norway/svalbard-janmayen" }
+  - { id: europe-norway-trondelag, name: "Trøndelag<br />(Central Norway)", country: "EU", geopath: "europe/norway/trondelag" }
+  - { id: europe-norway-vestlandet, name: "Vestlandet<br />(Western Norway)", country: "EU", geopath: "europe/norway/vestlandet" }
+  - { id: europe-poland-dolnoslaskie, name: "Województwo dolnośląskie<br />(Lower Silesian Voivodeship)", country: "EU", geopath: "europe/poland/dolnoslaskie" }
+  - { id: europe-poland-kujawsko-pomorskie, name: "Województwo kujawsko-pomorskie<br />(Kuyavian-Pomeranian Voivodeship)", country: "EU", geopath: "europe/poland/kujawsko-pomorskie" }
+  - { id: europe-poland-lodzkie, name: "Województwo łódzkie<br />(Łódź Voivodeship)", country: "EU", geopath: "europe/poland/lodzkie" }
+  - { id: europe-poland-lubelskie, name: "Województwo lubelskie<br />(Lublin Voivodeship)", country: "EU", geopath: "europe/poland/lubelskie" }
+  - { id: europe-poland-lubuskie, name: "Województwo lubuskie<br />(Lubusz Voivodeship)", country: "EU", geopath: "europe/poland/lubuskie" }
+  - { id: europe-poland-malopolskie, name: "Województwo małopolskie<br />(Lesser Poland Voivodeship)", country: "EU", geopath: "europe/poland/malopolskie" }
+  - { id: europe-poland-mazowieckie, name: "Województwo mazowieckie<br />(Mazovian Voivodeship)", country: "EU", geopath: "europe/poland/mazowieckie" }
+  - { id: europe-poland-opolskie, name: "Województwo opolskie<br />(Opole Voivodeship)", country: "EU", geopath: "europe/poland/opolskie" }
+  - { id: europe-poland-podkarpackie, name: "Województwo podkarpackie<br />(Subcarpathian Voivodeship)", country: "EU", geopath: "europe/poland/podkarpackie" }
+  - { id: europe-poland-podlaskie, name: "Województwo podlaskie<br />(Podlaskie Voivodeship)", country: "EU", geopath: "europe/poland/podlaskie" }
+  - { id: europe-poland-pomorskie, name: "Województwo pomorskie<br />(Pomeranian Voivodeship)", country: "EU", geopath: "europe/poland/pomorskie" }
+  - { id: europe-poland-slaskie, name: "Województwo śląskie<br />(Silesian Voivodeship)", country: "EU", geopath: "europe/poland/slaskie" }
+  - { id: europe-poland-swietokrzyskie, name: "Województwo świętokrzyskie<br />(Świętokrzyskie Voivodeship)", country: "EU", geopath: "europe/poland/swietokrzyskie" }
+  - { id: europe-poland-warminsko-mazurskie, name: "Województwo warmińsko-mazurskie<br />(Warmian-Masurian Voivodeship)", country: "EU", geopath: "europe/poland/warminsko-mazurskie" }
+  - { id: europe-poland-wielkopolskie, name: "Województwo wielkopolskie<br />(Greater Poland Voivodeship)", country: "EU", geopath: "europe/poland/wielkopolskie" }
+  - { id: europe-poland-zachodniopomorskie, name: "Województwo zachodniopomorskie<br />(West Pomeranian Voivodeship)", country: "EU", geopath: "europe/poland/zachodniopomorskie" }
+  - { id: europe-portugal, name: "Portugal", country: "EU", geopath: "europe/portugal" }
+  - { id: europe-romania, name: "Romania", country: "EU", geopath: "europe/romania" }
+  - { id: europe-serbia, name: "Serbia", country: "EU", geopath: "europe/serbia" }
+  - { id: europe-slovakia, name: "Slovakia", country: "EU", geopath: "europe/slovakia" }
+  - { id: europe-slovenia, name: "Slovenia", country: "EU", geopath: "europe/slovenia" }
+  - { id: europe-spain-andalucia, name: "Andalucía", country: "EU", geopath: "europe/spain/andalucia" }
+  - { id: europe-spain-aragon, name: "Aragón", country: "EU", geopath: "europe/spain/aragon" }
+  - { id: europe-spain-asturias, name: "Asturias", country: "EU", geopath: "europe/spain/asturias" }
+  - { id: europe-spain-cantabria, name: "Cantabria", country: "EU", geopath: "europe/spain/cantabria" }
+  - { id: europe-spain-castilla-la-mancha, name: "Castilla-La Mancha", country: "EU", geopath: "europe/spain/castilla-la-mancha" }
+  - { id: europe-spain-castilla-y-leon, name: "Castilla y León", country: "EU", geopath: "europe/spain/castilla-y-leon" }
+  - { id: europe-spain-cataluna, name: "Cataluña", country: "EU", geopath: "europe/spain/cataluna" }
+  - { id: europe-spain-ceuta, name: "Ceuta", country: "EU", geopath: "europe/spain/ceuta" }
+  - { id: europe-spain-extremadura, name: "Extremadura", country: "EU", geopath: "europe/spain/extremadura" }
+  - { id: europe-spain-galicia, name: "Galicia", country: "EU", geopath: "europe/spain/galicia" }
+  - { id: europe-spain-islas-baleares, name: "Islas Baleares", country: "EU", geopath: "europe/spain/islas-baleares" }
+  - { id: europe-spain-la-rioja, name: "La Rioja", country: "EU", geopath: "europe/spain/la-rioja" }
+  - { id: europe-spain-madrid, name: "Madrid", country: "EU", geopath: "europe/spain/madrid" }
+  - { id: europe-spain-melilla, name: "Melilla", country: "EU", geopath: "europe/spain/melilla" }
+  - { id: europe-spain-murcia, name: "Murcia", country: "EU", geopath: "europe/spain/murcia" }
+  - { id: europe-spain-navarra, name: "Navarra", country: "EU", geopath: "europe/spain/navarra" }
+  - { id: europe-spain-pais-vasco, name: "País Vasco", country: "EU", geopath: "europe/spain/pais-vasco" }
+  - { id: europe-spain-valencia, name: "Valencia", country: "EU", geopath: "europe/spain/valencia" }
+  - { id: europe-sweden, name: "Sweden", country: "EU", geopath: "europe/sweden" }
+  - { id: europe-switzerland, name: "Switzerland", country: "EU", geopath: "europe/switzerland" }
+  - { id: europe-turkey, name: "Turkey", country: "EU", geopath: "europe/turkey" }
+  - { id: europe-ukraine, name: "Ukraine (with Crimea)", country: "EU", geopath: "europe/ukraine" }
+  - { id: europe-united-kingdom-bermuda, name: "Bermuda", country: "EU", geopath: "europe/united-kingdom/bermuda" }
+  - { id: europe-united-kingdom-england, name: "England", country: "EU", geopath: "europe/united-kingdom/england" }
+  - { id: europe-united-kingdom-falklands, name: "Falkland Islands", country: "EU", geopath: "europe/united-kingdom/falklands" }
+  - { id: europe-united-kingdom-scotland, name: "Scotland", country: "EU", geopath: "europe/united-kingdom/scotland" }
+  - { id: europe-united-kingdom-wales, name: "Wales", country: "EU", geopath: "europe/united-kingdom/wales" }
+  - { id: north-america-canada-alberta, name: "Alberta", country: "NA", geopath: "north-america/canada/alberta" }
+  - { id: north-america-canada-british-columbia, name: "British Columbia", country: "NA", geopath: "north-america/canada/british-columbia" }
+  - { id: north-america-canada-manitoba, name: "Manitoba", country: "NA", geopath: "north-america/canada/manitoba" }
+  - { id: north-america-canada-new-brunswick, name: "New Brunswick", country: "NA", geopath: "north-america/canada/new-brunswick" }
+  - { id: north-america-canada-newfoundland-and-labrador, name: "Newfoundland and Labrador", country: "NA", geopath: "north-america/canada/newfoundland-and-labrador" }
+  - { id: north-america-canada-northwest-territories, name: "Northwest Territories", country: "NA", geopath: "north-america/canada/northwest-territories" }
+  - { id: north-america-canada-nova-scotia, name: "Nova Scotia", country: "NA", geopath: "north-america/canada/nova-scotia" }
+  - { id: north-america-canada-nunavut, name: "Nunavut", country: "NA", geopath: "north-america/canada/nunavut" }
+  - { id: north-america-canada-ontario, name: "Ontario", country: "NA", geopath: "north-america/canada/ontario" }
+  - { id: north-america-canada-prince-edward-island, name: "Prince Edward Island", country: "NA", geopath: "north-america/canada/prince-edward-island" }
+  - { id: north-america-canada-quebec, name: "Quebec", country: "NA", geopath: "north-america/canada/quebec" }
+  - { id: north-america-canada-saskatchewan, name: "Saskatchewan", country: "NA", geopath: "north-america/canada/saskatchewan" }
+  - { id: north-america-canada-yukon, name: "Yukon", country: "NA", geopath: "north-america/canada/yukon" }
+  - { id: north-america-greenland, name: "Greenland", country: "NA", geopath: "north-america/greenland" }
+  - { id: north-america-mexico, name: "Mexico", country: "NA", geopath: "north-america/mexico" }
+  - { id: north-america-us-alabama, name: "us/alabama", country: "NA", geopath: "north-america/us/alabama" }
+  - { id: north-america-us-alaska, name: "us/alaska", country: "NA", geopath: "north-america/us/alaska" }
+  - { id: north-america-us-arizona, name: "us/arizona", country: "NA", geopath: "north-america/us/arizona" }
+  - { id: north-america-us-arkansas, name: "us/arkansas", country: "NA", geopath: "north-america/us/arkansas" }
+  - { id: north-america-us-california-norcal, name: "Northern California", country: "NA", geopath: "north-america/us/california/norcal" }
+  - { id: north-america-us-california-socal, name: "Southern California", country: "NA", geopath: "north-america/us/california/socal" }
+  - { id: north-america-us-colorado, name: "us/colorado", country: "NA", geopath: "north-america/us/colorado" }
+  - { id: north-america-us-connecticut, name: "us/connecticut", country: "NA", geopath: "north-america/us/connecticut" }
+  - { id: north-america-us-delaware, name: "us/delaware", country: "NA", geopath: "north-america/us/delaware" }
+  - { id: north-america-us-district-of-columbia, name: "us/district-of-columbia", country: "NA", geopath: "north-america/us/district-of-columbia" }
+  - { id: north-america-us-florida, name: "us/florida", country: "NA", geopath: "north-america/us/florida" }
+  - { id: north-america-us-georgia, name: "Georgia", country: "NA", geopath: "north-america/us/georgia" }
+  - { id: north-america-us-hawaii, name: "us/hawaii", country: "NA", geopath: "north-america/us/hawaii" }
+  - { id: north-america-us-idaho, name: "us/idaho", country: "NA", geopath: "north-america/us/idaho" }
+  - { id: north-america-us-illinois, name: "us/illinois", country: "NA", geopath: "north-america/us/illinois" }
+  - { id: north-america-us-indiana, name: "us/indiana", country: "NA", geopath: "north-america/us/indiana" }
+  - { id: north-america-us-iowa, name: "us/iowa", country: "NA", geopath: "north-america/us/iowa" }
+  - { id: north-america-us-kansas, name: "us/kansas", country: "NA", geopath: "north-america/us/kansas" }
+  - { id: north-america-us-kentucky, name: "us/kentucky", country: "NA", geopath: "north-america/us/kentucky" }
+  - { id: north-america-us-louisiana, name: "us/louisiana", country: "NA", geopath: "north-america/us/louisiana" }
+  - { id: north-america-us-maine, name: "us/maine", country: "NA", geopath: "north-america/us/maine" }
+  - { id: north-america-us-maryland, name: "us/maryland", country: "NA", geopath: "north-america/us/maryland" }
+  - { id: north-america-us-massachusetts, name: "us/massachusetts", country: "NA", geopath: "north-america/us/massachusetts" }
+  - { id: north-america-us-michigan, name: "us/michigan", country: "NA", geopath: "north-america/us/michigan" }
+  - { id: north-america-us-minnesota, name: "us/minnesota", country: "NA", geopath: "north-america/us/minnesota" }
+  - { id: north-america-us-mississippi, name: "us/mississippi", country: "NA", geopath: "north-america/us/mississippi" }
+  - { id: north-america-us-missouri, name: "us/missouri", country: "NA", geopath: "north-america/us/missouri" }
+  - { id: north-america-us-montana, name: "us/montana", country: "NA", geopath: "north-america/us/montana" }
+  - { id: north-america-us-nebraska, name: "us/nebraska", country: "NA", geopath: "north-america/us/nebraska" }
+  - { id: north-america-us-nevada, name: "us/nevada", country: "NA", geopath: "north-america/us/nevada" }
+  - { id: north-america-us-new-hampshire, name: "us/new-hampshire", country: "NA", geopath: "north-america/us/new-hampshire" }
+  - { id: north-america-us-new-jersey, name: "us/new-jersey", country: "NA", geopath: "north-america/us/new-jersey" }
+  - { id: north-america-us-new-mexico, name: "us/new-mexico", country: "NA", geopath: "north-america/us/new-mexico" }
+  - { id: north-america-us-new-york, name: "us/new-york", country: "NA", geopath: "north-america/us/new-york" }
+  - { id: north-america-us-north-carolina, name: "us/north-carolina", country: "NA", geopath: "north-america/us/north-carolina" }
+  - { id: north-america-us-north-dakota, name: "us/north-dakota", country: "NA", geopath: "north-america/us/north-dakota" }
+  - { id: north-america-us-ohio, name: "us/ohio", country: "NA", geopath: "north-america/us/ohio" }
+  - { id: north-america-us-oklahoma, name: "us/oklahoma", country: "NA", geopath: "north-america/us/oklahoma" }
+  - { id: north-america-us-oregon, name: "us/oregon", country: "NA", geopath: "north-america/us/oregon" }
+  - { id: north-america-us-pennsylvania, name: "us/pennsylvania", country: "NA", geopath: "north-america/us/pennsylvania" }
+  - { id: north-america-us-puerto-rico, name: "us/puerto-rico", country: "NA", geopath: "north-america/us/puerto-rico" }
+  - { id: north-america-us-rhode-island, name: "us/rhode-island", country: "NA", geopath: "north-america/us/rhode-island" }
+  - { id: north-america-us-south-carolina, name: "us/south-carolina", country: "NA", geopath: "north-america/us/south-carolina" }
+  - { id: north-america-us-south-dakota, name: "us/south-dakota", country: "NA", geopath: "north-america/us/south-dakota" }
+  - { id: north-america-us-tennessee, name: "us/tennessee", country: "NA", geopath: "north-america/us/tennessee" }
+  - { id: north-america-us-texas, name: "us/texas", country: "NA", geopath: "north-america/us/texas" }
+  - { id: north-america-us-us-virgin-islands, name: "us/us-virgin-islands", country: "NA", geopath: "north-america/us/us-virgin-islands" }
+  - { id: north-america-us-utah, name: "us/utah", country: "NA", geopath: "north-america/us/utah" }
+  - { id: north-america-us-vermont, name: "us/vermont", country: "NA", geopath: "north-america/us/vermont" }
+  - { id: north-america-us-virginia, name: "us/virginia", country: "NA", geopath: "north-america/us/virginia" }
+  - { id: north-america-us-washington, name: "us/washington", country: "NA", geopath: "north-america/us/washington" }
+  - { id: north-america-us-west-virginia, name: "us/west-virginia", country: "NA", geopath: "north-america/us/west-virginia" }
+  - { id: north-america-us-wisconsin, name: "us/wisconsin", country: "NA", geopath: "north-america/us/wisconsin" }
+  - { id: north-america-us-wyoming, name: "us/wyoming", country: "NA", geopath: "north-america/us/wyoming" }
+  - { id: australia-oceania-american-oceania, name: "American Oceania", country: "OC", geopath: "australia-oceania/american-oceania" }
+  - { id: australia-oceania-australia-act, name: "Australian Capital Territory", country: "OC", geopath: "australia-oceania/australia/act" }
+  - { id: australia-oceania-australia-ashmore-cartier, name: "Ashmore and Cartier Islands", country: "OC", geopath: "australia-oceania/australia/ashmore-cartier" }
+  - { id: australia-oceania-australia-christmas-island, name: "Christmas Island", country: "OC", geopath: "australia-oceania/australia/christmas-island" }
+  - { id: australia-oceania-australia-cocos-islands, name: "Cocos (Keeling) Islands", country: "OC", geopath: "australia-oceania/australia/cocos-islands" }
+  - { id: australia-oceania-australia-coral-sea-islands, name: "Coral Sea Islands", country: "OC", geopath: "australia-oceania/australia/coral-sea-islands" }
+  - { id: australia-oceania-australia-heard-mcdonald, name: "Heard Island and McDonald Islands", country: "OC", geopath: "australia-oceania/australia/heard-mcdonald" }
+  - { id: australia-oceania-australia-new-south-wales, name: "New South Wales (with ACT and JBT)", country: "OC", geopath: "australia-oceania/australia/new-south-wales" }
+  - { id: australia-oceania-australia-norfolk-island, name: "Norfolk Island", country: "OC", geopath: "australia-oceania/australia/norfolk-island" }
+  - { id: australia-oceania-australia-northern-territory, name: "Northern Territory", country: "OC", geopath: "australia-oceania/australia/northern-territory" }
+  - { id: australia-oceania-australia-queensland, name: "Queensland", country: "OC", geopath: "australia-oceania/australia/queensland" }
+  - { id: australia-oceania-australia-south-australia, name: "South Australia", country: "OC", geopath: "australia-oceania/australia/south-australia" }
+  - { id: australia-oceania-australia-tasmania, name: "Tasmania", country: "OC", geopath: "australia-oceania/australia/tasmania" }
+  - { id: australia-oceania-australia-victoria, name: "Victoria", country: "OC", geopath: "australia-oceania/australia/victoria" }
+  - { id: australia-oceania-australia-western-australia, name: "Western Australia", country: "OC", geopath: "australia-oceania/australia/western-australia" }
+  - { id: australia-oceania-cook-islands, name: "Cook Islands", country: "OC", geopath: "australia-oceania/cook-islands" }
+  - { id: australia-oceania-fiji, name: "Fiji", country: "OC", geopath: "australia-oceania/fiji" }
+  - { id: australia-oceania-ile-de-clipperton, name: "Île de Clipperton", country: "OC", geopath: "australia-oceania/ile-de-clipperton" }
+  - { id: australia-oceania-kiribati, name: "Kiribati", country: "OC", geopath: "australia-oceania/kiribati" }
+  - { id: australia-oceania-marshall-islands, name: "Marshall Islands", country: "OC", geopath: "australia-oceania/marshall-islands" }
+  - { id: australia-oceania-micronesia, name: "Micronesia", country: "OC", geopath: "australia-oceania/micronesia" }
+  - { id: australia-oceania-nauru, name: "Nauru", country: "OC", geopath: "australia-oceania/nauru" }
+  - { id: australia-oceania-new-caledonia, name: "New Caledonia", country: "OC", geopath: "australia-oceania/new-caledonia" }
+  - { id: australia-oceania-new-zealand, name: "New Zealand", country: "OC", geopath: "australia-oceania/new-zealand" }
+  - { id: australia-oceania-niue, name: "Niue", country: "OC", geopath: "australia-oceania/niue" }
+  - { id: australia-oceania-palau, name: "Palau", country: "OC", geopath: "australia-oceania/palau" }
+  - { id: australia-oceania-papua-new-guinea, name: "Papua New Guinea", country: "OC", geopath: "australia-oceania/papua-new-guinea" }
+  - { id: australia-oceania-pitcairn-islands, name: "Pitcairn Islands", country: "OC", geopath: "australia-oceania/pitcairn-islands" }
+  - { id: australia-oceania-polynesie-francaise, name: "Polynésie française (French Polynesia)", country: "OC", geopath: "australia-oceania/polynesie-francaise" }
+  - { id: australia-oceania-samoa, name: "Samoa", country: "OC", geopath: "australia-oceania/samoa" }
+  - { id: australia-oceania-solomon-islands, name: "Solomon Islands", country: "OC", geopath: "australia-oceania/solomon-islands" }
+  - { id: australia-oceania-tokelau, name: "Tokelau", country: "OC", geopath: "australia-oceania/tokelau" }
+  - { id: australia-oceania-tonga, name: "Tonga", country: "OC", geopath: "australia-oceania/tonga" }
+  - { id: australia-oceania-tuvalu, name: "Tuvalu", country: "OC", geopath: "australia-oceania/tuvalu" }
+  - { id: australia-oceania-vanuatu, name: "Vanuatu", country: "OC", geopath: "australia-oceania/vanuatu" }
+  - { id: australia-oceania-wallis-et-futuna, name: "Wallis et Futuna", country: "OC", geopath: "australia-oceania/wallis-et-futuna" }
+  - { id: south-america-argentina, name: "Argentina", country: "SA", geopath: "south-america/argentina" }
+  - { id: south-america-bolivia, name: "Bolivia", country: "SA", geopath: "south-america/bolivia" }
+  - { id: south-america-brazil-centro-oeste, name: "Centro-Oeste", country: "SA", geopath: "south-america/brazil/centro-oeste" }
+  - { id: south-america-brazil-nordeste, name: "Nordeste", country: "SA", geopath: "south-america/brazil/nordeste" }
+  - { id: south-america-brazil-norte, name: "Norte", country: "SA", geopath: "south-america/brazil/norte" }
+  - { id: south-america-brazil-sudeste, name: "Sudeste", country: "SA", geopath: "south-america/brazil/sudeste" }
+  - { id: south-america-brazil-sul, name: "Sul", country: "SA", geopath: "south-america/brazil/sul" }
+  - { id: south-america-chile, name: "Chile", country: "SA", geopath: "south-america/chile" }
+  - { id: south-america-colombia, name: "Colombia", country: "SA", geopath: "south-america/colombia" }
+  - { id: south-america-ecuador, name: "Ecuador", country: "SA", geopath: "south-america/ecuador" }
+  - { id: south-america-guyana, name: "Guyana", country: "SA", geopath: "south-america/guyana" }
+  - { id: south-america-paraguay, name: "Paraguay", country: "SA", geopath: "south-america/paraguay" }
+  - { id: south-america-peru, name: "Peru", country: "SA", geopath: "south-america/peru" }
+  - { id: south-america-suriname, name: "Suriname", country: "SA", geopath: "south-america/suriname" }
+  - { id: south-america-uruguay, name: "Uruguay", country: "SA", geopath: "south-america/uruguay" }
+  - { id: south-america-venezuela, name: "Venezuela", country: "SA", geopath: "south-america/venezuela" }
