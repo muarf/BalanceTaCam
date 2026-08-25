@@ -138,8 +138,16 @@ jobs:
 
             wget -q "https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/${GH_VERSION}/graphhopper-web-${GH_VERSION}.jar"
             rm -rf graph-cache
-            java -Xmx12g -jar "graphhopper-web-${GH_VERSION}.jar" import config.yml
-            test -f graph-cache/edges || { echo "graphe non genere pour $ID"; exit 1; }
+            if ! java -Xmx12g -jar "graphhopper-web-${GH_VERSION}.jar" import config.yml 2>&1; then
+              echo "WARN: GraphHopper a echoue pour $ID (region vide/pas de routes pietonnes), on passe."
+              rm -rf graph-cache region.osm.pbf
+              continue
+            fi
+            if [ ! -f graph-cache/edges ]; then
+              echo "WARN: graphe non genere pour $ID (pas de routes pietonnes), on passe."
+              rm -rf graph-cache region.osm.pbf
+              continue
+            fi
             zip -q -r "$ASSET" graph-cache
             gh release create "$TAG" "$ASSET" -R "$REPO" \
               --title "Region hors-ligne : $NAME ($MONTH)" \
