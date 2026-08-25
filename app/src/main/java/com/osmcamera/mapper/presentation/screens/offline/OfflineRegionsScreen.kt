@@ -91,7 +91,7 @@ fun OfflineRegionsScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(state.regions, key = { it.id }) { region ->
+                        items(state.regions, key = { "region_${it.id}" }) { region ->
                             RegionCard(
                                 region = region,
                                 installed = region.id in state.installed,
@@ -113,7 +113,7 @@ fun OfflineRegionsScreen(
                                     modifier = Modifier.padding(top = 8.dp)
                                 )
                             }
-                            items(state.basemaps, key = { it.id }) { basemap ->
+                            items(state.basemaps, key = { "basemap_${it.id}" }) { basemap ->
                                 BasemapCard(
                                     basemap = basemap,
                                     installed = basemap.id in state.installedBasemaps,

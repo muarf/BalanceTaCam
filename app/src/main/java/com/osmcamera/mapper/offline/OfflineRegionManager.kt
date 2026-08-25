@@ -70,10 +70,11 @@ class OfflineRegionManager @Inject constructor(
                 }
                 // Vector basemaps (Mapsforge) — optional section
                 if (root.has("basemaps")) {
+                    val bList = mutableListOf<BasemapInfo>()
                     val bArr = root.getJSONArray("basemaps")
                     for (i in 0 until bArr.length()) {
                         val b = bArr.getJSONObject(i)
-                        _cachedBasemaps.value = _cachedBasemaps.value + listOf(BasemapInfo(
+                        bList.add(BasemapInfo(
                             id = b.getString("id"),
                             name = b.getString("name"),
                             url = b.getString("url"),
@@ -83,6 +84,7 @@ class OfflineRegionManager @Inject constructor(
                             }
                         ))
                     }
+                    _cachedBasemaps.value = bList
                     Log.i(TAG, "Manifest: ${_cachedBasemaps.value.size} cartes vectorielles")
                 } else {
                     _cachedBasemaps.value = emptyList()
