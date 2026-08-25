@@ -113,6 +113,27 @@ class AuthRepository @Inject constructor(
     }
     
     /**
+     * Ensure token is valid — refresh silently if expired
+     */
+    suspend fun ensureValidToken(): Boolean {
+        val tokens = preferencesManager.getOAuthTokens() ?: return false
+        if (!tokens.isExpired()) return true
+        val rt = tokens.refreshToken ?: return false
+        return try {
+            val newTokens = oauthService.refreshAccessToken(rt)
+            val updated = newTokens.copy(
+                userId = tokens.userId,
+                userName = tokens.userName
+            )
+            preferencesManager.saveOAuthTokens(updated)
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("AuthRepository", "Token refresh failed", e)
+            false
+        }
+    }
+    
+    /**
      * Get stored OAuth tokens
      */
     fun getTokens(): OAuthTokens? {

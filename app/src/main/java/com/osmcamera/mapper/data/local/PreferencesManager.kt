@@ -50,6 +50,8 @@ class PreferencesManager @Inject constructor(
     private object OAuthKeys {
         const val ACCESS_TOKEN = "access_token"
         const val ACCESS_TOKEN_SECRET = "access_token_secret"
+        const val REFRESH_TOKEN = "refresh_token"
+        const val EXPIRES_AT = "expires_at"
         const val USER_ID = "user_id"
         const val USER_NAME = "user_name"
     }
@@ -114,6 +116,8 @@ class PreferencesManager @Inject constructor(
         encryptedPrefs.edit().apply {
             putString(OAuthKeys.ACCESS_TOKEN, tokens.accessToken)
             putString(OAuthKeys.ACCESS_TOKEN_SECRET, tokens.accessTokenSecret)
+            tokens.refreshToken?.let { putString(OAuthKeys.REFRESH_TOKEN, it) }
+            tokens.expiresAt?.let { putLong(OAuthKeys.EXPIRES_AT, it) }
             tokens.userId?.let { putLong(OAuthKeys.USER_ID, it) }
             tokens.userName?.let { putString(OAuthKeys.USER_NAME, it) }
             apply()
@@ -128,6 +132,10 @@ class PreferencesManager @Inject constructor(
             return OAuthTokens(
                 accessToken = accessToken,
                 accessTokenSecret = accessTokenSecret,
+                refreshToken = encryptedPrefs.getString(OAuthKeys.REFRESH_TOKEN, null),
+                expiresAt = if (encryptedPrefs.contains(OAuthKeys.EXPIRES_AT)) {
+                    encryptedPrefs.getLong(OAuthKeys.EXPIRES_AT, 0)
+                } else null,
                 userId = if (encryptedPrefs.contains(OAuthKeys.USER_ID)) {
                     encryptedPrefs.getLong(OAuthKeys.USER_ID, 0)
                 } else null,
@@ -142,6 +150,8 @@ class PreferencesManager @Inject constructor(
         encryptedPrefs.edit().apply {
             remove(OAuthKeys.ACCESS_TOKEN)
             remove(OAuthKeys.ACCESS_TOKEN_SECRET)
+            remove(OAuthKeys.REFRESH_TOKEN)
+            remove(OAuthKeys.EXPIRES_AT)
             remove(OAuthKeys.USER_ID)
             remove(OAuthKeys.USER_NAME)
             apply()

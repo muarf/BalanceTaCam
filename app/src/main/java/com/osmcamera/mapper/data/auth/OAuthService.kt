@@ -95,10 +95,52 @@ class OAuthService @Inject constructor() {
         
         val json = JSONObject(responseBody)
         val accessToken = json.getString("access_token")
+        val refreshToken = if (json.has("refresh_token")) json.getString("refresh_token") else null
+        val expiresIn = json.optInt("expires_in", 0)
+        val expiresAt = if (expiresIn > 0) System.currentTimeMillis() + expiresIn * 1000L else null
         
         OAuthTokens(
             accessToken = accessToken,
-            accessTokenSecret = "" // Not used in OAuth 2.0
+            accessTokenSecret = "",
+            refreshToken = refreshToken,
+            expiresAt = expiresAt
+        )
+    }
+    
+    /**
+     * Refresh an expired access token using the refresh token
+     */
+    suspend fun refreshAccessToken(refreshToken: String): OAuthTokens = withContext(Dispatchers.IO) {
+        val requestBody = FormBody.Builder()
+            .add("grant_type", "refresh_token")
+            .add("refresh_token", refreshToken)
+            .add("client_id", CLIENT_ID)
+            .add("client_secret", CLIENT_SECRET)
+            .build()
+        
+        val request = Request.Builder()
+            .url(TOKEN_URL)
+            .post(requestBody)
+            .build()
+        
+        val response = httpClient.newCall(request).execute()
+        val responseBody = response.body?.string() ?: throw Exception("Empty refresh response")
+        
+        if (!response.isSuccessful) {
+            throw Exception("Refresh token request failed: $responseBody")
+        }
+        
+        val json = JSONObject(responseBody)
+        val accessToken = json.getString("access_token")
+        val newRefreshToken = json.optString("refresh_token", refreshToken)
+        val expiresIn = json.optInt("expires_in", 0)
+        val expiresAt = if (expiresIn > 0) System.currentTimeMillis() + expiresIn * 1000L else null
+        
+        OAuthTokens(
+            accessToken = accessToken,
+            accessTokenSecret = "",
+            refreshToken = newRefreshToken,
+            expiresAt = expiresAt
         )
     }
     

@@ -32,8 +32,14 @@ class AuthViewModel @Inject constructor(
     private fun checkAuthentication() {
         viewModelScope.launch {
             if (authRepository.isAuthenticated()) {
-                _uiState.value = AuthUiState.Authenticated
-                loadUserDetails()
+                // Token may have expired — refresh silently if needed
+                val valid = authRepository.ensureValidToken()
+                if (valid) {
+                    _uiState.value = AuthUiState.Authenticated
+                    loadUserDetails()
+                } else {
+                    _uiState.value = AuthUiState.NotAuthenticated
+                }
             } else {
                 _uiState.value = AuthUiState.NotAuthenticated
             }
@@ -89,7 +95,7 @@ class AuthViewModel @Inject constructor(
     }
     
     fun isAuthenticated(): Boolean {
-        return authRepository.isAuthenticated()
+        return _uiState.value is AuthUiState.Authenticated
     }
 }
 
