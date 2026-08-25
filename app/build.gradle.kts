@@ -28,8 +28,9 @@ android {
         applicationId = "com.osmcamera.mapper"
         minSdk = 24
         targetSdk = 34
-        versionCode = 40
-        versionName = "4.0.0"
+        versionCode = 42
+        versionName = "4.2.0"
+        setProperty("archivesBaseName", "BalanceTaCam-v$versionName")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
