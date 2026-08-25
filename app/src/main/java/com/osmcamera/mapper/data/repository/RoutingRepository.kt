@@ -1,6 +1,7 @@
 package com.osmcamera.mapper.data.repository
 
 import android.util.Log
+import com.osmcamera.mapper.BuildConfig
 import com.osmcamera.mapper.data.api.OpenRouteServiceApi
 import com.osmcamera.mapper.data.api.ORSAlternativeRoutes
 import com.osmcamera.mapper.data.api.ORSOptions
@@ -234,6 +235,10 @@ class RoutingRepository @Inject constructor(
         transportMode: String = "foot-walking"
     ): List<Route> {
         if (cameras.isEmpty()) return emptyList()
+        if (BuildConfig.ORS_API_KEY.isEmpty()) {
+            Log.i(TAG, "Clé ORS absente, alternatives en-ligne ignorées")
+            return emptyList()
+        }
         
         val alternatives = mutableListOf<Route>()
         try {
@@ -252,7 +257,7 @@ class RoutingRepository @Inject constructor(
             
             val response = orsApi.getRoute(
                 profile = transportMode,
-                apiKey = OpenRouteServiceApi.API_KEY,
+                apiKey = BuildConfig.ORS_API_KEY,
                 request = request
             )
             
@@ -376,7 +381,7 @@ class RoutingRepository @Inject constructor(
             
             val response = orsApi.getRoute(
                 profile = transportMode,
-                apiKey = OpenRouteServiceApi.API_KEY,
+                apiKey = BuildConfig.ORS_API_KEY,
                 request = request
             )
             
@@ -446,7 +451,7 @@ class RoutingRepository @Inject constructor(
                     
                     val response = orsApi.getRoute(
                         profile = transportMode,
-                        apiKey = OpenRouteServiceApi.API_KEY,
+                        apiKey = BuildConfig.ORS_API_KEY,
                         request = request
                     )
                     
@@ -494,10 +499,11 @@ class RoutingRepository @Inject constructor(
         transportMode: String = "foot-walking",
         avoidanceRadius: Double = 40.0
     ): Route? {
+        if (BuildConfig.ORS_API_KEY.isEmpty()) return null
         try {
             val response = orsApi.getRoute(
                 profile = transportMode,
-                apiKey = OpenRouteServiceApi.API_KEY,
+                apiKey = BuildConfig.ORS_API_KEY,
                 request = request
             )
             

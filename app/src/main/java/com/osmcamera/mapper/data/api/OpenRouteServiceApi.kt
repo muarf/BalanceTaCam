@@ -18,8 +18,7 @@ interface OpenRouteServiceApi {
     
     companion object {
         const val BASE_URL = "https://api.openrouteservice.org/"
-        // Free tier: 2000 requests/day
-        const val API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImRiZWE4ZmVlMWEwYzQ3YTVhYTE5ZmQ4ZGZjNDA4NzM2IiwiaCI6Im11cm11cjY0In0="
+        // La clé est injectée via BuildConfig.ORS_API_KEY (local.properties ou env)
     }
 }
 

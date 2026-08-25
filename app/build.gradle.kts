@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -36,6 +38,17 @@ android {
 
         // Localizations
         resourceConfigurations.addAll(listOf("en", "fr", "es", "de"))
+
+        // Clé API OpenRouteService injectée hors du dépôt :
+        // local.properties (ors.api.key=...) ou variable d'environnement ORS_API_KEY
+        val localProps = Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.isFile) f.inputStream().use { load(it) }
+        }
+        val orsKey = System.getenv("ORS_API_KEY")
+            ?: localProps.getProperty("ors.api.key")
+            ?: ""
+        buildConfigField("String", "ORS_API_KEY", "\"$orsKey\"")
     }
 
     buildTypes {
