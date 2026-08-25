@@ -128,8 +128,12 @@ jobs:
             fi
 
             wget -q "https://download.geofabrik.de/$GEOPATH-latest.osm.pbf" -O region.osm.pbf
-            BBOX=$(osmium fileinfo region.osm.pbf | grep -iE '^(bounding )?box:' | head -1 \
-                   | sed 's/^[^:]*: (//;s/)//' | awk -F', ' '{printf "[%.4f, %.4f, %.4f, %.4f]", $2, $1, $4, $3}')
+            # osmium affiche la bbox sur la ligne suivant "Bounding boxes:"
+            # au format (ouest, sud, est, nord) -> [latS, lonW, latN, lonE]
+            BBOX=$(osmium fileinfo region.osm.pbf \
+                   | grep -A1 '^  Bounding boxes:' | tail -1 \
+                   | sed 's/[()]//g' \
+                   | awk -F',' '{printf "[%.4f, %.4f, %.4f, %.4f]", $2, $1, $4, $3}' || true)
             if [ -z "$BBOX" ]; then BBOX="[0,0,0,0]"; echo "WARN pas de bbox pour $ID"; fi
 
             wget -q "https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/${GH_VERSION}/graphhopper-web-${GH_VERSION}.jar"
