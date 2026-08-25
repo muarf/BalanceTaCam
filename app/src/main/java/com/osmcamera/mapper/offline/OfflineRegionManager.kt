@@ -68,6 +68,25 @@ class OfflineRegionManager @Inject constructor(
                         builtAt = r.optString("builtAt", "")
                     ))
                 }
+                // Vector basemaps (Mapsforge) — optional section
+                if (root.has("basemaps")) {
+                    val bArr = root.getJSONArray("basemaps")
+                    for (i in 0 until bArr.length()) {
+                        val b = bArr.getJSONObject(i)
+                        _cachedBasemaps.value = _cachedBasemaps.value + listOf(BasemapInfo(
+                            id = b.getString("id"),
+                            name = b.getString("name"),
+                            url = b.getString("url"),
+                            bytes = b.getLong("bytes"),
+                            bbox = b.getJSONArray("bbox").let { a ->
+                                (0 until a.length()).map { a.getDouble(it) }
+                            }
+                        ))
+                    }
+                    Log.i(TAG, "Manifest: ${_cachedBasemaps.value.size} cartes vectorielles")
+                } else {
+                    _cachedBasemaps.value = emptyList()
+                }
                 Log.i(TAG, "Manifest: ${regions.size} régions disponibles")
                 Result.success(regions)
             }
@@ -75,6 +94,97 @@ class OfflineRegionManager @Inject constructor(
             Log.e(TAG, "Erreur manifest", e)
             Result.failure(e)
         }
+    }
+
+    private val _cachedBasemaps = MutableStateFlow<List<BasemapInfo>>(emptyList())
+    val cachedBasemaps: StateFlow<List<BasemapInfo>> = _cachedBasemaps
+
+    /**
+     * Basemap files live at files/basemaps/<id>.map with an <id>.json sidecar
+     */
+    private fun basemapsDir(): File = File(context.filesDir, "basemaps").apply { mkdirs() }
+
+    fun installedBasemapIds(): List<String> =
+        basemapsDir().listFiles()?.filter { it.extension == "map" }?.map { it.nameWithoutExtension } ?: emptyList()
+
+    fun installedBasemapFiles(): List<File> =
+        basemapsDir().listFiles()?.filter { it.extension == "map" && it.length() > 0 }?.sortedBy { it.name } ?: emptyList()
+
+    fun installedBasemapUrl(id: String): String? {
+        val metaFile = File(basemapsDir(), "$id.json")
+        if (!metaFile.isFile) return null
+        return try {
+            JSONObject(metaFile.readText()).optString("url", "").ifEmpty { null }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    fun basemapFile(id: String): File? {
+        val f = File(basemapsDir(), "$id.map")
+        return if (f.isFile && f.length() > 0) f else null
+    }
+
+    suspend fun downloadBasemap(info: BasemapInfo, overwrite: Boolean = false): Result<Unit> = withContext(Dispatchers.IO) {
+        val existing = basemapFile(info.id)
+        if (!overwrite && existing != null) return@withContext Result.success(Unit)
+        _downloadState.value = DownloadState.Downloading(0f, 0L, info.bytes)
+        try {
+            val request = Request.Builder().url(info.url).build()
+            okHttpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw IOException("Téléchargement HTTP ${response.code}")
+                val total = response.body?.contentLength() ?: info.bytes
+                val tmp = File(context.cacheDir, "${info.id}.map.part")
+
+                response.body!!.byteStream().use { input ->
+                    tmp.outputStream().use { output ->
+                        val buf = ByteArray(DEFAULT_BUFFER_SIZE * 8)
+                        var read: Int
+                        var downloaded = 0L
+                        var lastEmit = 0L
+                        while (input.read(buf).also { read = it } != -1) {
+                            output.write(buf, 0, read)
+                            downloaded += read
+                            if (downloaded - lastEmit > 1024 * 1024) {
+                                lastEmit = downloaded
+                                _downloadState.value = DownloadState.Downloading(
+                                    progress = downloaded.toFloat() / total,
+                                    downloadedBytes = downloaded,
+                                    totalBytes = total
+                                )
+                            }
+                        }
+                        _downloadState.value = DownloadState.Downloading(1f, downloaded, total)
+                    }
+                }
+
+                if (!tmp.renameTo(File(basemapsDir(), "${info.id}.map"))) {
+                    tmp.copyTo(File(basemapsDir(), "${info.id}.map"), overwrite = true)
+                    tmp.delete()
+                }
+                File(basemapsDir(), "${info.id}.json").writeText(
+                    JSONObject().apply {
+                        put("id", info.id)
+                        put("url", info.url)
+                        put("bytes", info.bytes)
+                    }.toString()
+                )
+                Log.i(TAG, "Carte ${info.id} installée")
+            }
+            _downloadState.value = DownloadState.Done
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Échec téléchargement carte ${info.id}", e)
+            File(basemapsDir(), "${info.id}.map").delete()
+            _downloadState.value = DownloadState.Error(e.message ?: "Erreur inconnue")
+            Result.failure(e)
+        }
+    }
+
+    fun deleteBasemap(id: String) {
+        File(basemapsDir(), "$id.map").delete()
+        File(basemapsDir(), "$id.json").delete()
+        Log.i(TAG, "Carte $id supprimée")
     }
 
     /**
@@ -113,8 +223,23 @@ class OfflineRegionManager @Inject constructor(
         return if (dir.isDirectory && File(dir, "edges").isFile) dir else null
     }
 
-    suspend fun downloadRegion(info: RegionInfo): Result<Unit> = withContext(Dispatchers.IO) {
-        if (installedRegionIds().contains(info.id)) {
+    /**
+     * Source URL of the installed region build, used to detect newer weekly builds
+     */
+    fun installedGraphUrl(regionId: String): String? {
+        val metaFile = File(File(regionsDir(), regionId), "meta.json")
+        if (!metaFile.isFile) return null
+        return try {
+            JSONObject(metaFile.readText()).optString("graphUrl", "").ifEmpty { null }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    suspend fun downloadRegion(info: RegionInfo, overwrite: Boolean = false): Result<Unit> = withContext(Dispatchers.IO) {
+        if (overwrite) {
+            deleteRegion(info.id)
+        } else if (installedRegionIds().contains(info.id)) {
             return@withContext Result.success(Unit)
         }
         _downloadState.value = DownloadState.Downloading(0f, 0L, info.graphBytes)
@@ -158,6 +283,7 @@ class OfflineRegionManager @Inject constructor(
                         put("bbox", org.json.JSONArray(info.bbox))
                         put("builtAt", info.builtAt)
                         put("bytes", info.graphBytes)
+                        put("graphUrl", info.graphUrl)
                     }.toString()
                 )
                 tmp.delete()

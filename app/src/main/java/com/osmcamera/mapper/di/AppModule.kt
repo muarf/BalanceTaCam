@@ -48,7 +48,7 @@ object AppModule {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
-        
+
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .addInterceptor { chain ->
@@ -57,6 +57,25 @@ object AppModule {
                     .build()
                 chain.proceed(request)
             }
+            .proxySelector(object : java.net.ProxySelector() {
+                override fun select(uri: java.net.URI?): List<java.net.Proxy> {
+                    return if (uri != null && com.osmcamera.mapper.offline.TorProxyHolder.enabled) {
+                        listOf(java.net.Proxy(
+                            java.net.Proxy.Type.SOCKS,
+                            java.net.InetSocketAddress(
+                                com.osmcamera.mapper.offline.TorProxyHolder.HOST,
+                                com.osmcamera.mapper.offline.TorProxyHolder.PORT
+                            )
+                        ))
+                    } else {
+                        listOf(java.net.Proxy.NO_PROXY)
+                    }
+                }
+
+                override fun connectFailed(uri: java.net.URI?, sa: java.net.SocketAddress?, ioe: java.io.IOException?) {
+                    android.util.Log.w("BalanceTaCam", "Proxy connect failed", ioe)
+                }
+            })
             .connectTimeout(4, TimeUnit.SECONDS)
             .readTimeout(6, TimeUnit.SECONDS)
             .writeTimeout(6, TimeUnit.SECONDS)

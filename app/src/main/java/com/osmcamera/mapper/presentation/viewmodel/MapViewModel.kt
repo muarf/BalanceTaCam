@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.osmcamera.mapper.data.location.LocationService
 import com.osmcamera.mapper.data.model.Camera
 import com.osmcamera.mapper.data.repository.CameraRepository
+import com.osmcamera.mapper.offline.OfflineRegionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +21,11 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
-    private val locationService: LocationService
+    private val locationService: LocationService,
+    private val regionManager: OfflineRegionManager
 ) : ViewModel() {
+
+    fun installedBasemapFiles(): List<java.io.File> = regionManager.installedBasemapFiles()
     
     private val _uiState = MutableStateFlow<MapUiState>(MapUiState.Loading)
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()

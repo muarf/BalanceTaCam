@@ -5,8 +5,22 @@ package com.osmcamera.mapper.offline
  */
 data class RegionsManifest(
     val version: Int = 1,
-    val regions: List<RegionInfo> = emptyList()
+    val regions: List<RegionInfo> = emptyList(),
+    val basemaps: List<BasemapInfo> = emptyList()
 )
+
+data class BasemapInfo(
+    val id: String,
+    val name: String,
+    val url: String,
+    val bytes: Long,
+    val bbox: List<Double>
+) {
+    fun contains(lat: Double, lon: Double): Boolean {
+        if (bbox.size < 4) return false
+        return lat >= bbox[0] && lon >= bbox[1] && lat <= bbox[2] && lon <= bbox[3]
+    }
+}
 
 data class RegionInfo(
     val id: String,

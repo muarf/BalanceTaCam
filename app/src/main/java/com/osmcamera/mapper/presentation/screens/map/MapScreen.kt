@@ -23,6 +23,7 @@ import com.osmcamera.mapper.R
 import com.osmcamera.mapper.presentation.viewmodel.AuthViewModel
 import com.osmcamera.mapper.presentation.viewmodel.MapViewModel
 import kotlinx.coroutines.launch
+import org.osmdroid.mapsforge.MapsForgeTileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.util.GeoPoint
@@ -218,21 +219,37 @@ fun MapScreen(
                     .padding(padding)
             ) {
                 // OSMDroid MapView
+                val forgeSource = remember { mutableStateOf<MapsForgeTileSource?>(null) }
                 AndroidView(
                     factory = { context ->
-                        MapView(context).apply {
-                            setTileSource(TileSourceFactory.MAPNIK)
+                        val startPoint = userLocation ?: GeoPoint(48.8566, 2.3522) // Paris default
+                        val forge = OfflineBasemapHelper.prepare(
+                            context, mapViewModel.installedBasemapFiles(),
+                            startPoint.latitude, startPoint.longitude
+                        )
+                        val mv = if (forge != null) {
+                            forgeSource.value = forge.source
+                            MapView(context, forge.provider).apply {
+                                setUseDataConnection(false)
+                                setTileSource(forge.source)
+                            }
+                        } else {
+                            MapView(context)
+                        }
+                        mv.apply {
+                            if (forge == null) {
+                                setTileSource(TileSourceFactory.MAPNIK)
+                                setUseDataConnection(true)
+                            }
                             setMultiTouchControls(true)
                             
                             // Enable all gestures
                             isClickable = true
                             isFocusable = true
                             setBuiltInZoomControls(false)
-                            setUseDataConnection(true)
-                            
+                                                    
                             // Set initial position
                             controller.setZoom(15.0)
-                            val startPoint = userLocation ?: GeoPoint(48.8566, 2.3522) // Paris default
                             controller.setCenter(startPoint)
                             
                             // Force enable touch
@@ -332,8 +349,7 @@ fun MapScreen(
                             })
                         }
                     },
-                    update = { map ->
-                        // 1. Update route ONLY when the selected route actually changes
+                    update = { map ->                        // 1. Update route ONLY when the selected route actually changes
                         if (selectedRoute?.id != lastDrawnRouteId) {
                             lastDrawnRouteId = selectedRoute?.id
                             val route = selectedRoute
@@ -425,6 +441,10 @@ fun MapScreen(
                     },
                     modifier = Modifier.fillMaxSize()
                 )
+
+                DisposableEffect(Unit) {
+                    onDispose { OfflineBasemapHelper.dispose(forgeSource.value) }
+                }
                 
                 // Show route point selection banner
                 if (routePickTarget != null) {

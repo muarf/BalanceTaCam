@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.osmcamera.mapper.offline.BasemapInfo
 import com.osmcamera.mapper.offline.RegionInfo
 import com.osmcamera.mapper.presentation.viewmodel.OfflineRegionsViewModel
 import java.text.NumberFormat
@@ -93,12 +95,37 @@ fun OfflineRegionsScreen(
                             RegionCard(
                                 region = region,
                                 installed = region.id in state.installed,
+                                updatable = region.id in state.updatable,
                                 downloading = state.downloadingId == region.id,
                                 progress = state.downloadProgress,
                                 statusText = if (state.downloadingId == region.id) state.statusText else "",
                                 onDownload = { viewModel.download(region) },
+                                onUpdate = { viewModel.download(region, overwrite = true) },
                                 onDelete = { viewModel.delete(region) }
                             )
+                        }
+
+                        if (state.basemaps.isNotEmpty()) {
+                            item {
+                                Text(
+                                    "Cartes hors-ligne (affichage)",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                            items(state.basemaps, key = { it.id }) { basemap ->
+                                BasemapCard(
+                                    basemap = basemap,
+                                    installed = basemap.id in state.installedBasemaps,
+                                    updatable = basemap.id in state.updatableBasemaps,
+                                    downloading = state.downloadingId == basemap.id,
+                                    progress = state.downloadProgress,
+                                    statusText = if (state.downloadingId == basemap.id) state.statusText else "",
+                                    onDownload = { viewModel.downloadBasemap(basemap) },
+                                    onUpdate = { viewModel.downloadBasemap(basemap, overwrite = true) },
+                                    onDelete = { viewModel.deleteBasemap(basemap) }
+                                )
+                            }
                         }
                     }
                 }
@@ -111,10 +138,12 @@ fun OfflineRegionsScreen(
 private fun RegionCard(
     region: RegionInfo,
     installed: Boolean,
+    updatable: Boolean,
     downloading: Boolean,
     progress: Float,
     statusText: String,
     onDownload: () -> Unit,
+    onUpdate: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -129,6 +158,33 @@ private fun RegionCard(
                     )
                 }
                 when {
+                    installed && updatable -> {
+                        var confirmDelete by remember { mutableStateOf(false) }
+                        Button(
+                            onClick = onUpdate,
+                            enabled = !downloading,
+                            modifier = Modifier.padding(end = 4.dp)
+                        ) { Text("Mettre à jour") }
+                        IconButton(onClick = { confirmDelete = true }, enabled = !downloading) {
+                            Icon(Icons.Default.Delete, contentDescription = "Supprimer",
+                                tint = MaterialTheme.colorScheme.error)
+                        }
+                        if (confirmDelete) {
+                            AlertDialog(
+                                onDismissRequest = { confirmDelete = false },
+                                title = { Text("Supprimer ${region.name} ?") },
+                                text = { Text("Le routage hors-ligne sera indisponible pour cette région.") },
+                                confirmButton = {
+                                    TextButton(onClick = { confirmDelete = false; onDelete() }) {
+                                        Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { confirmDelete = false }) { Text("Annuler") }
+                                }
+                            )
+                        }
+                    }
                     installed -> {
                         var confirmDelete by remember { mutableStateOf(false) }
                         TextButton(onClick = { confirmDelete = true }, enabled = !downloading) {
@@ -165,11 +221,19 @@ private fun RegionCard(
                 }
             } else if (installed) {
                 Spacer(Modifier.height(4.dp))
-                Text(
-                    "✅ Installée",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelMedium
-                )
+                if (updatable) {
+                    Text(
+                        "⬆️ Nouvelle version disponible",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                } else {
+                    Text(
+                        "✅ Installée",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
         }
     }
@@ -180,5 +244,99 @@ private fun formatBytes(bytes: Long): String {
     return when {
         bytes >= 1_000_000_000 -> "${nf.format(bytes / 100_000_000 / 10.0)} Go"
         else -> "${nf.format(bytes / 100_000 / 10.0)} Mo"
+    }
+}
+
+@Composable
+private fun BasemapCard(
+    basemap: BasemapInfo,
+    installed: Boolean,
+    updatable: Boolean,
+    downloading: Boolean,
+    progress: Float,
+    statusText: String,
+    onDownload: () -> Unit,
+    onUpdate: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(basemap.name, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        formatBytes(basemap.bytes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                when {
+                    installed && updatable -> {
+                        var confirmDelete by remember { mutableStateOf(false) }
+                        Button(onClick = onUpdate, enabled = !downloading,
+                            modifier = Modifier.padding(end = 4.dp)) { Text("Mettre à jour") }
+                        IconButton(onClick = { confirmDelete = true }, enabled = !downloading) {
+                            Icon(Icons.Default.Delete, contentDescription = "Supprimer",
+                                tint = MaterialTheme.colorScheme.error)
+                        }
+                        if (confirmDelete) {
+                            AlertDialog(
+                                onDismissRequest = { confirmDelete = false },
+                                title = { Text("Supprimer ${basemap.name} ?") },
+                                text = { Text("La carte reviendra en mode en-ligne.") },
+                                confirmButton = {
+                                    TextButton(onClick = { confirmDelete = false; onDelete() }) {
+                                        Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { confirmDelete = false }) { Text("Annuler") }
+                                }
+                            )
+                        }
+                    }
+                    installed -> {
+                        var confirmDelete by remember { mutableStateOf(false) }
+                        TextButton(onClick = { confirmDelete = true }, enabled = !downloading) {
+                            Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                        }
+                        if (confirmDelete) {
+                            AlertDialog(
+                                onDismissRequest = { confirmDelete = false },
+                                title = { Text("Supprimer ${basemap.name} ?") },
+                                text = { Text("La carte reviendra en mode en-ligne.") },
+                                confirmButton = {
+                                    TextButton(onClick = { confirmDelete = false; onDelete() }) {
+                                        Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { confirmDelete = false }) { Text("Annuler") }
+                                }
+                            )
+                        }
+                    }
+                    downloading -> {}
+                    else -> {
+                        Button(onClick = onDownload) { Text("Télécharger") }
+                    }
+                }
+            }
+
+            if (downloading) {
+                Spacer(Modifier.height(8.dp))
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                if (statusText.isNotEmpty()) {
+                    Text(statusText, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+                }
+            } else if (installed) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    if (updatable) "⬆️ Nouvelle version disponible" else "✅ Installée",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
     }
 }

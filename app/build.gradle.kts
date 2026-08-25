@@ -115,7 +115,8 @@ dependencies {
     implementation("com.github.scribejava:scribejava-core:8.3.3")
 
     // OSMDroid - Map library
-    implementation("org.osmdroid:osmdroid-android:6.1.18")
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.20")
 
     // GraphHopper - routage offline embarqué (PoC)
     implementation("com.graphhopper:graphhopper-core:5.3")
