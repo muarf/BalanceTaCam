@@ -178,7 +178,7 @@ class RoutingRepository @Inject constructor(
 
             Log.i(TAG, "[OFFLINE] ${cameras.size} caméras locales, région $regionId")
 
-            offlineEngine.calculateAntiCameraRoutes(start, end, cameras)
+            offlineEngine.calculateAntiCameraRoutes(start, end, cameras, avoidanceRadius)
         } catch (e: Exception) {
             Log.e(TAG, "[OFFLINE] Échec", e)
             Result.failure(e)

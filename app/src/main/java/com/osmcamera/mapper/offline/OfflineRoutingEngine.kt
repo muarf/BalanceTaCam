@@ -76,58 +76,118 @@ class OfflineRoutingEngine @Inject constructor() {
     fun calculateAntiCameraRoutes(
         start: GeoPoint,
         end: GeoPoint,
-        cameras: List<Camera>
+        cameras: List<Camera>,
+        avoidanceRadius: Double = AVOID_RADIUS_M
     ): Result<RouteComparison> {
-        val h = hopper ?: return Result.failure(IllegalStateException("Graphe non chargé"))
+        val h = hopper ?: return Result.failure(IllegalStateException("Graphe hors-ligne non chargé"))
 
         return try {
             val t0 = System.currentTimeMillis()
+            val publicCameras = cameras.filter { it.surveillance == "public" || it.surveillance == null }
+            Log.d(TAG, "Offline routing: ${publicCameras.size} public cameras available")
 
             // 1. Direct route
-            val directRoute = route(h, start, end, cameras, "direct")
+            val directRoute = route(h, start, end, publicCameras, "direct", avoidanceRadius)
                 ?: return Result.failure(Exception("Aucun itinéraire direct trouvé"))
             Log.d(TAG, "DIRECT : ${directRoute.distance.toInt()} m | ${directRoute.cameraCount} caméras")
 
             val candidates = mutableListOf(directRoute)
 
-            // 2. Iterative waypoint refinement: repeatedly detour the worst remaining
-            // camera cluster on the CURRENT best route, composing previous vias.
+            // 2. Native GraphHopper alternative routes
+            try {
+                val altReq = com.graphhopper.GHRequest(
+                    listOf(
+                        com.graphhopper.util.shapes.GHPoint(start.latitude, start.longitude),
+                        com.graphhopper.util.shapes.GHPoint(end.latitude, end.longitude)
+                    )
+                ).setProfile("foot")
+                altReq.algorithm = "alternative_route"
+                altReq.hints.putObject("alternative_route.max_share_factor", 0.7)
+                altReq.hints.putObject("alternative_route.max_weight_factor", 1.8)
+
+                val altResp = h.route(altReq)
+                if (!altResp.hasErrors()) {
+                    altResp.all.forEachIndexed { idx, path ->
+                        val pl = path.points
+                        val pts = ArrayList<GeoPoint>(pl.size())
+                        for (i in 0 until pl.size()) {
+                            pts.add(GeoPoint(pl.getLat(i), pl.getLon(i)))
+                        }
+                        val d = path.distance
+                        candidates.add(Route(
+                            id = "alt_$idx",
+                            points = pts,
+                            distance = d,
+                            duration = d / WALKING_SPEED_MS,
+                            cameraCount = GeometryUtils.countCamerasNearRoute(pts, publicCameras, avoidanceRadius)
+                        ))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Native alternatives error: ${e.message}")
+            }
+
+            // 3. Iterative local street detours around camera obstacles
+            var currentBest = candidates.minByOrNull { it.cameraCount } ?: directRoute
             var currentVias = emptyList<GeoPoint>()
-            var currentBest = directRoute
 
             loop@ for (round in 0 until MAX_ROUNDS) {
                 if (currentBest.cameraCount == 0) break@loop
 
-                val clusters = clusterCamerasOnRoute(currentBest.points, cameras)
-                if (clusters.isEmpty()) break@loop
-                val target = clusters.first()
+                // Find the first public camera hit on the current route
+                val hitCameras = GeometryUtils.getCamerasAlongRoute(currentBest.points, publicCameras, avoidanceRadius)
+                if (hitCameras.isEmpty()) break@loop
+                val targetCam = hitCameras.first()
 
-                val dirLat = end.latitude - start.latitude
-                val dirLon = end.longitude - start.longitude
-                val norm = kotlin.math.sqrt(dirLat * dirLat + dirLon * dirLon)
-                if (norm == 0.0) break@loop
-                val uLat = dirLat / norm
-                val uLon = dirLon / norm
+                // Find local road direction near this camera on current route
+                val pts = currentBest.points
+                var bestIdx = 0
+                var minD = Double.MAX_VALUE
+                for (i in pts.indices) {
+                    val d = GeometryUtils.distance(pts[i].latitude, pts[i].longitude, targetCam.latitude, targetCam.longitude)
+                    if (d < minD) {
+                        minD = d
+                        bestIdx = i
+                    }
+                }
 
-                val cLat = target.map { it.latitude }.average()
-                val cLon = target.map { it.longitude }.average()
+                val prev = pts[maxOf(0, bestIdx - 2)]
+                val next = pts[minOf(pts.size - 1, bestIdx + 2)]
+
+                val cLat = targetCam.latitude
+                val cLon = targetCam.longitude
+                val cosLat = cos(cLat * Math.PI / 180.0)
+
+                val dLat = (next.latitude - prev.latitude)
+                val dLon = (next.longitude - prev.longitude) * cosLat
+                val norm = kotlin.math.hypot(dLat, dLon)
+
+                val (nLat, nLon) = if (norm > 1e-7) {
+                    val tLat = dLat / norm
+                    val tLon = dLon / norm
+                    Pair(-tLon, tLat)
+                } else {
+                    Pair(0.0, 1.0)
+                }
 
                 var improved = false
-                OFFSETS_METERS.forEach { offsetM ->
-                    listOf(1.0, -1.0).forEach { side ->
-                        val dLat = offsetM * side * (-uLon) / METERS_PER_DEG_LAT
-                        val dLon = offsetM * side * uLon / METERS_PER_DEG_LAT * cos(cLat * Math.PI / 180)
-                        val via = GeoPoint(cLat + dLat, cLon + dLon)
+                val offsets = doubleArrayOf(35.0, 60.0, 95.0, 140.0)
+
+                for (offsetM in offsets) {
+                    for (side in listOf(1.0, -1.0)) {
+                        val vLat = cLat + (offsetM * side * nLat) / METERS_PER_DEG_LAT
+                        val vLon = cLon + (offsetM * side * nLon) / (METERS_PER_DEG_LAT * cosLat)
+                        val via = GeoPoint(vLat, vLon)
 
                         val vias = currentVias + via
                         val route = routePoints(
                             h,
                             listOf(start) + vias + listOf(end),
-                            cameras,
-                            "round${round}_${side}_$offsetM"
-                        ) ?: return@forEach
+                            publicCameras,
+                            "round${round}_${side}_${offsetM.toInt()}",
+                            avoidanceRadius
+                        ) ?: continue
 
-                        Log.d(TAG, "Round $round via=${route.id} -> ${route.distance.toInt()} m, ${route.cameraCount} caméras")
                         candidates.add(route)
 
                         val better = route.cameraCount < currentBest.cameraCount ||
@@ -139,18 +199,17 @@ class OfflineRoutingEngine @Inject constructor() {
                         }
                     }
                 }
+
                 if (!improved) {
-                    Log.i(TAG, "Round $round: aucune amélioration, arrêt")
+                    Log.i(TAG, "Round $round: aucune amélioration locale")
                     break@loop
-                } else {
-                    Log.i(TAG, "Round $round: ${currentBest.cameraCount} caméras restantes (${currentBest.distance.toInt()} m)")
                 }
             }
 
-            // 3. Dedup + rank like the online engine
+            // 4. Dedup + rank
             val unique = mutableListOf<Route>()
             candidates.forEach { r ->
-                if (unique.none { abs(it.distance - r.distance) < 35 && it.cameraCount == r.cameraCount }) {
+                if (unique.none { abs(it.distance - r.distance) < 25 && it.cameraCount == r.cameraCount }) {
                     unique.add(r)
                 }
             }
@@ -160,7 +219,7 @@ class OfflineRoutingEngine @Inject constructor() {
                 bestRoute = sorted.first(),
                 directRoute = directRoute
             )
-            Log.i(TAG, "Routage offline terminé en ${System.currentTimeMillis() - t0} ms")
+            Log.i(TAG, "Routage offline terminé en ${System.currentTimeMillis() - t0} ms (meilleure: ${sorted.first().cameraCount} caméras, ${sorted.first().distance.toInt()}m)")
             Result.success(comparison)
         } catch (e: Exception) {
             Log.e(TAG, "Erreur routage offline", e)
@@ -173,14 +232,16 @@ class OfflineRoutingEngine @Inject constructor() {
         start: GeoPoint,
         end: GeoPoint,
         cameras: List<Camera>,
-        label: String
-    ): Route? = routePoints(h, listOf(start, end), cameras, label)
+        label: String,
+        avoidanceRadius: Double = AVOID_RADIUS_M
+    ): Route? = routePoints(h, listOf(start, end), cameras, label, avoidanceRadius)
 
     private fun routePoints(
         h: GraphHopper,
         waypoints: List<GeoPoint>,
         cameras: List<Camera>,
-        label: String
+        label: String,
+        avoidanceRadius: Double = AVOID_RADIUS_M
     ): Route? {
         return try {
             val request = com.graphhopper.GHRequest(
@@ -206,7 +267,7 @@ class OfflineRoutingEngine @Inject constructor() {
                 points = pts,
                 distance = distance,
                 duration = distance / WALKING_SPEED_MS,
-                cameraCount = GeometryUtils.countCamerasNearRoute(pts, cameras, AVOID_RADIUS_M)
+                cameraCount = GeometryUtils.countCamerasNearRoute(pts, cameras, avoidanceRadius)
             )
         } catch (e: Exception) {
             Log.e(TAG, "$label: échec", e)
