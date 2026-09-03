@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6337,7 +6337,7 @@
       "id": "central-america-panama-map",
       "name": "Panama (carte)",
       "url": "https://download.mapsforge.org/maps/v5/central-america/panama.map",
-      "bytes": 38609471,
+      "bytes": 39031883,
       "bbox": [
         6.644,
         -83.4646,
