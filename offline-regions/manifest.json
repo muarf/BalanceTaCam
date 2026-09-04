@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "regions": [
     {
       "id": "africa-algeria",
@@ -4338,6 +4338,20 @@
       ]
     },
     {
+      "id": "australia-oceania-australia-coral-sea-islands",
+      "name": "Coral Sea Islands",
+      "country": "OC",
+      "graphUrl": "https://github.com/muarf/BalanceTaCam/releases/download/region-australia-oceania-australia-coral-sea-islands-2026.09/region-australia-oceania-australia-coral-sea-islands-2026.09.ghz",
+      "graphBytes": 8343,
+      "bbox": [
+        -30.5783,
+        146.8651,
+        -14.9629,
+        160.4218
+      ],
+      "builtAt": "2026-09-04"
+    },
+    {
       "id": "australia-oceania-australia-new-south-wales",
       "name": "New South Wales (with ACT and JBT)",
       "country": "OC",
@@ -5847,18 +5861,6 @@
         134.0452,
         37.1599,
         155.6058
-      ]
-    },
-    {
-      "id": "asia-japan-kyushu-map",
-      "name": "Kyūshū (carte)",
-      "url": "https://download.mapsforge.org/maps/v5/asia/japan/kyushu.map",
-      "bytes": 269285904,
-      "bbox": [
-        20.7259,
-        122.2344,
-        35.0972,
-        132.8044
       ]
     },
     {
