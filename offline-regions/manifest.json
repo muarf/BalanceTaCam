@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "regions": [
     {
       "id": "africa-algeria",
@@ -5861,6 +5861,18 @@
         134.0452,
         37.1599,
         155.6058
+      ]
+    },
+    {
+      "id": "asia-japan-kyushu-map",
+      "name": "Kyūshū (carte)",
+      "url": "https://download.mapsforge.org/maps/v5/asia/japan/kyushu.map",
+      "bytes": 269285904,
+      "bbox": [
+        20.7259,
+        122.2344,
+        35.0972,
+        132.8044
       ]
     },
     {
