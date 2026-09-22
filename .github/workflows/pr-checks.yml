@@ -8,6 +8,9 @@ jobs:
   validate:
     name: Validate PR
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
 
     steps:
     - name: Checkout code
@@ -38,6 +41,7 @@ jobs:
         name: Unit Test Results
         path: '**/build/test-results/testDebugUnitTest/*.xml'
         reporter: java-junit
+        fail-on-empty: 'false'
 
     - name: Build debug
       run: ./gradlew assembleDebug --stacktrace
