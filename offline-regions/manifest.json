@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "regions": [
     {
       "id": "africa-algeria",
@@ -7200,14 +7200,14 @@
       "id": "europe-portugal-map",
       "name": "Portugal (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/portugal.map",
-      "bytes": 366150207,
+      "bytes": 382705505,
       "bbox": []
     },
     {
       "id": "europe-romania-map",
       "name": "Romania (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/romania.map",
-      "bytes": 298060637,
+      "bytes": 301372065,
       "bbox": [
         43.6125,
         20.2418,
@@ -7219,7 +7219,7 @@
       "id": "europe-serbia-map",
       "name": "Serbia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/serbia.map",
-      "bytes": 200470005,
+      "bytes": 202887356,
       "bbox": [
         42.2298,
         18.8089,
@@ -7231,14 +7231,14 @@
       "id": "europe-slovakia-map",
       "name": "Slovakia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/slovakia.map",
-      "bytes": 233969497,
+      "bytes": 236910343,
       "bbox": []
     },
     {
       "id": "europe-slovenia-map",
       "name": "Slovenia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/slovenia.map",
-      "bytes": 238465781,
+      "bytes": 239545877,
       "bbox": []
     },
     {
