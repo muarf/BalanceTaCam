@@ -1,5 +1,5 @@
 {
-  "version": 13,
+  "version": 14,
   "regions": [
     {
       "id": "africa-algeria",
@@ -5383,42 +5383,42 @@
       "id": "asia-afghanistan-map",
       "name": "Afghanistan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/afghanistan.map",
-      "bytes": 140637663,
+      "bytes": 142773295,
       "bbox": []
     },
     {
       "id": "asia-armenia-map",
       "name": "Armenia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/armenia.map",
-      "bytes": 45905250,
+      "bytes": 47027993,
       "bbox": []
     },
     {
       "id": "asia-azerbaijan-map",
       "name": "Azerbaijan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/azerbaijan.map",
-      "bytes": 55107553,
+      "bytes": 56377138,
       "bbox": []
     },
     {
       "id": "asia-bangladesh-map",
       "name": "Bangladesh (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/bangladesh.map",
-      "bytes": 396722299,
+      "bytes": 419264166,
       "bbox": []
     },
     {
       "id": "asia-bhutan-map",
       "name": "Bhutan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/bhutan.map",
-      "bytes": 24305269,
+      "bytes": 24350098,
       "bbox": []
     },
     {
       "id": "asia-cambodia-map",
       "name": "Cambodia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/cambodia.map",
-      "bytes": 43553815,
+      "bytes": 45205232,
       "bbox": []
     },
     {
@@ -5691,7 +5691,7 @@
       "id": "asia-east-timor-map",
       "name": "East Timor (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/east-timor.map",
-      "bytes": 18585793,
+      "bytes": 18657579,
       "bbox": [
         -9.6901,
         123.7912,
@@ -5703,7 +5703,7 @@
       "id": "asia-gcc-states-map",
       "name": "GCC States (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/gcc-states.map",
-      "bytes": 322177740,
+      "bytes": 327938747,
       "bbox": []
     },
     {
@@ -7081,7 +7081,7 @@
       "id": "europe-netherlands-drenthe-map",
       "name": "Drenthe (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/drenthe.map",
-      "bytes": 42879059,
+      "bytes": 43203799,
       "bbox": [
         52.5823,
         6.1186,
@@ -7093,14 +7093,14 @@
       "id": "europe-netherlands-flevoland-map",
       "name": "Flevoland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/flevoland.map",
-      "bytes": 24723145,
+      "bytes": 25675974,
       "bbox": []
     },
     {
       "id": "europe-netherlands-friesland-map",
       "name": "Friesland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/friesland.map",
-      "bytes": 64883233,
+      "bytes": 65136174,
       "bbox": [
         52.7636,
         4.5973,
@@ -7112,7 +7112,7 @@
       "id": "europe-netherlands-gelderland-map",
       "name": "Gelderland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/gelderland.map",
-      "bytes": 126344803,
+      "bytes": 126900199,
       "bbox": [
         51.7323,
         4.9926,
@@ -7124,14 +7124,14 @@
       "id": "europe-netherlands-groningen-map",
       "name": "Groningen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/groningen.map",
-      "bytes": 38190377,
+      "bytes": 38387043,
       "bbox": []
     },
     {
       "id": "europe-netherlands-limburg-map",
       "name": "Limburg (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/limburg.map",
-      "bytes": 65832839,
+      "bytes": 66018864,
       "bbox": [
         50.6035,
         5.1656,
@@ -7143,14 +7143,14 @@
       "id": "europe-netherlands-noord-brabant-map",
       "name": "Noord-Brabant (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/noord-brabant.map",
-      "bytes": 141304701,
+      "bytes": 141576885,
       "bbox": []
     },
     {
       "id": "europe-netherlands-noord-holland-map",
       "name": "Noord-Holland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/noord-holland.map",
-      "bytes": 129044929,
+      "bytes": 129546689,
       "bbox": [
         52.165,
         3.8969,
@@ -7162,7 +7162,7 @@
       "id": "europe-netherlands-overijssel-map",
       "name": "Overijssel (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/overijssel.map",
-      "bytes": 77752993,
+      "bytes": 78457642,
       "bbox": [
         52.0744,
         5.7768,
@@ -7174,21 +7174,21 @@
       "id": "europe-netherlands-utrecht-map",
       "name": "Utrecht (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/utrecht.map",
-      "bytes": 64750977,
+      "bytes": 65192608,
       "bbox": []
     },
     {
       "id": "europe-netherlands-zeeland-map",
       "name": "Zeeland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/zeeland.map",
-      "bytes": 31784973,
+      "bytes": 31898226,
       "bbox": []
     },
     {
       "id": "europe-netherlands-zuid-holland-map",
       "name": "Zuid-Holland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/netherlands/zuid-holland.map",
-      "bytes": 146436702,
+      "bytes": 147309943,
       "bbox": [
         51.6425,
         3.3453,
@@ -7446,7 +7446,7 @@
       "id": "europe-sweden-map",
       "name": "Sweden (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/sweden.map",
-      "bytes": 825322693,
+      "bytes": 830438433,
       "bbox": [
         55.0265,
         10.5414,
@@ -7458,7 +7458,7 @@
       "id": "europe-switzerland-map",
       "name": "Switzerland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/switzerland.map",
-      "bytes": 332116844,
+      "bytes": 334266727,
       "bbox": [
         45.8164,
         5.9544,
@@ -7470,7 +7470,7 @@
       "id": "europe-turkey-map",
       "name": "Turkey (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/turkey.map",
-      "bytes": 607595061,
+      "bytes": 614175859,
       "bbox": [
         35.717,
         25.524,
@@ -7482,7 +7482,7 @@
       "id": "europe-ukraine-map",
       "name": "Ukraine (with Crimea) (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/ukraine.map",
-      "bytes": 866027184,
+      "bytes": 873985569,
       "bbox": [
         44.0086,
         22.1326,
@@ -7947,7 +7947,7 @@
       "id": "north-america-us-michigan-map",
       "name": "us/michigan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/michigan.map",
-      "bytes": 264539501,
+      "bytes": 272231209,
       "bbox": [
         41.6944,
         -90.4198,
@@ -7959,7 +7959,7 @@
       "id": "north-america-us-minnesota-map",
       "name": "us/minnesota (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/minnesota.map",
-      "bytes": 207668865,
+      "bytes": 223638305,
       "bbox": [
         43.4991,
         -97.2716,
@@ -7971,7 +7971,7 @@
       "id": "north-america-us-mississippi-map",
       "name": "us/mississippi (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/mississippi.map",
-      "bytes": 64051156,
+      "bytes": 65626450,
       "bbox": [
         30.0417,
         -91.6586,
@@ -7983,7 +7983,7 @@
       "id": "north-america-us-missouri-map",
       "name": "us/missouri (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/missouri.map",
-      "bytes": 152954123,
+      "bytes": 160259754,
       "bbox": [
         35.9947,
         -95.7775,
@@ -7995,7 +7995,7 @@
       "id": "north-america-us-montana-map",
       "name": "us/montana (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/montana.map",
-      "bytes": 96697694,
+      "bytes": 98414049,
       "bbox": [
         44.3556,
         -116.0518,
@@ -8007,7 +8007,7 @@
       "id": "north-america-us-nebraska-map",
       "name": "us/nebraska (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/nebraska.map",
-      "bytes": 82789700,
+      "bytes": 86346495,
       "bbox": [
         40.0001,
         -104.7301,
@@ -8019,7 +8019,7 @@
       "id": "north-america-us-nevada-map",
       "name": "us/nevada (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/nevada.map",
-      "bytes": 104688795,
+      "bytes": 107866020,
       "bbox": [
         35.0005,
         -120.0074,
@@ -8031,7 +8031,7 @@
       "id": "north-america-us-new-hampshire-map",
       "name": "us/new-hampshire (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/new-hampshire.map",
-      "bytes": 51467335,
+      "bytes": 53014191,
       "bbox": [
         42.6967,
         -72.5588,
@@ -8043,7 +8043,7 @@
       "id": "north-america-us-new-jersey-map",
       "name": "us/new-jersey (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/new-jersey.map",
-      "bytes": 123288781,
+      "bytes": 125782973,
       "bbox": [
         38.555,
         -75.8351,
@@ -8055,7 +8055,7 @@
       "id": "north-america-us-new-mexico-map",
       "name": "us/new-mexico (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/new-mexico.map",
-      "bytes": 111220636,
+      "bytes": 113506909,
       "bbox": [
         27.0279,
         -109.0504,
@@ -8067,7 +8067,7 @@
       "id": "north-america-us-new-york-map",
       "name": "us/new-york (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/new-york.map",
-      "bytes": 371630316,
+      "bytes": 377664687,
       "bbox": [
         40.4392,
         -79.824,
@@ -8079,7 +8079,7 @@
       "id": "north-america-us-north-carolina-map",
       "name": "us/north-carolina (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/north-carolina.map",
-      "bytes": 310570740,
+      "bytes": 318100523,
       "bbox": [
         32.5578,
         -84.3222,
@@ -8091,7 +8091,7 @@
       "id": "north-america-us-north-dakota-map",
       "name": "us/north-dakota (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/north-dakota.map",
-      "bytes": 81144504,
+      "bytes": 82469614,
       "bbox": [
         45.9345,
         -105.0844,
@@ -8103,7 +8103,7 @@
       "id": "north-america-us-ohio-map",
       "name": "us/ohio (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/ohio.map",
-      "bytes": 254835115,
+      "bytes": 268654696,
       "bbox": [
         38.0986,
         -84.8219,
@@ -8115,14 +8115,14 @@
       "id": "north-america-us-oklahoma-map",
       "name": "us/oklahoma (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/oklahoma.map",
-      "bytes": 121208964,
+      "bytes": 121539449,
       "bbox": []
     },
     {
       "id": "north-america-us-oregon-map",
       "name": "us/oregon (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/oregon.map",
-      "bytes": 193093799,
+      "bytes": 197505196,
       "bbox": [
         41.9634,
         -126.3879,
@@ -8134,7 +8134,7 @@
       "id": "north-america-us-pennsylvania-map",
       "name": "us/pennsylvania (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/pennsylvania.map",
-      "bytes": 258107649,
+      "bytes": 270846851,
       "bbox": [
         38.9214,
         -81.3783,
@@ -8146,7 +8146,7 @@
       "id": "north-america-us-puerto-rico-map",
       "name": "us/puerto-rico (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/puerto-rico.map",
-      "bytes": 67283517,
+      "bytes": 68291658,
       "bbox": [
         17.5157,
         -68.3102,
@@ -8158,7 +8158,7 @@
       "id": "north-america-us-rhode-island-map",
       "name": "us/rhode-island (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/rhode-island.map",
-      "bytes": 34767247,
+      "bytes": 35676811,
       "bbox": [
         40.9992,
         -71.9146,
@@ -8170,7 +8170,7 @@
       "id": "north-america-us-south-carolina-map",
       "name": "us/south-carolina (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/south-carolina.map",
-      "bytes": 122189799,
+      "bytes": 125858511,
       "bbox": [
         32.0297,
         -83.3562,
@@ -8182,7 +8182,7 @@
       "id": "north-america-us-south-dakota-map",
       "name": "us/south-dakota (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/south-dakota.map",
-      "bytes": 45766060,
+      "bytes": 48509968,
       "bbox": [
         42.4774,
         -104.9132,
@@ -8194,7 +8194,7 @@
       "id": "north-america-us-tennessee-map",
       "name": "us/tennessee (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/tennessee.map",
-      "bytes": 140210774,
+      "bytes": 148432588,
       "bbox": [
         34.9827,
         -90.3133,
@@ -8206,7 +8206,7 @@
       "id": "north-america-us-texas-map",
       "name": "us/texas (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/texas.map",
-      "bytes": 575434102,
+      "bytes": 596992049,
       "bbox": [
         25.6676,
         -106.9125,
@@ -8218,7 +8218,7 @@
       "id": "north-america-us-us-virgin-islands-map",
       "name": "us/us-virgin-islands (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/us-virgin-islands.map",
-      "bytes": 3082658,
+      "bytes": 3094923,
       "bbox": [
         17.2825,
         -65.175,
@@ -8230,7 +8230,7 @@
       "id": "north-america-us-utah-map",
       "name": "us/utah (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/utah.map",
-      "bytes": 125039702,
+      "bytes": 129551443,
       "bbox": [
         36.9963,
         -114.0556,
@@ -8242,7 +8242,7 @@
       "id": "north-america-us-vermont-map",
       "name": "us/vermont (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/vermont.map",
-      "bytes": 34338679,
+      "bytes": 35031332,
       "bbox": [
         42.725,
         -73.4394,
@@ -8254,7 +8254,7 @@
       "id": "north-america-us-virginia-map",
       "name": "us/virginia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/virginia.map",
-      "bytes": 296705374,
+      "bytes": 300981444,
       "bbox": [
         36.538,
         -83.6784,
@@ -8266,7 +8266,7 @@
       "id": "north-america-us-washington-map",
       "name": "us/washington (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/washington.map",
-      "bytes": 287244824,
+      "bytes": 295067958,
       "bbox": [
         45.5388,
         -126.7423,
@@ -8278,7 +8278,7 @@
       "id": "north-america-us-west-virginia-map",
       "name": "us/west-virginia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/west-virginia.map",
-      "bytes": 92495279,
+      "bytes": 94882792,
       "bbox": [
         37.1986,
         -82.6496,
@@ -8290,7 +8290,7 @@
       "id": "north-america-us-wisconsin-map",
       "name": "us/wisconsin (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/wisconsin.map",
-      "bytes": 230123842,
+      "bytes": 235628875,
       "bbox": [
         42.489,
         -92.8909,
@@ -8302,7 +8302,7 @@
       "id": "north-america-us-wyoming-map",
       "name": "us/wyoming (carte)",
       "url": "https://download.mapsforge.org/maps/v5/north-america/us/wyoming.map",
-      "bytes": 86221065,
+      "bytes": 88479534,
       "bbox": [
         40.9834,
         -111.0576,
