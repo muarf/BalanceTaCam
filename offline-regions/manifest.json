@@ -1,5 +1,5 @@
 {
-  "version": 15,
+  "version": 16,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6463,7 +6463,7 @@
       "id": "asia-jordan-map",
       "name": "Jordan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/jordan.map",
-      "bytes": 29982149,
+      "bytes": 30148125,
       "bbox": []
     },
     {
@@ -9252,7 +9252,7 @@
       "id": "south-america-brazil-sudeste-map",
       "name": "Sudeste (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/brazil/sudeste.map",
-      "bytes": 786960209,
+      "bytes": 805522030,
       "bbox": [
         -25.4993,
         -53.1189,
@@ -9264,7 +9264,7 @@
       "id": "south-america-brazil-sul-map",
       "name": "Sul (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/brazil/sul.map",
-      "bytes": 396395038,
+      "bytes": 406282971,
       "bbox": [
         -34.8642,
         -59.5531,
