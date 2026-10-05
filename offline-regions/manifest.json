@@ -1,5 +1,5 @@
 {
-  "version": 16,
+  "version": 17,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6470,21 +6470,21 @@
       "id": "asia-kazakhstan-map",
       "name": "Kazakhstan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/kazakhstan.map",
-      "bytes": 416203277,
+      "bytes": 439496494,
       "bbox": []
     },
     {
       "id": "asia-kyrgyzstan-map",
       "name": "Kyrgyzstan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/kyrgyzstan.map",
-      "bytes": 57818309,
+      "bytes": 94450334,
       "bbox": []
     },
     {
       "id": "asia-laos-map",
       "name": "Laos (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/laos.map",
-      "bytes": 59921142,
+      "bytes": 61379721,
       "bbox": [
         13.9016,
         100.0828,
@@ -6496,21 +6496,21 @@
       "id": "asia-lebanon-map",
       "name": "Lebanon (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/lebanon.map",
-      "bytes": 42905287,
+      "bytes": 44196032,
       "bbox": []
     },
     {
       "id": "asia-malaysia-singapore-brunei-map",
       "name": "Malaysia, Singapore, and Brunei (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/malaysia-singapore-brunei.map",
-      "bytes": 219385649,
+      "bytes": 227866983,
       "bbox": []
     },
     {
       "id": "asia-maldives-map",
       "name": "Maldives (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/maldives.map",
-      "bytes": 6483035,
+      "bytes": 6496295,
       "bbox": [
         -1.36,
         71.7,
@@ -6522,7 +6522,7 @@
       "id": "asia-mongolia-map",
       "name": "Mongolia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/mongolia.map",
-      "bytes": 156477614,
+      "bytes": 158400332,
       "bbox": [
         41.5004,
         87.7026,
@@ -6534,7 +6534,7 @@
       "id": "asia-myanmar-map",
       "name": "Myanmar (a.k.a. Burma) (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/myanmar.map",
-      "bytes": 311583422,
+      "bytes": 329308373,
       "bbox": [
         9.5102,
         90.6513,
@@ -6546,21 +6546,21 @@
       "id": "asia-nepal-map",
       "name": "Nepal (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/nepal.map",
-      "bytes": 391688100,
+      "bytes": 396510792,
       "bbox": []
     },
     {
       "id": "asia-north-korea-map",
       "name": "North Korea (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/north-korea.map",
-      "bytes": 99893953,
+      "bytes": 103387415,
       "bbox": []
     },
     {
       "id": "asia-pakistan-map",
       "name": "Pakistan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/pakistan.map",
-      "bytes": 192555012,
+      "bytes": 198438075,
       "bbox": [
         23.3763,
         60.8217,
