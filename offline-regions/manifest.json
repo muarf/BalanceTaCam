@@ -1,5 +1,5 @@
 {
-  "version": 17,
+  "version": 18,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6572,14 +6572,14 @@
       "id": "asia-philippines-map",
       "name": "Philippines (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/philippines.map",
-      "bytes": 570876900,
+      "bytes": 590131647,
       "bbox": []
     },
     {
       "id": "asia-south-korea-map",
       "name": "South Korea (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/south-korea.map",
-      "bytes": 258548315,
+      "bytes": 275249155,
       "bbox": [
         32.3608,
         124.3188,
@@ -6591,14 +6591,14 @@
       "id": "asia-sri-lanka-map",
       "name": "Sri Lanka (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/sri-lanka.map",
-      "bytes": 141919130,
+      "bytes": 144275373,
       "bbox": []
     },
     {
       "id": "asia-syria-map",
       "name": "Syria (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/syria.map",
-      "bytes": 83579028,
+      "bytes": 88430157,
       "bbox": [
         32.3066,
         35.2771,
@@ -6610,14 +6610,14 @@
       "id": "asia-taiwan-map",
       "name": "Taiwan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/taiwan.map",
-      "bytes": 249895446,
+      "bytes": 254703705,
       "bbox": []
     },
     {
       "id": "asia-tajikistan-map",
       "name": "Tajikistan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/tajikistan.map",
-      "bytes": 51711209,
+      "bytes": 52931397,
       "bbox": [
         36.6637,
         67.3201,
@@ -6629,7 +6629,7 @@
       "id": "asia-thailand-map",
       "name": "Thailand (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/thailand.map",
-      "bytes": 301330700,
+      "bytes": 313204586,
       "bbox": [
         5.5979,
         97.1356,
@@ -6641,7 +6641,7 @@
       "id": "asia-turkmenistan-map",
       "name": "Turkmenistan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/turkmenistan.map",
-      "bytes": 56807264,
+      "bytes": 59842268,
       "bbox": [
         35.1236,
         51.8327,
@@ -6653,7 +6653,7 @@
       "id": "asia-uzbekistan-map",
       "name": "Uzbekistan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/uzbekistan.map",
-      "bytes": 138709569,
+      "bytes": 162376482,
       "bbox": [
         37.1664,
         55.9771,
@@ -6665,7 +6665,7 @@
       "id": "asia-vietnam-map",
       "name": "Vietnam (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/vietnam.map",
-      "bytes": 278882397,
+      "bytes": 291053522,
       "bbox": [
         7.3822,
         102.0959,
@@ -6677,7 +6677,7 @@
       "id": "asia-yemen-map",
       "name": "Yemen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/asia/yemen.map",
-      "bytes": 61764943,
+      "bytes": 62650358,
       "bbox": [
         11.3162,
         41.0689,
