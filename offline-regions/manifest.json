@@ -1,5 +1,5 @@
 {
-  "version": 18,
+  "version": 19,
   "regions": [
     {
       "id": "africa-algeria",
@@ -7442,7 +7442,7 @@
       "id": "europe-germany-baden-wuerttemberg-map",
       "name": "Baden-Württemberg (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/baden-wuerttemberg.map",
-      "bytes": 423023062,
+      "bytes": 425266620,
       "bbox": [
         47.1874,
         7.3722,
@@ -7454,14 +7454,14 @@
       "id": "europe-germany-bayern-map",
       "name": "Bayern (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/bayern.map",
-      "bytes": 575902459,
+      "bytes": 577483822,
       "bbox": []
     },
     {
       "id": "europe-germany-berlin-map",
       "name": "Berlin (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/berlin.map",
-      "bytes": 54122886,
+      "bytes": 54324000,
       "bbox": [
         52.3345,
         13.0828,
@@ -7473,7 +7473,7 @@
       "id": "europe-germany-brandenburg-map",
       "name": "Brandenburg (mit Berlin) (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/brandenburg.map",
-      "bytes": 200556982,
+      "bytes": 197427925,
       "bbox": [
         51.3561,
         11.2606,
@@ -7485,7 +7485,7 @@
       "id": "europe-germany-bremen-map",
       "name": "Bremen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/bremen.map",
-      "bytes": 14066542,
+      "bytes": 14101328,
       "bbox": [
         53.0103,
         8.481,
@@ -7497,7 +7497,7 @@
       "id": "europe-germany-hamburg-map",
       "name": "Hamburg (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/hamburg.map",
-      "bytes": 29365589,
+      "bytes": 29488989,
       "bbox": [
         53.3918,
         7.9678,
@@ -7509,7 +7509,7 @@
       "id": "europe-germany-hessen-map",
       "name": "Hessen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/hessen.map",
-      "bytes": 228908526,
+      "bytes": 229825935,
       "bbox": [
         49.3932,
         7.768,
@@ -7521,7 +7521,7 @@
       "id": "europe-germany-mecklenburg-vorpommern-map",
       "name": "Mecklenburg-Vorpommern (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/mecklenburg-vorpommern.map",
-      "bytes": 100852702,
+      "bytes": 101166918,
       "bbox": [
         53.1062,
         10.5881,
@@ -7533,7 +7533,7 @@
       "id": "europe-germany-niedersachsen-map",
       "name": "Niedersachsen (mit Bremen) (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/niedersachsen.map",
-      "bytes": 364201241,
+      "bytes": 366352866,
       "bbox": [
         51.2935,
         6.2952,
@@ -7545,14 +7545,14 @@
       "id": "europe-germany-nordrhein-westfalen-map",
       "name": "Nordrhein-Westfalen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/nordrhein-westfalen.map",
-      "bytes": 609202545,
+      "bytes": 614561658,
       "bbox": []
     },
     {
       "id": "europe-germany-rheinland-pfalz-map",
       "name": "Rheinland-Pfalz (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/rheinland-pfalz.map",
-      "bytes": 184237628,
+      "bytes": 191497376,
       "bbox": [
         48.9638,
         6.1088,
@@ -7564,14 +7564,14 @@
       "id": "europe-germany-saarland-map",
       "name": "Saarland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/saarland.map",
-      "bytes": 36020760,
+      "bytes": 36406537,
       "bbox": []
     },
     {
       "id": "europe-germany-sachsen-anhalt-map",
       "name": "Sachsen-Anhalt (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/sachsen-anhalt.map",
-      "bytes": 128439342,
+      "bytes": 129582786,
       "bbox": [
         50.9289,
         10.5473,
@@ -7583,7 +7583,7 @@
       "id": "europe-germany-sachsen-map",
       "name": "Sachsen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/sachsen.map",
-      "bytes": 173523510,
+      "bytes": 174028537,
       "bbox": [
         50.0319,
         11.8668,
@@ -7595,14 +7595,14 @@
       "id": "europe-germany-schleswig-holstein-map",
       "name": "Schleswig-Holstein (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/schleswig-holstein.map",
-      "bytes": 113620764,
+      "bytes": 115376781,
       "bbox": []
     },
     {
       "id": "europe-germany-thueringen-map",
       "name": "Thüringen (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/germany/thueringen.map",
-      "bytes": 117004305,
+      "bytes": 117289421,
       "bbox": [
         50.1997,
         9.8632,
