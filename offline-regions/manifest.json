@@ -1,5 +1,5 @@
 {
-  "version": 20,
+  "version": 21,
   "regions": [
     {
       "id": "africa-algeria",
@@ -7153,7 +7153,7 @@
       "id": "europe-france-alsace-map",
       "name": "Alsace (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/alsace.map",
-      "bytes": 89836009,
+      "bytes": 90211271,
       "bbox": [
         47.3845,
         6.8389,
@@ -7165,7 +7165,7 @@
       "id": "europe-france-aquitaine-map",
       "name": "Aquitaine (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/aquitaine.map",
-      "bytes": 221130076,
+      "bytes": 222705086,
       "bbox": [
         42.6116,
         -1.8428,
@@ -7177,7 +7177,7 @@
       "id": "europe-france-auvergne-map",
       "name": "Auvergne (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/auvergne.map",
-      "bytes": 117979281,
+      "bytes": 120178520,
       "bbox": [
         44.6146,
         2.0605,
@@ -7189,14 +7189,14 @@
       "id": "europe-france-basse-normandie-map",
       "name": "Basse-Normandie (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/basse-normandie.map",
-      "bytes": 108480875,
+      "bytes": 109196733,
       "bbox": []
     },
     {
       "id": "europe-france-bourgogne-map",
       "name": "Bourgogne (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/bourgogne.map",
-      "bytes": 157352355,
+      "bytes": 160811663,
       "bbox": [
         46.1548,
         2.8433,
@@ -7208,14 +7208,14 @@
       "id": "europe-france-bretagne-map",
       "name": "Bretagne (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/bretagne.map",
-      "bytes": 217352551,
+      "bytes": 219512097,
       "bbox": []
     },
     {
       "id": "europe-france-centre-map",
       "name": "Centre (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/centre.map",
-      "bytes": 183509950,
+      "bytes": 184951527,
       "bbox": [
         46.3459,
         0.0515,
@@ -7227,7 +7227,7 @@
       "id": "europe-france-champagne-ardenne-map",
       "name": "Champagne Ardenne (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/champagne-ardenne.map",
-      "bytes": 82887748,
+      "bytes": 83421647,
       "bbox": [
         47.5755,
         3.3824,
@@ -7239,7 +7239,7 @@
       "id": "europe-france-corse-map",
       "name": "Corse (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/corse.map",
-      "bytes": 25435160,
+      "bytes": 27152482,
       "bbox": [
         41.311,
         8.3179,
@@ -7251,7 +7251,7 @@
       "id": "europe-france-franche-comte-map",
       "name": "Franche-Comté (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/franche-comte.map",
-      "bytes": 92450225,
+      "bytes": 92920432,
       "bbox": [
         46.2597,
         5.2508,
@@ -7263,7 +7263,7 @@
       "id": "europe-france-guadeloupe-map",
       "name": "Guadeloupe (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/guadeloupe.map",
-      "bytes": 17341643,
+      "bytes": 18241745,
       "bbox": [
         15.4907,
         -62.1524,
@@ -7275,7 +7275,7 @@
       "id": "europe-france-guyane-map",
       "name": "Guyane (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/guyane.map",
-      "bytes": 15687054,
+      "bytes": 16928882,
       "bbox": [
         2.0931,
         -54.623,
@@ -7287,7 +7287,7 @@
       "id": "europe-france-haute-normandie-map",
       "name": "Haute-Normandie (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/haute-normandie.map",
-      "bytes": 82187185,
+      "bytes": 82602200,
       "bbox": [
         48.6657,
         0.0095,
@@ -7299,7 +7299,7 @@
       "id": "europe-france-languedoc-roussillon-map",
       "name": "Languedoc-Roussillon (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/languedoc-roussillon.map",
-      "bytes": 185667851,
+      "bytes": 187898102,
       "bbox": [
         42.1666,
         1.6863,
@@ -7311,14 +7311,14 @@
       "id": "europe-france-limousin-map",
       "name": "Limousin (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/limousin.map",
-      "bytes": 76171522,
+      "bytes": 76739840,
       "bbox": []
     },
     {
       "id": "europe-france-lorraine-map",
       "name": "Lorraine (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/lorraine.map",
-      "bytes": 127981417,
+      "bytes": 128683560,
       "bbox": [
         47.8119,
         4.886,
@@ -7330,14 +7330,14 @@
       "id": "europe-france-martinique-map",
       "name": "Martinique (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/martinique.map",
-      "bytes": 14166767,
+      "bytes": 14332816,
       "bbox": []
     },
     {
       "id": "europe-france-mayotte-map",
       "name": "Mayotte (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/mayotte.map",
-      "bytes": 7651175,
+      "bytes": 7761459,
       "bbox": []
     },
     {
@@ -8320,7 +8320,7 @@
       "id": "idf-map",
       "name": "Île-de-France (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/ile-de-france.map",
-      "bytes": 208854411,
+      "bytes": 210258216,
       "bbox": [
         48.12,
         2.22,
