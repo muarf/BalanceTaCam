@@ -1,5 +1,5 @@
 {
-  "version": 21,
+  "version": 22,
   "regions": [
     {
       "id": "africa-algeria",
@@ -7344,7 +7344,7 @@
       "id": "europe-france-midi-pyrenees-map",
       "name": "Midi-Pyrénées (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/midi-pyrenees.map",
-      "bytes": 256136337,
+      "bytes": 261608970,
       "bbox": [
         42.5333,
         -0.3275,
@@ -7356,7 +7356,7 @@
       "id": "europe-france-nord-pas-de-calais-map",
       "name": "Nord-Pas-de-Calais (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/nord-pas-de-calais.map",
-      "bytes": 166211802,
+      "bytes": 167745917,
       "bbox": [
         49.9676,
         1.2783,
@@ -7368,7 +7368,7 @@
       "id": "europe-france-pays-de-la-loire-map",
       "name": "Pays de la Loire (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/pays-de-la-loire.map",
-      "bytes": 249402426,
+      "bytes": 250868467,
       "bbox": [
         46.2188,
         -2.6747,
@@ -7380,7 +7380,7 @@
       "id": "europe-france-picardie-map",
       "name": "Picardie (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/picardie.map",
-      "bytes": 110339578,
+      "bytes": 110661751,
       "bbox": [
         48.836,
         1.3601,
@@ -7392,14 +7392,14 @@
       "id": "europe-france-poitou-charentes-map",
       "name": "Poitou-Charentes (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/poitou-charentes.map",
-      "bytes": 153744314,
+      "bytes": 154238277,
       "bbox": []
     },
     {
       "id": "europe-france-provence-alpes-cote-d-azur-map",
       "name": "Provence-Alpes-Côte d'Azur (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/provence-alpes-cote-d-azur.map",
-      "bytes": 241950427,
+      "bytes": 245496565,
       "bbox": [
         42.3154,
         4.1447,
@@ -7411,7 +7411,7 @@
       "id": "europe-france-reunion-map",
       "name": "Reunion (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/reunion.map",
-      "bytes": 22186347,
+      "bytes": 22637609,
       "bbox": [
         -21.7292,
         54.9469,
@@ -7423,7 +7423,7 @@
       "id": "europe-france-rhone-alpes-map",
       "name": "Rhône-Alpes (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/france/rhone-alpes.map",
-      "bytes": 356387127,
+      "bytes": 359162737,
       "bbox": [
         44.1127,
         3.6861,
@@ -9192,7 +9192,7 @@
       "id": "south-america-argentina-map",
       "name": "Argentina (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/argentina.map",
-      "bytes": 551770732,
+      "bytes": 568374802,
       "bbox": [
         -55.683,
         -73.6145,
@@ -9204,7 +9204,7 @@
       "id": "south-america-bolivia-map",
       "name": "Bolivia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/bolivia.map",
-      "bytes": 175808528,
+      "bytes": 179404903,
       "bbox": [
         -22.9255,
         -69.6568,
@@ -9276,7 +9276,7 @@
       "id": "south-america-chile-map",
       "name": "Chile (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/chile.map",
-      "bytes": 693475631,
+      "bytes": 682169123,
       "bbox": [
         -58.4519,
         -113.2233,
@@ -9288,7 +9288,7 @@
       "id": "south-america-colombia-map",
       "name": "Colombia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/colombia.map",
-      "bytes": 329128002,
+      "bytes": 347065584,
       "bbox": [
         -4.2573,
         -83.231,
@@ -9300,7 +9300,7 @@
       "id": "south-america-ecuador-map",
       "name": "Ecuador (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/ecuador.map",
-      "bytes": 125197706,
+      "bytes": 130665254,
       "bbox": [
         -5.0242,
         -93.5649,
@@ -9312,7 +9312,7 @@
       "id": "south-america-guyana-map",
       "name": "Guyana (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/guyana.map",
-      "bytes": 23717236,
+      "bytes": 23912796,
       "bbox": [
         1.1494,
         -61.421,
@@ -9324,7 +9324,7 @@
       "id": "south-america-paraguay-map",
       "name": "Paraguay (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/paraguay.map",
-      "bytes": 149666906,
+      "bytes": 153026848,
       "bbox": [
         -27.6567,
         -62.6947,
@@ -9336,7 +9336,7 @@
       "id": "south-america-peru-map",
       "name": "Peru (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/peru.map",
-      "bytes": 280710315,
+      "bytes": 302817098,
       "bbox": [
         -20.3055,
         -86.0251,
@@ -9348,7 +9348,7 @@
       "id": "south-america-suriname-map",
       "name": "Suriname (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/suriname.map",
-      "bytes": 28640935,
+      "bytes": 29167729,
       "bbox": [
         1.8168,
         -58.0846,
@@ -9360,7 +9360,7 @@
       "id": "south-america-uruguay-map",
       "name": "Uruguay (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/uruguay.map",
-      "bytes": 46810555,
+      "bytes": 47599203,
       "bbox": [
         -36.2487,
         -58.5259,
@@ -9372,7 +9372,7 @@
       "id": "south-america-venezuela-map",
       "name": "Venezuela (carte)",
       "url": "https://download.mapsforge.org/maps/v5/south-america/venezuela.map",
-      "bytes": 145720533,
+      "bytes": 158902470,
       "bbox": [
         0.6217,
         -73.381,
