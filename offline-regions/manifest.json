@@ -1,5 +1,5 @@
 {
-  "version": 23,
+  "version": 24,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6193,7 +6193,7 @@
       "id": "africa-egypt-map",
       "name": "Egypt (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/egypt.map",
-      "bytes": 181190736,
+      "bytes": 183662321,
       "bbox": [
         21.9838,
         24.6263,
@@ -6205,7 +6205,7 @@
       "id": "africa-equatorial-guinea-map",
       "name": "Equatorial Guinea (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/equatorial-guinea.map",
-      "bytes": 13199711,
+      "bytes": 13253323,
       "bbox": [
         -1.7927,
         5.1656,
@@ -6217,7 +6217,7 @@
       "id": "africa-eritrea-map",
       "name": "Eritrea (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/eritrea.map",
-      "bytes": 35303445,
+      "bytes": 37517522,
       "bbox": [
         12.3439,
         36.4207,
@@ -6229,7 +6229,7 @@
       "id": "africa-ethiopia-map",
       "name": "Ethiopia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/ethiopia.map",
-      "bytes": 151309835,
+      "bytes": 177029893,
       "bbox": [
         3.3892,
         32.9672,
@@ -6241,7 +6241,7 @@
       "id": "africa-gabon-map",
       "name": "Gabon (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/gabon.map",
-      "bytes": 41714237,
+      "bytes": 42242549,
       "bbox": [
         -5.9958,
         7.3897,
