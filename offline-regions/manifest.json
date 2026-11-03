@@ -1,5 +1,5 @@
 {
-  "version": 24,
+  "version": 25,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6253,7 +6253,7 @@
       "id": "africa-ghana-map",
       "name": "Ghana (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/ghana.map",
-      "bytes": 108807275,
+      "bytes": 115260110,
       "bbox": [
         3.7041,
         -3.8074,
@@ -6265,7 +6265,7 @@
       "id": "africa-guinea-bissau-map",
       "name": "Guinea-Bissau (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/guinea-bissau.map",
-      "bytes": 12309915,
+      "bytes": 12267274,
       "bbox": [
         10.1449,
         -16.9643,
@@ -6277,7 +6277,7 @@
       "id": "africa-guinea-map",
       "name": "Guinea (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/guinea.map",
-      "bytes": 114091663,
+      "bytes": 117805630,
       "bbox": [
         7.1833,
         -16.8571,
@@ -6289,7 +6289,7 @@
       "id": "africa-ivory-coast-map",
       "name": "Ivory Coast (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/ivory-coast.map",
-      "bytes": 93143104,
+      "bytes": 89719856,
       "bbox": [
         4.1419,
         -8.6339,
@@ -6301,7 +6301,7 @@
       "id": "africa-kenya-map",
       "name": "Kenya (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/kenya.map",
-      "bytes": 330929978,
+      "bytes": 336168269,
       "bbox": [
         -4.8163,
         33.8679,
@@ -6313,7 +6313,7 @@
       "id": "africa-lesotho-map",
       "name": "Lesotho (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/lesotho.map",
-      "bytes": 93830380,
+      "bytes": 94954837,
       "bbox": [
         -30.6847,
         27.0092,
@@ -6325,7 +6325,7 @@
       "id": "africa-liberia-map",
       "name": "Liberia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/liberia.map",
-      "bytes": 43196768,
+      "bytes": 43350837,
       "bbox": [
         -0.681,
         -14.9545,
@@ -6337,7 +6337,7 @@
       "id": "africa-libya-map",
       "name": "Libya (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/libya.map",
-      "bytes": 119912696,
+      "bytes": 121118466,
       "bbox": [
         19.4509,
         9.3744,
@@ -6349,7 +6349,7 @@
       "id": "africa-madagascar-map",
       "name": "Madagascar (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/madagascar.map",
-      "bytes": 381908434,
+      "bytes": 390688114,
       "bbox": [
         -26.5823,
         42.3012,
@@ -6361,7 +6361,7 @@
       "id": "africa-malawi-map",
       "name": "Malawi (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/malawi.map",
-      "bytes": 145067456,
+      "bytes": 145807116,
       "bbox": [
         -17.1332,
         32.6644,
@@ -6373,7 +6373,7 @@
       "id": "africa-mali-map",
       "name": "Mali (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/mali.map",
-      "bytes": 214452703,
+      "bytes": 216744702,
       "bbox": [
         10.1176,
         -12.247,
@@ -6385,7 +6385,7 @@
       "id": "africa-mauritania-map",
       "name": "Mauritania (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/mauritania.map",
-      "bytes": 58753857,
+      "bytes": 59466980,
       "bbox": [
         14.7158,
         -17.3502,
@@ -6397,7 +6397,7 @@
       "id": "africa-mauritius-map",
       "name": "Mauritius (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/mauritius.map",
-      "bytes": 26710740,
+      "bytes": 26924365,
       "bbox": [
         -22.2411,
         53.5473,
@@ -6409,7 +6409,7 @@
       "id": "africa-morocco-map",
       "name": "Morocco (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/morocco.map",
-      "bytes": 222321055,
+      "bytes": 224560423,
       "bbox": [
         20.4037,
         -18.1835,
@@ -6421,7 +6421,7 @@
       "id": "africa-mozambique-map",
       "name": "Mozambique (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/mozambique.map",
-      "bytes": 279310814,
+      "bytes": 280399484,
       "bbox": [
         -26.9384,
         30.2074,
@@ -6433,7 +6433,7 @@
       "id": "africa-namibia-map",
       "name": "Namibia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/namibia.map",
-      "bytes": 87238396,
+      "bytes": 88598778,
       "bbox": [
         -30.2069,
         9.7846,
@@ -6445,7 +6445,7 @@
       "id": "africa-niger-map",
       "name": "Niger (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/niger.map",
-      "bytes": 113392772,
+      "bytes": 119192411,
       "bbox": [
         11.6868,
         0.1197,
