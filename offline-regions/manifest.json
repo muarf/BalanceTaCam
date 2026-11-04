@@ -1,5 +1,5 @@
 {
-  "version": 25,
+  "version": 26,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6457,7 +6457,7 @@
       "id": "africa-nigeria-map",
       "name": "Nigeria (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/nigeria.map",
-      "bytes": 764324280,
+      "bytes": 763938334,
       "bbox": [
         2.674,
         2.6645,
@@ -6469,7 +6469,7 @@
       "id": "africa-rwanda-map",
       "name": "Rwanda (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/rwanda.map",
-      "bytes": 62471121,
+      "bytes": 65849936,
       "bbox": [
         -2.8487,
         28.8593,
@@ -6481,7 +6481,7 @@
       "id": "africa-saint-helena-ascension-and-tristan-da-cunha-map",
       "name": "Saint Helena, Ascension, and Tristan da Cunha (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/saint-helena-ascension-and-tristan-da-cunha.map",
-      "bytes": 68104287,
+      "bytes": 68197221,
       "bbox": [
         -43.8325,
         -15.5703,
@@ -6493,7 +6493,7 @@
       "id": "africa-sao-tome-and-principe-map",
       "name": "Sao Tome and Principe (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/sao-tome-and-principe.map",
-      "bytes": 2583442,
+      "bytes": 2595298,
       "bbox": [
         -0.5256,
         5.2739,
@@ -6505,7 +6505,7 @@
       "id": "africa-senegal-and-gambia-map",
       "name": "Senegal and Gambia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/senegal-and-gambia.map",
-      "bytes": 106421046,
+      "bytes": 107746291,
       "bbox": [
         12.0151,
         -19.8562,
@@ -6517,7 +6517,7 @@
       "id": "africa-seychelles-map",
       "name": "Seychelles (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/seychelles.map",
-      "bytes": 16937658,
+      "bytes": 16956856,
       "bbox": [
         -12.5584,
         45.6849,
@@ -6529,7 +6529,7 @@
       "id": "africa-sierra-leone-map",
       "name": "Sierra Leone (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/sierra-leone.map",
-      "bytes": 39067377,
+      "bytes": 42089185,
       "bbox": [
         5.3916,
         -14.7645,
@@ -6541,7 +6541,7 @@
       "id": "africa-somalia-map",
       "name": "Somalia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/somalia.map",
-      "bytes": 197002569,
+      "bytes": 199208463,
       "bbox": [
         -1.8168,
         40.9749,
@@ -6553,7 +6553,7 @@
       "id": "africa-south-africa-and-lesotho-map",
       "name": "South Africa (includes Lesotho) (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/south-africa-and-lesotho.map",
-      "bytes": 577837861,
+      "bytes": 586898578,
       "bbox": [
         -47.5849,
         15.9961,
@@ -6565,7 +6565,7 @@
       "id": "africa-south-sudan-map",
       "name": "South Sudan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/south-sudan.map",
-      "bytes": 164580620,
+      "bytes": 166261366,
       "bbox": [
         3.4615,
         23.4249,
