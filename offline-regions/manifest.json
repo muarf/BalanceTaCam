@@ -1,5 +1,5 @@
 {
-  "version": 26,
+  "version": 27,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6577,7 +6577,7 @@
       "id": "africa-sudan-map",
       "name": "Sudan (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/sudan.map",
-      "bytes": 266405626,
+      "bytes": 269152759,
       "bbox": [
         8.6537,
         21.781,
@@ -6589,7 +6589,7 @@
       "id": "africa-swaziland-map",
       "name": "Swaziland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/swaziland.map",
-      "bytes": 28028304,
+      "bytes": 28284980,
       "bbox": [
         -27.3183,
         30.7858,
@@ -9481,7 +9481,7 @@
       "id": "europe-united-kingdom-scotland-map",
       "name": "Scotland (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/united-kingdom/scotland.map",
-      "bytes": 282418096,
+      "bytes": 289304519,
       "bbox": [
         54.54,
         -14.8616,
@@ -9493,7 +9493,7 @@
       "id": "europe-united-kingdom-wales-map",
       "name": "Wales (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/united-kingdom/wales.map",
-      "bytes": 110405003,
+      "bytes": 116745727,
       "bbox": [
         51.04,
         -6.1832,
