@@ -3,11 +3,14 @@ package com.osmcamera.mapper.presentation.viewmodel
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.osmcamera.mapper.data.api.NominatimApi
 import com.osmcamera.mapper.data.location.LocationService
 import com.osmcamera.mapper.data.model.Camera
 import com.osmcamera.mapper.data.repository.CameraRepository
+import com.osmcamera.mapper.data.api.NominatimResult
 import com.osmcamera.mapper.offline.OfflineRegionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +28,7 @@ class MapViewModel @Inject constructor(
     private val cameraRepository: CameraRepository,
     private val locationService: LocationService,
     private val regionManager: OfflineRegionManager,
+    private val nominatimApi: NominatimApi,
     preferences: com.osmcamera.mapper.data.local.PreferencesManager
 ) : ViewModel() {
 
@@ -90,6 +94,74 @@ class MapViewModel @Inject constructor(
 
     private val _isLoadingCameras = MutableStateFlow(false)
     val isLoadingCameras: StateFlow<Boolean> = _isLoadingCameras.asStateFlow()
+
+    // Address search state
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _searchResults = MutableStateFlow<List<NominatimResult>>(emptyList())
+    val searchResults: StateFlow<List<NominatimResult>> = _searchResults.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    private val _searchError = MutableStateFlow<String?>(null)
+    val searchError: StateFlow<String?> = _searchError.asStateFlow()
+
+    private var searchJob: Job? = null
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+            _searchError.value = null
+        }
+    }
+
+    fun clearSearch() {
+        _searchQuery.value = ""
+        _searchResults.value = emptyList()
+        _searchError.value = null
+        searchJob?.cancel()
+    }
+
+    fun performSearch() {
+        val query = _searchQuery.value
+        if (query.isBlank()) return
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            _isSearching.value = true
+            _searchError.value = null
+
+            try {
+                if (offlineMode.value) {
+                    _searchError.value = "La recherche d'adresse nécessite une connexion internet."
+                    _searchResults.value = emptyList()
+                    _isSearching.value = false
+                    return@launch
+                }
+
+                val response = nominatimApi.search(query)
+                if (response.isSuccessful) {
+                    _searchResults.value = response.body() ?: emptyList()
+                    if (_searchResults.value.isEmpty()) {
+                        _searchError.value = "Aucun résultat trouvé"
+                    }
+                } else {
+                    _searchError.value = "Erreur de recherche: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                if (e is java.net.UnknownHostException || e is java.net.ConnectException) {
+                    _searchError.value = "Impossible de se connecter au serveur. Vérifiez votre connexion."
+                } else {
+                    _searchError.value = "Erreur de recherche"
+                }
+            } finally {
+                _isSearching.value = false
+            }
+        }
+    }
     
     init {
         _uiState.value = MapUiState.Ready

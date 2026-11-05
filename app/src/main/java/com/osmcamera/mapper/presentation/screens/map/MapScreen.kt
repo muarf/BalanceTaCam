@@ -10,10 +10,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -35,7 +44,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 /**
  * Main map screen
  */
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MapScreen(
     onAddCamera: (Double, Double) -> Unit,
@@ -54,6 +63,14 @@ fun MapScreen(
     val routePickTarget by mapViewModel.routePickTarget.collectAsState()
     val isAuthenticated = authViewModel.isAuthenticated()
     val user by authViewModel.user.collectAsState()
+
+    // Search state
+    var showSearchBar by remember { mutableStateOf(false) }
+    val searchQuery by mapViewModel.searchQuery.collectAsState()
+    val searchResults by mapViewModel.searchResults.collectAsState()
+    val isSearching by mapViewModel.isSearching.collectAsState()
+    val searchError by mapViewModel.searchError.collectAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
     
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var currentZoom by remember { mutableDoubleStateOf(15.0) }
@@ -87,42 +104,99 @@ fun MapScreen(
         locationPermissions.launchMultiplePermissionRequest()
     }
     
+    // Handle search errors
+    LaunchedEffect(searchError) {
+        if (searchError != null) {
+            snackbarHostState.showSnackbar(searchError!!)
+        }
+    }
+
     // Removed ModalNavigationDrawer to avoid swipe conflict with map
     Box {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.map_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateToSettings) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
-                    },
-                    actions = {
-                        // Routing button
-                        IconButton(onClick = {
-                            // Pass user location to routing screen
-                            onNavigateToRouting()
-                        }) {
-                            Icon(Icons.Default.Route, contentDescription = "Itinéraire", tint = MaterialTheme.colorScheme.tertiary)
-                        }
-                        
-                        // Filter toggle
-                        IconButton(onClick = { showPublicOnly = !showPublicOnly }) {
-                            if (showPublicOnly) {
-                                Icon(Icons.Default.FilterAlt, contentDescription = "Toutes les caméras", tint = MaterialTheme.colorScheme.primary)
-                            } else {
-                                Icon(Icons.Default.FilterAltOff, contentDescription = "Seulement publiques")
+                if (showSearchBar) {
+                    TopAppBar(
+                        title = {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { mapViewModel.setSearchQuery(it) },
+                                modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                                placeholder = { Text("Rechercher une adresse...") },
+                                singleLine = true,
+                                trailingIcon = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        IconButton(onClick = { mapViewModel.clearSearch() }) {
+                                            Icon(Icons.Default.Clear, contentDescription = "Clear search")
+                                        }
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(onSearch = {
+                                    mapViewModel.performSearch()
+                                    keyboardController?.hide()
+                                }),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                )
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                showSearchBar = false
+                                mapViewModel.clearSearch()
+                            }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            }
+                        },
+                        actions = {
+                            if (isSearching) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.padding(16.dp).size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
                             }
                         }
-                        
-                        // Auth button in top bar
-                        if (!isAuthenticated) {
-                            IconButton(onClick = onNavigateToAuth) {
-                                Icon(Icons.Default.Login, contentDescription = "Login")
+                    )
+                } else {
+                    TopAppBar(
+                        title = { Text(stringResource(R.string.map_title)) },
+                        navigationIcon = {
+                            IconButton(onClick = onNavigateToSettings) {
+                                Icon(Icons.Default.Settings, contentDescription = "Settings")
                             }
-                        } else if (user != null) {
+                        },
+                        actions = {
+                            // Search button
+                            IconButton(onClick = { showSearchBar = true }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+
+                            // Routing button
+                            IconButton(onClick = {
+                                // Pass user location to routing screen
+                                onNavigateToRouting()
+                            }) {
+                                Icon(Icons.Default.Route, contentDescription = "Itinéraire", tint = MaterialTheme.colorScheme.tertiary)
+                            }
+
+                            // Filter toggle
+                            IconButton(onClick = { showPublicOnly = !showPublicOnly }) {
+                                if (showPublicOnly) {
+                                    Icon(Icons.Default.FilterAlt, contentDescription = "Toutes les caméras", tint = MaterialTheme.colorScheme.primary)
+                                } else {
+                                    Icon(Icons.Default.FilterAltOff, contentDescription = "Seulement publiques")
+                                }
+                            }
+
+                            // Auth button in top bar
+                            if (!isAuthenticated) {
+                                IconButton(onClick = onNavigateToAuth) {
+                                    Icon(Icons.Default.Login, contentDescription = "Login")
+                                }
+                            } else if (user != null) {
                             var showLogoutDialog by remember { mutableStateOf(false) }
                             
                             IconButton(onClick = { showLogoutDialog = true }) {
@@ -147,24 +221,25 @@ fun MapScreen(
                                             Text("Annuler")
                                         }
                                     }
-                                )
+                                    )
+                                }
+                            }
+                            IconButton(onClick = {
+                                mapView?.let { map ->
+                                    val bounds = map.boundingBox
+                                    mapViewModel.refreshCameras(
+                                        south = bounds.latSouth,
+                                        west = bounds.lonWest,
+                                        north = bounds.latNorth,
+                                        east = bounds.lonEast
+                                    )
+                                }
+                            }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                             }
                         }
-                        IconButton(onClick = {
-                            mapView?.let { map ->
-                                val bounds = map.boundingBox
-                                mapViewModel.refreshCameras(
-                                    south = bounds.latSouth,
-                                    west = bounds.lonWest,
-                                    north = bounds.latNorth,
-                                    east = bounds.lonEast
-                                )
-                            }
-                        }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                        }
-                    }
-                )
+                    )
+                }
             },
             floatingActionButton = {
                 Column(horizontalAlignment = Alignment.End) {
@@ -510,7 +585,7 @@ fun MapScreen(
                 }
                 
                 // Show camera count
-                if (filteredCameras.isNotEmpty()) {
+                if (filteredCameras.isNotEmpty() && !showSearchBar) {
                     Card(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -525,6 +600,45 @@ fun MapScreen(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.bodyMedium
                         )
+                    }
+                }
+
+                // Show Search Results Dropdown-like list
+                if (showSearchBar && searchResults.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth().heightIn(max = 250.dp)
+                        ) {
+                            items(searchResults) { result ->
+                                ListItem(
+                                    headlineContent = { Text(result.displayName, maxLines = 2) },
+                                    modifier = Modifier.clickable {
+                                        try {
+                                            val lat = result.lat.toDouble()
+                                            val lon = result.lon.toDouble()
+                                            mapView?.controller?.apply {
+                                                setZoom(17.0)
+                                                animateTo(GeoPoint(lat, lon))
+                                            }
+                                            showSearchBar = false
+                                            mapViewModel.clearSearch()
+                                            keyboardController?.hide()
+                                        } catch (e: Exception) {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar("Erreur de format de coordonnées")
+                                            }
+                                        }
+                                    }
+                                )
+                                HorizontalDivider()
+                            }
+                        }
                     }
                 }
                 
