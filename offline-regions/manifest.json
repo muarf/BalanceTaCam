@@ -1,5 +1,5 @@
 {
-  "version": 27,
+  "version": 28,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6601,7 +6601,7 @@
       "id": "africa-tanzania-map",
       "name": "Tanzania (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/tanzania.map",
-      "bytes": 638632838,
+      "bytes": 641664504,
       "bbox": [
         -11.7759,
         29.244,
@@ -6613,7 +6613,7 @@
       "id": "africa-togo-map",
       "name": "Togo (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/togo.map",
-      "bytes": 61961000,
+      "bytes": 62157432,
       "bbox": [
         5.8925,
         -0.1483,
@@ -6625,7 +6625,7 @@
       "id": "africa-tunisia-map",
       "name": "Tunisia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/tunisia.map",
-      "bytes": 69603766,
+      "bytes": 70117381,
       "bbox": [
         30.2086,
         7.514,
