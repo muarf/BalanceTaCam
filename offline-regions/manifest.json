@@ -1,5 +1,5 @@
 {
-  "version": 28,
+  "version": 29,
   "regions": [
     {
       "id": "africa-algeria",
@@ -6637,7 +6637,7 @@
       "id": "africa-uganda-map",
       "name": "Uganda (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/uganda.map",
-      "bytes": 386396261,
+      "bytes": 388378041,
       "bbox": [
         -1.4873,
         29.5706,
@@ -6649,7 +6649,7 @@
       "id": "africa-zambia-map",
       "name": "Zambia (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/zambia.map",
-      "bytes": 259493102,
+      "bytes": 260210636,
       "bbox": [
         -18.0878,
         21.9898,
@@ -6661,7 +6661,7 @@
       "id": "africa-zimbabwe-map",
       "name": "Zimbabwe (carte)",
       "url": "https://download.mapsforge.org/maps/v5/africa/zimbabwe.map",
-      "bytes": 180117054,
+      "bytes": 182093443,
       "bbox": [
         -22.4472,
         25.2229,
