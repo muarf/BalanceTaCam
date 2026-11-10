@@ -1,5 +1,5 @@
 {
-  "version": 29,
+  "version": 30,
   "regions": [
     {
       "id": "africa-algeria",
@@ -8821,7 +8821,7 @@
       "id": "europe-italy-centro-map",
       "name": "Centro (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/italy/centro.map",
-      "bytes": 297779839,
+      "bytes": 301160813,
       "bbox": [
         40.2144,
         8.6133,
@@ -8833,7 +8833,7 @@
       "id": "europe-italy-isole-map",
       "name": "Isole (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/italy/isole.map",
-      "bytes": 182312551,
+      "bytes": 184221849,
       "bbox": [
         34.3753,
         7.4184,
@@ -8845,7 +8845,7 @@
       "id": "europe-italy-nord-est-map",
       "name": "Nord-Est (carte)",
       "url": "https://download.mapsforge.org/maps/v5/europe/italy/nord-est.map",
-      "bytes": 461892903,
+      "bytes": 466227553,
       "bbox": [
         43.7298,
         9.1955,
